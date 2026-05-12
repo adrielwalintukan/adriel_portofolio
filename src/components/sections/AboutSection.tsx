@@ -23,12 +23,12 @@ export const AboutSection = memo(function AboutSection() {
       />
 
       <div className="mx-auto mt-12 grid grid-cols-1 items-start gap-16 lg:grid-cols-2 lg:gap-12 xl:gap-20">
-        
+
         {/* LEFT COLUMN: Visual Composition (Hidden on mobile as it moves to Hero) */}
         <div className="relative mx-auto hidden w-full max-w-md lg:sticky lg:top-32 lg:block lg:max-w-none">
           <Reveal direction="up" delay={0.2} className="relative z-10 aspect-[4/5] w-full overflow-hidden rounded-3xl border border-border/40 glass-strong shadow-glow-lg">
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
-            
+
             {/* The profile image using object-cover */}
             <img
               src="/images/adriel_profile.png"
@@ -36,7 +36,7 @@ export const AboutSection = memo(function AboutSection() {
               loading="lazy"
               className="h-full w-full object-cover"
             />
-            
+
             {/* Floating decorative labels */}
             <motion.div
               animate={{ y: [0, -10, 0] }}
@@ -56,21 +56,21 @@ export const AboutSection = memo(function AboutSection() {
               Mobile App Developer
             </motion.div>
           </Reveal>
-          
+
           {/* Ambient glow behind the image */}
           <div className="absolute left-1/2 top-1/2 -z-10 h-3/4 w-3/4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent opacity-20 blur-[100px]" />
         </div>
 
         {/* RIGHT COLUMN: Content & Story */}
         <StaggerContainer delay={0.3} staggerDelay={0.1} className="flex flex-col">
-          
+
           {/* Story Text */}
           <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }} className="mb-10">
             <h3 className="mb-4 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               Hello, I'm <span className="text-gradient">Adriel Walintukan</span>.
             </h3>
             <p className="mb-6 text-base leading-relaxed text-foreground-subtle sm:text-lg">
-              I'm an Information System student at Klabat University. I have a strong interest in AI Integration, Web Development, Mobile App Development, Python, and Software Testing.
+              I'm an Information System student at Klabat University. I have a strong interest in AI Integration, Web Developer, Mobile App Developer, Python, and Software Testing.
             </p>
             <p className="mb-6 text-base leading-relaxed text-foreground-subtle sm:text-lg">
               I believe technology can become a real solution to everyday problems, which motivates me to continuously learn, explore, and grow as a developer and technology enthusiast.

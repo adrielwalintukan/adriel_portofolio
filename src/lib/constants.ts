@@ -22,35 +22,223 @@ export interface Project {
   description: string
   longDescription?: string
   image: string
+  images: string[]
   technologies: string[]
-  githubUrl?: string
-  liveUrl?: string
   category: string
   featured?: boolean
 }
 
 export const PROJECTS: Project[] = [
   {
-    id: 'project-1',
+    id: 'dailyboost_AI',
     title: 'DailyBoost AI',
-    description: 'An AI-powered productivity platform featuring smart financial insights and auto-refresh mechanisms.',
-    longDescription: 'A comprehensive full-stack application leveraging modern AI capabilities to analyze financial patterns and optimize daily workflows. Built with a heavy focus on performance and seamless data synchronization.',
-    image: '/projects/project_featured.png',
-    technologies: ['React Native', 'Expo', 'Convex', 'Google Generative AI', 'TypeScript'],
-    githubUrl: '#',
-    liveUrl: '#',
-    category: 'Fullstack App',
+    description: 'A productivity-focused AI application designed to improve task management and daily workflow efficiency.',
+    longDescription: 'A comprehensive intelligent application focused on streamlining user workflows, budgeting, and interactive chat features. Designed with immersive mobile interfaces and real-time state synchronisation.',
+    image: '/projects/dailyboost_AI/DailyBoost_AI - Home Page.jpeg',
+    images: [
+      '/projects/dailyboost_AI/DailyBoost_AI - Home Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Home Page (cont.).jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Insight Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Goals Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Goals.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Goals (cont.).jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Budget Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Transaction Page Pemasukan.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Transaction Page Pengeluaran.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page Choose Model.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page History.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - History Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Profile Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Profile Page (cont.).jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - Login Page.jpeg',
+      '/projects/dailyboost_AI/DailyBoost_AI - SignUp Page.jpeg'
+    ],
+    technologies: ['AI Project', 'Fullstack', 'Mobile App', 'Interactive Design'],
+    category: 'AI Project / Fullstack',
     featured: true,
   },
-  ...Array.from({ length: 12 }, (_, i) => ({
-    id: `project-${i + 2}`,
-    title: `Project Title ${i + 2}`,
-    description: 'A modern, high-performance project showcasing problem-solving and clean architecture.',
-    image: '/projects/project_placeholder.png',
-    technologies: ['React', 'TypeScript', 'Tailwind'],
-    category: 'Development',
+  {
+    id: 'AI_interview',
+    title: 'AI Interview Simulator',
+    description: 'An AI-powered interview simulation application focused on interactive conversation flow and user experience.',
+    image: '/projects/AI_interview/AI_Interview - Login.png',
+    images: [
+      '/projects/AI_interview/AI_Interview - Login.png',
+      '/projects/AI_interview/AI_Interview - Pilih_Skenario_Mahasiswa.png',
+      '/projects/AI_interview/AI_Interview - Hal_Interview_AI.png',
+      '/projects/AI_interview/AI_Interview - Dash_Dosen.png'
+    ],
+    technologies: ['AI Project', 'Web App', 'UI/UX', 'Interactive Design'],
+    category: 'AI Project',
     featured: false,
-  })),
+  },
+  {
+    id: 'car_rental_website',
+    title: 'Modern Car Rental Platform',
+    description: 'A modern vehicle rental website with responsive booking-oriented user interface design.',
+    image: '/projects/car_rental_website/Web_Rental_Mobil - Home.png',
+    images: [
+      '/projects/car_rental_website/Web_Rental_Mobil - Home.png',
+      '/projects/car_rental_website/Web_Rental_Mobil - Mobil.png',
+      '/projects/car_rental_website/Web_Rental_Mobil - About.png',
+      '/projects/car_rental_website/Web_Rental_Mobil - Information.png',
+      '/projects/car_rental_website/Web_Rental_Mobil - Contact.png'
+    ],
+    technologies: ['Web App', 'UI/UX', 'Frontend', 'Interactive Design'],
+    category: 'Web App',
+    featured: false,
+  },
+  {
+    id: 'kostfinder_unklab',
+    title: 'KostFinder UNKLAB',
+    description: 'A modern boarding house search and booking application tailored for university students with integrated price calculators.',
+    image: '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.png',
+    images: [
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.png',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Rekom_Kost.png',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Detail_Kost.png',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Booking_Kost.png',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Kalkulator_Sewa.png'
+    ],
+    technologies: ['Fullstack', 'Web App', 'Database', 'UI/UX'],
+    category: 'Fullstack / UI/UX',
+    featured: false,
+  },
+  {
+    id: 'system_library_mobile_app',
+    title: 'System Library Mobile App',
+    description: 'A comprehensive digital library management application featuring role-based dashboards, book tracking, and student visit gamification.',
+    image: '/projects/system_library_mobile_app/Home Page (Student) - System Library (MAD).jpeg',
+    images: [
+      '/projects/system_library_mobile_app/Home Page (Student) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Books Page (Student) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Events Page (Student) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Leaderboard Page (Student) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Profile Page (Student) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Dashboard (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/View All Students Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/View All Events Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Add Event Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/View Event Participants Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Set Visit Code Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/View All Students Visit Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/View All Students Point Page (Admin) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Login Page (Student) - System Library (MAD).jpeg',
+      '/projects/system_library_mobile_app/Register Page (Student) - System Library (MAD).jpeg'
+    ],
+    technologies: ['Mobile App', 'Backend', 'Database', 'UI/UX'],
+    category: 'Mobile App',
+    featured: false,
+  },
+  {
+    id: 'system_management_klinik_sentosa',
+    title: 'Klinik Sentosa Management System',
+    description: 'An integrated healthcare facility management system providing customized workflows for administrators, doctors, and pharmacists.',
+    image: '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.jpeg',
+    images: [
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.jpeg',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Admin.jpeg',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Dokter.jpeg',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Apoteker.jpeg',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Kepala_Klinik.jpeg'
+    ],
+    technologies: ['Fullstack', 'Backend', 'Database', 'Interactive Design'],
+    category: 'Fullstack',
+    featured: false,
+  },
+  {
+    id: 'web_infomation_ray',
+    title: 'RAY Information Web Portal',
+    description: 'An informational web portal focused on elegant content delivery, visual galleries, and clean user interfaces.',
+    image: '/projects/web_infomation_ray/Web_Informasi_RAY - Home.png',
+    images: [
+      '/projects/web_infomation_ray/Web_Informasi_RAY - Home.png',
+      '/projects/web_infomation_ray/Web_Informasi_RAY - About.png',
+      '/projects/web_infomation_ray/Web_Informasi_RAY - Gallery.png'
+    ],
+    technologies: ['Web App', 'Frontend', 'UI/UX'],
+    category: 'Web App',
+    featured: false,
+  },
+  {
+    id: 'web_portofolio_AI',
+    title: 'AI Web Portfolio Showcase',
+    description: 'A futuristic AI-augmented web portfolio designed to demonstrate intelligent chatbot integrations and dynamic themes.',
+    image: '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.png',
+    images: [
+      '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.png',
+      '/projects/web_portofolio_AI/Web_Portofolio_AI - Chatbot.png'
+    ],
+    technologies: ['AI Project', 'Web App', 'Frontend', 'Interactive Design'],
+    category: 'AI Project',
+    featured: false,
+  },
+  {
+    id: 'mobile_app_portofolio',
+    title: 'Mobile Portfolio Experience',
+    description: 'A native mobile app portfolio demonstration optimized for touch screens, custom gestures, and native transitions.',
+    image: '/projects/mobile_app_portofolio/Home Page - MAD Portofolio.jpeg',
+    images: [
+      '/projects/mobile_app_portofolio/Home Page - MAD Portofolio.jpeg',
+      '/projects/mobile_app_portofolio/Home Page (cont.) - MAD Portofolio.jpeg',
+      '/projects/mobile_app_portofolio/Experience (Projects) - MAD Portofolio.jpeg',
+      '/projects/mobile_app_portofolio/Experience (Certificates) - MAD Portofolio.jpeg',
+      '/projects/mobile_app_portofolio/Experience (Organization) - MAD Portofolio.jpeg',
+      '/projects/mobile_app_portofolio/Education - MAD Portofolio.jpeg'
+    ],
+    technologies: ['Mobile App', 'UI/UX', 'Frontend'],
+    category: 'Mobile App',
+    featured: false,
+  },
+  {
+    id: 'carta_AI',
+    title: 'Carta AI Assistant',
+    description: 'A specialized intelligent assistant interface designed for streamlined contextual data visualization and conversational exploration.',
+    image: '/projects/carta_AI/Carta_AI.jpeg',
+    images: [
+      '/projects/carta_AI/Carta_AI.jpeg'
+    ],
+    technologies: ['AI Project', 'UI/UX', 'Interactive Design'],
+    category: 'AI Project',
+    featured: false,
+  },
+  {
+    id: 'pablo_chatbot_AI',
+    title: 'Pablo AI Chatbot',
+    description: 'An intelligent chatbot interface providing natural language interactions and streamlined responses.',
+    image: '/projects/pablo_chatbot_AI/Pablo_Chatbot - AI.png',
+    images: [
+      '/projects/pablo_chatbot_AI/Pablo_Chatbot - AI.png'
+    ],
+    technologies: ['AI Project', 'Frontend', 'Interactive Design'],
+    category: 'AI Project',
+    featured: false,
+  },
+  {
+    id: 'personal_portofolio',
+    title: 'Cinematic Personal Portfolio',
+    description: 'A high-performance cinematic digital showcase implementing state-of-the-art interactive layouts and visual elements.',
+    image: '/projects/personal_portofolio/Web_Portofolio.png',
+    images: [
+      '/projects/personal_portofolio/Web_Portofolio.png'
+    ],
+    technologies: ['Web App', 'UI/UX', 'Frontend', 'Interactive Design'],
+    category: 'Web App',
+    featured: false,
+  },
+  {
+    id: 'portofolio_adriel',
+    title: 'Adriel Web Portfolio Core',
+    description: 'The comprehensive architectural foundation of the primary portfolio application built for premium user engagement.',
+    image: '/projects/project_featured.png',
+    images: [
+      '/projects/project_featured.png'
+    ],
+    technologies: ['Fullstack', 'Web App', 'UI/UX', 'Interactive Design'],
+    category: 'Fullstack',
+    featured: false,
+  }
 ]
 
 export const ABOUT_STATS = [
@@ -61,8 +249,8 @@ export const ABOUT_STATS = [
 
 export const CORE_STRENGTHS = [
   'AI Integration',
-  'Web Development',
-  'Mobile App Development',
+  'Web Developer',
+  'Mobile App Developer',
   'Python',
   'Software Testing'
 ]

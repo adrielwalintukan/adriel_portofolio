@@ -1,19 +1,20 @@
 import { memo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FiChevronDown } from 'react-icons/fi'
-import { PROJECTS } from '@/lib/constants'
+import { PROJECTS, type Project } from '@/lib/constants'
 import { Section, SectionHeading } from '@/components/shared'
 import { StaggerContainer } from '@/components/animations'
-import { FeaturedProjectCard, ProjectCard } from '@/components/ui'
+import { FeaturedProjectCard, ProjectCard, ProjectGalleryModal } from '@/components/ui'
 import { AmbientGlow } from '@/components/effects'
 
 /**
  * Premium Project Showcase Section.
  * Implements a responsive Bento Grid to display featured and secondary projects.
- * Features a smooth expandable "View All" system.
+ * Features a smooth expandable "View All" system and immersive local gallery overlay.
  */
 export const ProjectsSection = memo(function ProjectsSection() {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   
   const featuredProject = PROJECTS.find((p) => p.featured)
   const secondaryProjects = PROJECTS.filter((p) => !p.featured)
@@ -48,7 +49,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
             className="lg:col-span-2"
             style={{ willChange: 'opacity, transform' }}
           >
-            <FeaturedProjectCard project={featuredProject} />
+            <FeaturedProjectCard project={featuredProject} onSelectProject={setSelectedProject} />
           </motion.div>
         )}
 
@@ -61,7 +62,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
             }}
             style={{ willChange: 'opacity, transform' }}
           >
-            <ProjectCard project={project} />
+            <ProjectCard project={project} onSelectProject={setSelectedProject} />
           </motion.div>
         ))}
       </StaggerContainer>
@@ -84,7 +85,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <ProjectCard project={project} />
+                  <ProjectCard project={project} onSelectProject={setSelectedProject} />
                 </motion.div>
               ))}
             </div>
@@ -114,6 +115,9 @@ export const ProjectsSection = memo(function ProjectsSection() {
           </button>
         </motion.div>
       )}
+
+      {/* GLOBAL CINEMATIC GALLERY MODAL OVERLAY */}
+      <ProjectGalleryModal project={selectedProject} onClose={() => setSelectedProject(null)} />
     </Section>
   )
 })

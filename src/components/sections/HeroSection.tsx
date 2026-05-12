@@ -18,7 +18,7 @@ export const HeroSection = memo(function HeroSection() {
     >
       <div className="section-container relative z-10 w-full">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-12">
-          
+
           {/* LEFT COLUMN: Content */}
           <StaggerContainer
             delay={0.2}
@@ -26,7 +26,7 @@ export const HeroSection = memo(function HeroSection() {
             className="flex flex-col items-center text-center lg:items-start lg:text-left"
           >
             {/* Mobile Cinematic Portrait (Hidden on Desktop) */}
-            <motion.div 
+            <motion.div
               variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
               className="relative mb-8 -mt-8 flex justify-center lg:hidden"
             >
@@ -39,7 +39,7 @@ export const HeroSection = memo(function HeroSection() {
                 <div className="absolute -inset-4 rounded-full bg-accent/20 blur-[40px]" />
                 <div className="absolute -inset-1 animate-[spin_12s_linear_infinite] rounded-[40px] border border-accent/30 border-t-accent/80 border-r-neon-cyan/50" />
                 <div className="absolute -inset-2 animate-[spin_15s_linear_infinite_reverse] rounded-[48px] border border-neon-cyan/10 border-b-neon-cyan/60" />
-                
+
                 {/* Portrait Container */}
                 <div className="relative h-full w-full overflow-hidden rounded-[40px] border border-border/40 bg-surface/50 shadow-[0_0_30px_rgba(108,92,231,0.2)]">
                   <div className="absolute inset-0 z-10 bg-gradient-to-t from-background/90 via-background/10 to-transparent" />
@@ -86,7 +86,7 @@ export const HeroSection = memo(function HeroSection() {
               variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}
               className="mb-8 max-w-[320px] text-sm leading-relaxed text-foreground-subtle sm:max-w-xl sm:text-lg lg:max-w-xl lg:text-xl"
             >
-              Passionate about AI Integration, Web Development, Mobile App Development, and building modern digital solutions with clean architecture and immersive user experiences.
+              Passionate about AI Integration, Web Developer, Mobile App Developer, and building modern digital solutions with clean architecture and immersive user experiences.
             </motion.p>
 
             {/* Social Links integrated higher into the flow */}
@@ -124,7 +124,7 @@ export const HeroSection = memo(function HeroSection() {
           {/* We keep the wrapper here to ensure layout space is maintained, but HeroScene itself hides on mobile */}
           <div className="relative hidden h-[400px] w-full items-center justify-center lg:flex lg:h-[600px] xl:h-[700px] gpu-accelerated">
             <Reveal direction="left" delay={0.3} className="h-full w-full">
-               <HeroScene />
+              <HeroScene />
             </Reveal>
           </div>
         </div>
