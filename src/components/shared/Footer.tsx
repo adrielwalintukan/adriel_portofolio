@@ -36,7 +36,7 @@ export const Footer = memo(function Footer() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ duration: 0.5 }}
           className="flex flex-col items-center sm:items-start"
         >
@@ -52,7 +52,7 @@ export const Footer = memo(function Footer() {
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ duration: 0.5, delay: 0.1 }}
           className="flex items-center gap-6"
         >

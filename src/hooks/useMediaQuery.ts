@@ -1,25 +1,23 @@
-import { useState, useEffect } from 'react'
+import { useSyncExternalStore } from 'react'
 import { BREAKPOINTS } from '@/lib/constants'
 
 type BreakpointKey = keyof typeof BREAKPOINTS
 
 /**
  * Media query hook tied to design system breakpoints.
+ * Uses useSyncExternalStore to avoid setState-in-effect.
  */
 export function useMediaQuery(breakpoint: BreakpointKey): boolean {
-  const [matches, setMatches] = useState(false)
+  const query = `(min-width: ${BREAKPOINTS[breakpoint]}px)`
 
-  useEffect(() => {
-    const query = window.matchMedia(`(min-width: ${BREAKPOINTS[breakpoint]}px)`)
-    setMatches(query.matches)
-
-    function handleChange(e: MediaQueryListEvent) {
-      setMatches(e.matches)
-    }
-
-    query.addEventListener('change', handleChange)
-    return () => query.removeEventListener('change', handleChange)
-  }, [breakpoint])
-
-  return matches
+  return useSyncExternalStore(
+    (onStoreChange) => {
+      const mql = window.matchMedia(query)
+      const handler = () => onStoreChange()
+      mql.addEventListener('change', handler)
+      return () => mql.removeEventListener('change', handler)
+    },
+    () => window.matchMedia(query).matches,
+    () => false, // SSR fallback
+  )
 }

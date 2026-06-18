@@ -28,8 +28,9 @@
   --color-neon-blue: #3b82f6;
   --color-neon-green: #22d3ee;
 
-  --color-gradient-start: #6c5ce7;
-  --color-gradient-end: #00f0ff;
+  --color-gradient-start: #7c3aed;
+  --color-gradient-mid: #a78bfa;
+  --color-gradient-end: #f472b6;
 
   --color-card: rgba(22, 22, 37, 0.6);
   --color-card-hover: rgba(28, 28, 48, 0.8);
@@ -227,7 +228,7 @@
 }
 
 @utility text-gradient {
-  background: linear-gradient(135deg, var(--color-gradient-start), var(--color-gradient-end));
+  background: linear-gradient(135deg, var(--color-gradient-start) 0%, var(--color-gradient-mid) 50%, var(--color-gradient-end) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -257,7 +258,7 @@
 /* Responsive container with fluid padding */
 @utility section-container {
   width: 100%;
-  max-width: 1280px;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
   padding-left: var(--spacing-container);
@@ -329,12 +330,7 @@
   }
 }
 
-/* Ultrawide: cap max content width */
-@media (min-width: 1920px) {
-  .section-container {
-    max-width: 1440px;
-  }
-}
+/* Full width layout - no ultrawide cap */
 
 /* ============================================================
    MOBILE PERFORMANCE: disable expensive effects

@@ -20,7 +20,7 @@ export const StaggerContainer = memo(function StaggerContainer({
   staggerDelay = 0.08,
 }: StaggerContainerProps) {
   const [ref, inView] = useInView<HTMLDivElement>({
-    triggerOnce: true,
+    triggerOnce: false,
     rootMargin: '50px',
   })
 

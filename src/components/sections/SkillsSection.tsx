@@ -29,7 +29,7 @@ export const SkillsSection = memo(function SkillsSection() {
               key={categoryGroup.category}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
+              viewport={{ once: false, margin: "-50px" }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className="flex flex-col"
             >
@@ -43,14 +43,15 @@ export const SkillsSection = memo(function SkillsSection() {
               <StaggerContainer
                 delay={0.2}
                 staggerDelay={0.1}
-                className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+                className="flex flex-wrap justify-center md:justify-start gap-4 sm:gap-6"
               >
                 {categoryGroup.skills.map((skill) => (
                   <motion.div
                     key={skill.name}
                     variants={{ hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1 } }}
+                    className="w-28 sm:w-32"
                   >
-                    <TechSkillCard name={skill.name} level={skill.level} />
+                    <TechSkillCard name={skill.name} icon={skill.icon} />
                   </motion.div>
                 ))}
               </StaggerContainer>

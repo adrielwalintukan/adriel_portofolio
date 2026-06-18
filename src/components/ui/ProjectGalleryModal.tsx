@@ -1,5 +1,5 @@
 import { memo, useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { type Project } from '@/lib/constants'
 import { TechBadge } from './TechBadge'
@@ -67,7 +67,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
   if (!project) return null
 
   // Framer motion variants for smooth slide transitions
-  const slideVariants: any = {
+  const slideVariants: Variants = {
     enter: (dir: 'left' | 'right') => ({
       x: dir === 'right' ? 100 : -100,
       opacity: 0,

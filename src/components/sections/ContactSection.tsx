@@ -121,7 +121,7 @@ export const ContactSection = memo(function ContactSection() {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
+              viewport={{ once: false, margin: "-100px" }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <ContactForm />

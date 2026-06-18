@@ -13,9 +13,8 @@ interface ProjectCardProps {
 }
 
 /**
- * Standard project card for the bento grid.
- * Features a glassmorphism base, image zoom on hover, desktop 3D tilt,
- * and triggers interactive local image gallery overlay on click.
+ * Cinematic standard project card for the infinite marquee.
+ * Features a 16:10 landscape aspect ratio, full-cover image, and premium gradient text overlay.
  */
 export const ProjectCard = memo(function ProjectCard({
   project,
@@ -29,54 +28,57 @@ export const ProjectCard = memo(function ProjectCard({
     <div 
       onClick={() => onSelectProject?.(project)}
       className={cn(
-        'glass group relative flex h-full flex-col overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-glow-lg hover:border-accent/30 cursor-pointer',
+        'group relative flex h-full w-full overflow-hidden rounded-2xl cursor-pointer aspect-[16/10] border border-white/5 transition-all duration-500 hover:border-accent/40 shadow-xl',
         className
       )}
     >
-      {/* Image Container */}
-      <div className="relative aspect-video w-full overflow-hidden border-b border-border/50 bg-surface">
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-60" />
-        <img
-          src={project.image}
-          alt={project.title}
-          loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 will-change-transform"
-        />
-        
-        {/* Category Label */}
-        <div className="absolute left-4 top-4 z-20 rounded-full bg-background/80 px-3 py-1 text-xs font-medium text-foreground backdrop-blur-md">
-          {project.category}
-        </div>
+      {/* Background Image */}
+      <img
+        src={project.image}
+        alt={project.title}
+        loading="lazy"
+        draggable={false}
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-1000 ease-out group-hover:scale-105 will-change-transform select-none"
+      />
+      
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent opacity-90 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-accent/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 mix-blend-overlay" />
 
-        {/* Gallery Preview Count Overlay */}
-        <div className="absolute right-4 top-4 z-20 flex items-center gap-1 rounded-full bg-surface/80 px-2.5 py-1 text-[11px] font-semibold text-foreground-muted backdrop-blur-md transition-colors group-hover:text-accent border border-border/40">
-          <FiImage className="h-3 w-3" />
-          <span>{imageCount}</span>
-        </div>
+      {/* Top Badges */}
+      <div className="absolute top-4 left-4 z-20 rounded-full border border-white/10 bg-background/50 px-3 py-1.5 text-[9px] sm:text-[10px] font-semibold tracking-wider text-foreground-subtle backdrop-blur-md transition-colors group-hover:border-accent/30 group-hover:text-accent uppercase">
+        {project.category}
       </div>
 
-      {/* Content Container */}
-      <div className="flex flex-1 flex-col p-6">
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h3 className="font-display text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-accent">
-            {project.title}
-          </h3>
-          <span className="text-xs font-semibold text-accent opacity-0 transition-opacity group-hover:opacity-100 shrink-0 pt-1">
-            Open Gallery →
-          </span>
-        </div>
+      <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 rounded-full border border-white/10 bg-background/50 px-2.5 py-1.5 text-[10px] font-semibold text-foreground-muted backdrop-blur-md transition-colors group-hover:text-accent group-hover:border-accent/30">
+        <FiImage className="h-3 w-3" />
+        <span>{imageCount}</span>
+      </div>
 
-        <p className="mb-6 line-clamp-2 text-sm text-foreground-subtle sm:text-base">
+      {/* Content Area at Bottom */}
+      <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col justify-end p-4 sm:p-5 lg:p-6 transition-transform duration-500 ease-out">
+        <h3 className="mb-2 font-display text-lg sm:text-xl font-bold tracking-tight text-white transition-colors group-hover:text-accent drop-shadow-md">
+          {project.title}
+        </h3>
+        
+        <p className="mb-4 line-clamp-2 text-xs sm:text-sm text-gray-300 drop-shadow-sm max-w-[95%] leading-relaxed">
           {project.description}
         </p>
 
-        <div className="mt-auto flex flex-wrap gap-2">
-          {project.technologies.slice(0, 4).map((tech) => (
-            <TechBadge key={tech} name={tech} />
-          ))}
-          {project.technologies.length > 4 && (
-            <TechBadge name={`+${project.technologies.length - 4}`} />
-          )}
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            {project.technologies.slice(0, 3).map((tech) => (
+              <TechBadge key={tech} name={tech} />
+            ))}
+            {project.technologies.length > 3 && (
+              <span className="text-[10px] font-medium text-foreground-subtle bg-surface/40 backdrop-blur-md border border-border/40 rounded-full px-2 py-0.5 flex items-center">
+                +{project.technologies.length - 3}
+              </span>
+            )}
+          </div>
+          <span className="hidden sm:block text-[10px] font-bold text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100 uppercase tracking-wider">
+            View
+          </span>
         </div>
       </div>
     </div>
@@ -88,14 +90,12 @@ export const ProjectCard = memo(function ProjectCard({
 
   return (
     <Tilt
-      tiltMaxAngleX={3}
-      tiltMaxAngleY={3}
-      glareEnable={true}
-      glareMaxOpacity={0.05}
-      glarePosition="all"
+      tiltMaxAngleX={1}
+      tiltMaxAngleY={1}
+      glareEnable={false}
       transitionSpeed={1000}
       scale={1.01}
-      className="h-full"
+      className="h-full w-full"
     >
       {cardContent}
     </Tilt>

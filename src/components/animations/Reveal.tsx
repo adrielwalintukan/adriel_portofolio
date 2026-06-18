@@ -46,7 +46,7 @@ export const Reveal = memo(function Reveal({
   delay = 0,
   duration = ANIMATION.duration.slow,
   className,
-  once = true,
+  once = false,
 }: RevealProps) {
   const [ref, inView] = useInView<HTMLDivElement>({
     triggerOnce: once,

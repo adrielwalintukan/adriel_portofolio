@@ -23,7 +23,7 @@ export const HeroSection = memo(function HeroSection() {
           <StaggerContainer
             delay={0.2}
             staggerDelay={0.1}
-            className="flex flex-col items-center text-center lg:items-start lg:text-left"
+            className="flex flex-col items-center text-center lg:items-start lg:text-left lg:pl-8 xl:pl-16 2xl:pl-24"
           >
             {/* Mobile Cinematic Portrait (Hidden on Desktop) */}
             <motion.div

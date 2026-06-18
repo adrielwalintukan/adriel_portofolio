@@ -19,8 +19,8 @@ export const AnimatedCounter = memo(function AnimatedCounter({
   className,
 }: AnimatedCounterProps) {
   const ref = useRef<HTMLSpanElement>(null)
-  // useInView triggers the animation only when the component is visible
-  const isInView = useInView(ref, { once: true, margin: '-50px' })
+  // useInView triggers the animation whenever the component is visible
+  const isInView = useInView(ref, { once: false, margin: '-50px' })
 
   // Initialize the spring with the starting value
   const spring = useSpring(from, {
@@ -37,8 +37,11 @@ export const AnimatedCounter = memo(function AnimatedCounter({
   useEffect(() => {
     if (isInView) {
       spring.set(to)
+    } else {
+      // Reset instantly when out of view so it's ready to count up again
+      spring.jump(from)
     }
-  }, [isInView, spring, to])
+  }, [isInView, spring, to, from])
 
   return <motion.span ref={ref} className={className}>{display}</motion.span>
 })

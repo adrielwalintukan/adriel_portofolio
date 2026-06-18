@@ -267,6 +267,15 @@ export interface TimelineItem {
 
 export const EXPERIENCE_TIMELINE: TimelineItem[] = [
   {
+    id: 'exp-new-1',
+    year: 'Jun 2026 — Present',
+    title: 'Magang',
+    role: 'LLDIKTI XVI (Remote)',
+    description: 'My team and I are currently developing a system utilizing the Laravel, Blade, Vite, and PostgreSQL frameworks.',
+    category: 'Experience',
+    technologies: ['Laravel', 'Blade', 'Vite', 'PostgreSQL'],
+  },
+  {
     id: 'exp-1',
     year: 'Aug 2024 — Aug 2025',
     title: 'Web Developer',
@@ -339,6 +348,8 @@ export const SKILLS_DATA: SkillCategory[] = [
       { name: 'SQL', level: 85, icon: 'database' },
       { name: 'Supabase', level: 80, icon: 'supabase' },
       { name: 'Convex', level: 80, icon: 'convex' },
+      { name: 'Laravel', level: 85, icon: 'laravel' },
+      { name: 'PostgreSQL', level: 85, icon: 'postgresql' },
     ],
   },
   {
@@ -349,12 +360,14 @@ export const SKILLS_DATA: SkillCategory[] = [
       { name: 'TypeScript', level: 85, icon: 'typescript' },
       { name: 'Next.js', level: 85, icon: 'nextjs' },
       { name: 'Vite', level: 80, icon: 'vite' },
+      { name: 'Blade', level: 80, icon: 'blade' },
     ],
   },
   {
     category: 'Tools & Other',
     skills: [
-      { name: 'Git & GitHub', level: 90, icon: 'git' },
+      { name: 'Git', level: 90, icon: 'git' },
+      { name: 'GitHub', level: 90, icon: 'github' },
       { name: 'Software Testing', level: 85, icon: 'code' },
     ],
   },

@@ -28,7 +28,8 @@ export const TextReveal = memo(function TextReveal({
         <motion.span
           key={`${word}-${i}`}
           initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, margin: '-20px' }}
           transition={{
             duration: 0.4,
             delay: delay + i * staggerDelay,
