@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowRight, FileText } from 'lucide-react'
 import { FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi'
-import { StaggerContainer, TextReveal, Reveal, HeroCodingAnimation } from '@/components/animations'
+import { StaggerContainer, Reveal, HeroCodingAnimation, TypewriterText } from '@/components/animations'
 import { Button, Badge } from '@/components/ui'
 
 /**
@@ -71,17 +71,14 @@ export const HeroSection = memo(function HeroSection() {
               </motion.span>
             </h1>
 
-            {/* Typography Fix: Clearer wrapping and hierarchy */}
-            <div className="mb-6 flex flex-col gap-1 text-[1.2rem] font-semibold leading-tight sm:text-2xl lg:text-3xl">
-              <TextReveal
-                text="Information System Student"
-                delay={0.4}
-                className="text-foreground-muted justify-center lg:justify-start"
-              />
-              <TextReveal
-                text="& Fullstack Developer"
-                delay={0.5}
-                className="text-foreground-muted justify-center lg:justify-start"
+            {/* Typing Animation Subtitle */}
+            <div className="mb-6 min-h-[3.2rem] sm:min-h-[2.5rem] flex items-center justify-center lg:justify-start text-[1.2rem] font-semibold leading-tight sm:text-2xl lg:text-3xl text-foreground-muted">
+              <TypewriterText
+                text="Information System Student & Fullstack Developer"
+                delay={400}
+                speed={36}
+                className="text-foreground-muted text-center lg:text-left"
+                cursorClassName="text-accent font-bold"
               />
             </div>
 
@@ -101,7 +98,7 @@ export const HeroSection = memo(function HeroSection() {
               <a href="https://github.com/AdrielWalintukan" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="GitHub">
                 <FiGithub className="h-6 w-6 sm:h-5 sm:w-5" />
               </a>
-              <a href="https://www.linkedin.com/in/adriel-walintukan-56ba48259/" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="LinkedIn">
+              <a href="https://www.linkedin.com/in/adriel-walintukan-383032332/" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="LinkedIn">
                 <FiLinkedin className="h-6 w-6 sm:h-5 sm:w-5" />
               </a>
               <a href="https://www.instagram.com/walintukann.adriel/" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="Instagram">

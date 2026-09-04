@@ -319,7 +319,7 @@ export const CONTACT_INFO = {
 
 export const SOCIAL_LINKS = [
   { name: 'GitHub', url: 'https://github.com/AdrielWalintukan', icon: 'FiGithub' },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/adriel-walintukan-56ba48259/', icon: 'FiLinkedin' },
+  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/adriel-walintukan-383032332/', icon: 'FiLinkedin' },
   { name: 'Instagram', url: 'https://www.instagram.com/walintukann.adriel/', icon: 'FiInstagram' },
   { name: 'Email', url: 'mailto:adrielwalintukan27@gmail.com', icon: 'FiMail' },
 ]

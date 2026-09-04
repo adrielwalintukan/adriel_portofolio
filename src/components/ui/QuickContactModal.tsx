@@ -37,7 +37,7 @@ const contactChannels = [
     title: 'LinkedIn Network',
     subtitle: 'Adriel Walintukan',
     description: 'Professional background, endorsements & networking',
-    href: 'https://www.linkedin.com/in/adriel-walintukan-56ba48259/',
+    href: 'https://www.linkedin.com/in/adriel-walintukan-383032332/',
     icon: FiLinkedin,
     accentColor: 'text-blue-400',
     bgColor: 'bg-blue-500/10 border-blue-500/30 hover:border-blue-500/60 hover:bg-blue-500/20',
