@@ -1,0 +1,225 @@
+[
+  {
+    "id": "cert-cisco-cybersecurity",
+    "title": "Introduction to Cybersecurity",
+    "issuer": "Cisco Networking Academy",
+    "year": "2026",
+    "date": "Feb 2026",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/CISCO/Introduction_to_Cybersecurity_certificate.pdf",
+    "pdf_rel": "CISCO\\Introduction_to_Cybersecurity_certificate.pdf",
+    "skills": [
+      "Cybersecurity",
+      "Network Defense",
+      "Threat Detection"
+    ],
+    "description": "Comprehensive understanding of cyber threats, basic cryptography, network defense techniques, and privacy principles.",
+    "image": "/certificates/_thumbnails/cert-cisco-cybersecurity.png"
+  },
+  {
+    "id": "cert-ibm-granite-code-gen",
+    "title": "Code Generation and Optimization Using IBM Granite",
+    "issuer": "IBM SkillsBuild",
+    "year": "2025",
+    "date": "Sep 2025",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/Generative AI - IBM/IBMDesign20250913-34-28yo6n.pdf",
+    "pdf_rel": "Generative AI - IBM\\IBMDesign20250913-34-28yo6n.pdf",
+    "skills": [
+      "Generative AI",
+      "IBM Granite",
+      "Code Optimization",
+      "Prompt Engineering"
+    ],
+    "description": "Certified credential for utilizing IBM Granite foundation models for intelligent code generation, unit testing, and code refactoring.",
+    "image": "/certificates/_thumbnails/cert-ibm-granite-code-gen.png"
+  },
+  {
+    "id": "cert-ibm-genai-software-dev",
+    "title": "Use Generative AI for Software Development",
+    "issuer": "IBM SkillsBuild",
+    "year": "2025",
+    "date": "Sep 2025",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/Generative AI - IBM/Completion Certificate _ SkillsBuild.pdf",
+    "pdf_rel": "Generative AI - IBM\\Completion Certificate _ SkillsBuild.pdf",
+    "skills": [
+      "AI Integration",
+      "Software Engineering",
+      "Moodle Certified"
+    ],
+    "description": "Practical integration of Generative AI tools and assistants into modern software development lifecycles.",
+    "image": "/certificates/_thumbnails/cert-ibm-genai-software-dev.png"
+  },
+  {
+    "id": "cert-simplilearn-frontend",
+    "title": "Introduction to Front End Development",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Web Development",
+    "pdf": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to Front End Development\\Introduction to Front End Development.pdf",
+    "skills": [
+      "HTML5",
+      "CSS3",
+      "JavaScript",
+      "Responsive Design"
+    ],
+    "description": "Foundational masterclass in modern frontend architecture, interactive layouts, and user experience engineering.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-frontend.png"
+  },
+  {
+    "id": "cert-simplilearn-cissp",
+    "title": "CISSP Security Assessment & Testing and Security Operations",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/Simplilearn/Introduction to CISSP Security Assessment & Testing and Security Operations/Introduction to CISSP Security Assessment & Testing and Security Operations.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to CISSP Security Assessment & Testing and Security Operations\\Introduction to CISSP Security Assessment & Testing and Security Operations.pdf",
+    "skills": [
+      "Security Testing",
+      "Vulnerability Assessment",
+      "Security Operations"
+    ],
+    "description": "Advanced security assessment methodologies, penetration test concepts, and security operational controls.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-cissp.png"
+  },
+  {
+    "id": "cert-simplilearn-cybersecurity",
+    "title": "Introduction to Cyber Security",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/Simplilearn/Introduction to Cyber Security/Introduction to Cyber Security.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to Cyber Security\\Introduction to Cyber Security.pdf",
+    "skills": [
+      "Cyber Defense",
+      "Incident Response",
+      "Information Security"
+    ],
+    "description": "Core cybersecurity principles, threat mitigation strategies, and defensive security measures.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-cybersecurity.png"
+  },
+  {
+    "id": "cert-uvics-webdev",
+    "title": "Web Development Specialist",
+    "issuer": "UVICS (UNKLAB Virtue in Computer Science)",
+    "year": "2025",
+    "date": "2024 — 2025",
+    "category": "Web Development",
+    "pdf": "/certificates/Web Dev - UVICS/Sertifikat-UVICS-WebDev.pdf",
+    "pdf_rel": "Web Dev - UVICS\\Sertifikat-UVICS-WebDev.pdf",
+    "skills": [
+      "React",
+      "Next.js",
+      "Web Engineering",
+      "Team Collaboration"
+    ],
+    "description": "Official certification of contribution as Web Developer developing and maintaining student organization web systems.",
+    "image": "/certificates/_thumbnails/cert-uvics-webdev.png"
+  },
+  {
+    "id": "cert-proxo-mobile-app",
+    "title": "Proxo Coris 2026 — Mobile App Development",
+    "issuer": "Proxo Coris National Competition",
+    "year": "2026",
+    "date": "May 2026",
+    "category": "Competition / Award",
+    "pdf": "/certificates/Mobile App Dev - Proxo/PARTICIPANT_MOBILE APP (Adriel).pdf",
+    "pdf_rel": "Mobile App Dev - Proxo\\PARTICIPANT_MOBILE APP (Adriel).pdf",
+    "skills": [
+      "React Native",
+      "Mobile Innovation",
+      "National Contest"
+    ],
+    "description": "Certificate of participation & achievement in the national Proxo Coris 2026 Mobile Application Development competition.",
+    "image": "/certificates/_thumbnails/cert-proxo-mobile-app.png"
+  },
+  {
+    "id": "cert-proxo-appreciation",
+    "title": "Certificate of Appreciation — Proxo Coris",
+    "issuer": "Proxo Coris Committee",
+    "year": "2026",
+    "date": "2026",
+    "category": "Competition / Award",
+    "pdf": "/certificates/Mobile App Dev - Proxo/Certificate of Appreciation_JAT.pdf",
+    "pdf_rel": "Mobile App Dev - Proxo\\Certificate of Appreciation_JAT.pdf",
+    "skills": [
+      "Technical Excellence",
+      "Team Leadership"
+    ],
+    "description": "Certificate of appreciation awarded for dedicated participation and technical excellence.",
+    "image": "/certificates/_thumbnails/cert-proxo-appreciation.png"
+  },
+  {
+    "id": "cert-proxo-shortmovie",
+    "title": "Short Movie Production — Proxo Coris",
+    "issuer": "Proxo Coris Competition",
+    "year": "2026",
+    "date": "2026",
+    "category": "Creative & Media",
+    "pdf": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf",
+    "pdf_rel": "Short Movie - Proxo\\Sertifikat-ShortMovie.pdf",
+    "skills": [
+      "Creative Direction",
+      "Storytelling",
+      "Digital Media"
+    ],
+    "description": "Recognition for multimedia production and creative storytelling competition.",
+    "image": "/certificates/_thumbnails/cert-proxo-shortmovie.png"
+  },
+  {
+    "id": "cert-cfds-ugm",
+    "title": "Diffusion #127 — Digital Society & Labor Tech",
+    "issuer": "Center for Digital Society (CfDS) UGM & Oxford",
+    "year": "2025",
+    "date": "Sep 2025",
+    "category": "Technology & Society",
+    "pdf": "/certificates/Center for Digital Society/Sertifikat Difussion 127 (124).pdf",
+    "pdf_rel": "Center for Digital Society\\Sertifikat Difussion 127 (124).pdf",
+    "skills": [
+      "Digital Ethics",
+      "Data Governance",
+      "Worker Info Exchange"
+    ],
+    "description": "International seminar organized by CfDS UGM in collaboration with University of Oxford on digital society and data rights.",
+    "image": "/certificates/_thumbnails/cert-cfds-ugm.png"
+  },
+  {
+    "id": "cert-iris-robotics",
+    "title": "IRIS Tech Seminar & Workshop",
+    "issuer": "IRIS (Intelligent Robotics & Information Systems)",
+    "year": "2025",
+    "date": "2025",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/IRIS/Sertifikat-IRIS.pdf",
+    "pdf_rel": "IRIS\\Sertifikat-IRIS.pdf",
+    "skills": [
+      "Robotics",
+      "Intelligent Systems",
+      "IoT"
+    ],
+    "description": "Workshop on emerging intelligent robotics, automation, and intelligent system architectures.",
+    "image": "/certificates/_thumbnails/cert-iris-robotics.png"
+  },
+  {
+    "id": "cert-cpent-ai",
+    "title": "The Future of Penetration Testing with CPENT AI",
+    "issuer": "EC-Council / Cybersecurity Seminar",
+    "year": "2025",
+    "date": "2025",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf",
+    "pdf_rel": "The Future of Penetration Testing with CPENT AI\\The Future of Penetration Testing with CPENT AI.pdf",
+    "skills": [
+      "AI in Pentesting",
+      "CPENT",
+      "Threat Modeling"
+    ],
+    "description": "Specialized seminar exploring AI-driven penetration testing, automated vulnerability assessments, and modern exploit analysis.",
+    "image": "/certificates/_thumbnails/cert-cpent-ai.png"
+  }
+]

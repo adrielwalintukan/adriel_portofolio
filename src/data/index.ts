@@ -14,5 +14,5 @@ export const siteData = {
   name: 'Adriel Walintukan',
   role: 'Full-Stack Developer',
   tagline: 'Crafting digital experiences that push boundaries.',
-  email: 'contact@adrielwalintukan.dev',
+  email: 'adrielwalintukan27@gmail.com',
 } as const

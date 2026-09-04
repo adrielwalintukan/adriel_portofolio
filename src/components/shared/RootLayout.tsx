@@ -2,7 +2,7 @@ import { type ReactNode, memo } from 'react'
 import { Navbar } from '@/components/shared/Navbar'
 import { Footer } from '@/components/shared/Footer'
 import { NoiseOverlay } from '@/components/effects'
-import { AmbientGlow, CustomCursor } from '@/components/effects'
+import { AmbientGlow } from '@/components/effects'
 import { useSmoothScroll } from '@/hooks'
 
 interface RootLayoutProps {
@@ -21,7 +21,6 @@ export const RootLayout = memo(function RootLayout({ children }: RootLayoutProps
       <NoiseOverlay />
       <AmbientGlow variant="primary" />
       <AmbientGlow variant="secondary" />
-      <CustomCursor />
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />

@@ -1,4 +1,4 @@
-import { type ReactNode, memo } from 'react'
+﻿import { type ReactNode, memo } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { useInView } from '@/hooks'
 import { ANIMATION } from '@/lib/animations'
@@ -37,8 +37,8 @@ const directionVariants: Record<string, Variants> = {
 
 /**
  * Scroll-triggered reveal animation wrapper.
- * Memoized to prevent unnecessary re-renders of children.
- * Uses GPU-composited transform properties only.
+ * Optimized: triggers once by default for maximum scrolling smoothness,
+ * avoiding expensive reverse animations and GPU compositing layer churn.
  */
 export const Reveal = memo(function Reveal({
   children,
@@ -46,11 +46,11 @@ export const Reveal = memo(function Reveal({
   delay = 0,
   duration = ANIMATION.duration.slow,
   className,
-  once = false,
+  once = true,
 }: RevealProps) {
   const [ref, inView] = useInView<HTMLDivElement>({
     triggerOnce: once,
-    rootMargin: '50px', // Trigger slightly before visible for smoother entrance
+    rootMargin: '80px',
   })
 
   return (
@@ -65,7 +65,6 @@ export const Reveal = memo(function Reveal({
         ease: [...ANIMATION.ease.smooth],
       }}
       className={className}
-      style={{ willChange: 'opacity, transform' }}
     >
       {children}
     </motion.div>

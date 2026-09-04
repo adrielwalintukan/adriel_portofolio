@@ -269,9 +269,9 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
   {
     id: 'exp-new-1',
     year: 'Jun 2026 — Present',
-    title: 'Magang',
-    role: 'LLDIKTI XVI (Remote)',
-    description: 'My team and I are currently developing a system utilizing the Laravel, Blade, Vite, and PostgreSQL frameworks.',
+    title: 'System Development Intern',
+    role: 'LLDIKTI Wilayah XVI (Remote)',
+    description: 'Developing and engineering enterprise information systems utilizing Laravel, Blade, Vite, and PostgreSQL architectures.',
     category: 'Experience',
     technologies: ['Laravel', 'Blade', 'Vite', 'PostgreSQL'],
   },
@@ -312,7 +312,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
 
 
 export const CONTACT_INFO = {
-  email: 'adrielwalintukan@gmail.com',
+  email: 'adrielwalintukan27@gmail.com',
   location: 'Indonesia',
   availability: 'Available for collaboration & opportunities',
 }
@@ -320,8 +320,8 @@ export const CONTACT_INFO = {
 export const SOCIAL_LINKS = [
   { name: 'GitHub', url: 'https://github.com/AdrielWalintukan', icon: 'FiGithub' },
   { name: 'LinkedIn', url: 'https://www.linkedin.com/in/adriel-walintukan-56ba48259/', icon: 'FiLinkedin' },
-  { name: 'Instagram', url: 'https://www.instagram.com/adrielw_/', icon: 'FiInstagram' },
-  { name: 'Email', url: 'mailto:adrielwalintukan@gmail.com', icon: 'FiMail' },
+  { name: 'Instagram', url: 'https://www.instagram.com/walintukann.adriel/', icon: 'FiInstagram' },
+  { name: 'Email', url: 'mailto:adrielwalintukan27@gmail.com', icon: 'FiMail' },
 ]
 
 export interface SkillCategory {
@@ -334,50 +334,291 @@ export interface Certificate {
   title: string;
   issuer: string;
   year: string;
+  date?: string;
   image: string;
   category: string;
+  pdf?: string;
+  pdf_rel?: string;
   link?: string;
+  skills?: string[];
+  description?: string;
 }
 
 export const SKILLS_DATA: SkillCategory[] = [
   {
-    category: 'Fullstack & Backend',
+    category: 'Fullstack & Backend / AI',
     skills: [
       { name: 'Python', level: 90, icon: 'python' },
+      { name: 'FastAPI', level: 85, icon: 'fastapi' },
+      { name: 'Google Gemini', level: 90, icon: 'gemini' },
+      { name: 'REST API', level: 90, icon: 'restapi' },
       { name: 'Node.js', level: 85, icon: 'nodejs' },
-      { name: 'SQL', level: 85, icon: 'database' },
+      { name: 'PostgreSQL', level: 85, icon: 'postgresql' },
+      { name: 'Laravel', level: 85, icon: 'laravel' },
       { name: 'Supabase', level: 80, icon: 'supabase' },
       { name: 'Convex', level: 80, icon: 'convex' },
-      { name: 'Laravel', level: 85, icon: 'laravel' },
-      { name: 'PostgreSQL', level: 85, icon: 'postgresql' },
+      { name: 'SQL', level: 85, icon: 'database' },
     ],
   },
   {
     category: 'Frontend & Mobile',
     skills: [
       { name: 'React Native', level: 90, icon: 'react' },
-      { name: 'JavaScript', level: 90, icon: 'javascript' },
-      { name: 'TypeScript', level: 85, icon: 'typescript' },
+      { name: 'Expo', level: 85, icon: 'expo' },
       { name: 'Next.js', level: 85, icon: 'nextjs' },
+      { name: 'TypeScript', level: 85, icon: 'typescript' },
+      { name: 'JavaScript', level: 90, icon: 'javascript' },
       { name: 'Vite', level: 80, icon: 'vite' },
       { name: 'Blade', level: 80, icon: 'blade' },
     ],
   },
   {
-    category: 'Tools & Other',
+    category: 'Tools & Design',
     skills: [
       { name: 'Git', level: 90, icon: 'git' },
       { name: 'GitHub', level: 90, icon: 'github' },
-      { name: 'Software Testing', level: 85, icon: 'code' },
+      { name: 'Figma', level: 85, icon: 'figma' },
+      { name: 'Software Testing', level: 85, icon: 'testing' },
     ],
   },
 ]
 
-export const CERTIFICATES_DATA = Array.from({ length: 11 }, (_, i) => ({
-  id: `cert-${i + 1}`,
-  title: `Professional Certificate ${i + 1}`,
-  issuer: 'Certification Authority',
-  year: '2024',
-  image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=600&auto=format&fit=crop',
-  category: 'Professional Development',
-}))
+export const CERTIFICATES_DATA: Certificate[] = [
+  {
+    "id": "cert-cisco-cybersecurity",
+    "title": "Introduction to Cybersecurity",
+    "issuer": "Cisco Networking Academy",
+    "year": "2026",
+    "date": "Feb 2026",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/CISCO/Introduction_to_Cybersecurity_certificate.pdf",
+    "pdf_rel": "CISCO\\Introduction_to_Cybersecurity_certificate.pdf",
+    "skills": [
+      "Cybersecurity",
+      "Network Defense",
+      "Threat Detection"
+    ],
+    "description": "Comprehensive understanding of cyber threats, basic cryptography, network defense techniques, and privacy principles.",
+    "image": "/certificates/_thumbnails/cert-cisco-cybersecurity.png",
+    "link": "/certificates/CISCO/Introduction_to_Cybersecurity_certificate.pdf"
+  },
+  {
+    "id": "cert-ibm-granite-code-gen",
+    "title": "Code Generation and Optimization Using IBM Granite",
+    "issuer": "IBM SkillsBuild",
+    "year": "2025",
+    "date": "Sep 2025",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/Generative AI - IBM/IBMDesign20250913-34-28yo6n.pdf",
+    "pdf_rel": "Generative AI - IBM\\IBMDesign20250913-34-28yo6n.pdf",
+    "skills": [
+      "Generative AI",
+      "IBM Granite",
+      "Code Optimization",
+      "Prompt Engineering"
+    ],
+    "description": "Certified credential for utilizing IBM Granite foundation models for intelligent code generation, unit testing, and code refactoring.",
+    "image": "/certificates/_thumbnails/cert-ibm-granite-code-gen.png",
+    "link": "/certificates/Generative AI - IBM/IBMDesign20250913-34-28yo6n.pdf"
+  },
+  {
+    "id": "cert-ibm-genai-software-dev",
+    "title": "Use Generative AI for Software Development",
+    "issuer": "IBM SkillsBuild",
+    "year": "2025",
+    "date": "Sep 2025",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/Generative AI - IBM/Completion Certificate _ SkillsBuild.pdf",
+    "pdf_rel": "Generative AI - IBM\\Completion Certificate _ SkillsBuild.pdf",
+    "skills": [
+      "AI Integration",
+      "Software Engineering",
+      "Moodle Certified"
+    ],
+    "description": "Practical integration of Generative AI tools and assistants into modern software development lifecycles.",
+    "image": "/certificates/_thumbnails/cert-ibm-genai-software-dev.png",
+    "link": "/certificates/Generative AI - IBM/Completion Certificate _ SkillsBuild.pdf"
+  },
+  {
+    "id": "cert-simplilearn-frontend",
+    "title": "Introduction to Front End Development",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Web Development",
+    "pdf": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to Front End Development\\Introduction to Front End Development.pdf",
+    "skills": [
+      "HTML5",
+      "CSS3",
+      "JavaScript",
+      "Responsive Design"
+    ],
+    "description": "Foundational masterclass in modern frontend architecture, interactive layouts, and user experience engineering.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-frontend.png",
+    "link": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf"
+  },
+  {
+    "id": "cert-simplilearn-cissp",
+    "title": "CISSP Security Assessment & Testing and Security Operations",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/Simplilearn/Introduction to CISSP Security Assessment & Testing and Security Operations/Introduction to CISSP Security Assessment & Testing and Security Operations.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to CISSP Security Assessment & Testing and Security Operations\\Introduction to CISSP Security Assessment & Testing and Security Operations.pdf",
+    "skills": [
+      "Security Testing",
+      "Vulnerability Assessment",
+      "Security Operations"
+    ],
+    "description": "Advanced security assessment methodologies, penetration test concepts, and security operational controls.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-cissp.png",
+    "link": "/certificates/Simplilearn/Introduction to CISSP Security Assessment & Testing and Security Operations/Introduction to CISSP Security Assessment & Testing and Security Operations.pdf"
+  },
+  {
+    "id": "cert-simplilearn-cybersecurity",
+    "title": "Introduction to Cyber Security",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/Simplilearn/Introduction to Cyber Security/Introduction to Cyber Security.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to Cyber Security\\Introduction to Cyber Security.pdf",
+    "skills": [
+      "Cyber Defense",
+      "Incident Response",
+      "Information Security"
+    ],
+    "description": "Core cybersecurity principles, threat mitigation strategies, and defensive security measures.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-cybersecurity.png",
+    "link": "/certificates/Simplilearn/Introduction to Cyber Security/Introduction to Cyber Security.pdf"
+  },
+  {
+    "id": "cert-uvics-webdev",
+    "title": "Web Development Specialist",
+    "issuer": "UVICS (UNKLAB Virtue in Computer Science)",
+    "year": "2025",
+    "date": "2024 — 2025",
+    "category": "Web Development",
+    "pdf": "/certificates/Web Dev - UVICS/Sertifikat-UVICS-WebDev.pdf",
+    "pdf_rel": "Web Dev - UVICS\\Sertifikat-UVICS-WebDev.pdf",
+    "skills": [
+      "React",
+      "Next.js",
+      "Web Engineering",
+      "Team Collaboration"
+    ],
+    "description": "Official certification of contribution as Web Developer developing and maintaining student organization web systems.",
+    "image": "/certificates/_thumbnails/cert-uvics-webdev.png",
+    "link": "/certificates/Web Dev - UVICS/Sertifikat-UVICS-WebDev.pdf"
+  },
+  {
+    "id": "cert-proxo-mobile-app",
+    "title": "Proxo Coris 2026 — Mobile App Development",
+    "issuer": "Proxo Coris National Competition",
+    "year": "2026",
+    "date": "May 2026",
+    "category": "Competition / Award",
+    "pdf": "/certificates/Mobile App Dev - Proxo/PARTICIPANT_MOBILE APP (Adriel).pdf",
+    "pdf_rel": "Mobile App Dev - Proxo\\PARTICIPANT_MOBILE APP (Adriel).pdf",
+    "skills": [
+      "React Native",
+      "Mobile Innovation",
+      "National Contest"
+    ],
+    "description": "Certificate of participation & achievement in the national Proxo Coris 2026 Mobile Application Development competition.",
+    "image": "/certificates/_thumbnails/cert-proxo-mobile-app.png",
+    "link": "/certificates/Mobile App Dev - Proxo/PARTICIPANT_MOBILE APP (Adriel).pdf"
+  },
+  {
+    "id": "cert-proxo-appreciation",
+    "title": "Certificate of Appreciation — Proxo Coris",
+    "issuer": "Proxo Coris Committee",
+    "year": "2026",
+    "date": "2026",
+    "category": "Competition / Award",
+    "pdf": "/certificates/Mobile App Dev - Proxo/Certificate of Appreciation_JAT.pdf",
+    "pdf_rel": "Mobile App Dev - Proxo\\Certificate of Appreciation_JAT.pdf",
+    "skills": [
+      "Technical Excellence",
+      "Team Leadership"
+    ],
+    "description": "Certificate of appreciation awarded for dedicated participation and technical excellence.",
+    "image": "/certificates/_thumbnails/cert-proxo-appreciation.png",
+    "link": "/certificates/Mobile App Dev - Proxo/Certificate of Appreciation_JAT.pdf"
+  },
+  {
+    "id": "cert-proxo-shortmovie",
+    "title": "Short Movie Production — Proxo Coris",
+    "issuer": "Proxo Coris Competition",
+    "year": "2026",
+    "date": "2026",
+    "category": "Creative & Media",
+    "pdf": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf",
+    "pdf_rel": "Short Movie - Proxo\\Sertifikat-ShortMovie.pdf",
+    "skills": [
+      "Creative Direction",
+      "Storytelling",
+      "Digital Media"
+    ],
+    "description": "Recognition for multimedia production and creative storytelling competition.",
+    "image": "/certificates/_thumbnails/cert-proxo-shortmovie.png",
+    "link": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf"
+  },
+  {
+    "id": "cert-cfds-ugm",
+    "title": "Diffusion #127 — Digital Society & Labor Tech",
+    "issuer": "Center for Digital Society (CfDS) UGM & Oxford",
+    "year": "2025",
+    "date": "Sep 2025",
+    "category": "Technology & Society",
+    "pdf": "/certificates/Center for Digital Society/Sertifikat Difussion 127 (124).pdf",
+    "pdf_rel": "Center for Digital Society\\Sertifikat Difussion 127 (124).pdf",
+    "skills": [
+      "Digital Ethics",
+      "Data Governance",
+      "Worker Info Exchange"
+    ],
+    "description": "International seminar organized by CfDS UGM in collaboration with University of Oxford on digital society and data rights.",
+    "image": "/certificates/_thumbnails/cert-cfds-ugm.png",
+    "link": "/certificates/Center for Digital Society/Sertifikat Difussion 127 (124).pdf"
+  },
+  {
+    "id": "cert-iris-robotics",
+    "title": "IRIS Tech Seminar & Workshop",
+    "issuer": "IRIS (Intelligent Robotics & Information Systems)",
+    "year": "2025",
+    "date": "2025",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/IRIS/Sertifikat-IRIS.pdf",
+    "pdf_rel": "IRIS\\Sertifikat-IRIS.pdf",
+    "skills": [
+      "Robotics",
+      "Intelligent Systems",
+      "IoT"
+    ],
+    "description": "Workshop on emerging intelligent robotics, automation, and intelligent system architectures.",
+    "image": "/certificates/_thumbnails/cert-iris-robotics.png",
+    "link": "/certificates/IRIS/Sertifikat-IRIS.pdf"
+  },
+  {
+    "id": "cert-cpent-ai",
+    "title": "The Future of Penetration Testing with CPENT AI",
+    "issuer": "EC-Council / Cybersecurity Seminar",
+    "year": "2025",
+    "date": "2025",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf",
+    "pdf_rel": "The Future of Penetration Testing with CPENT AI\\The Future of Penetration Testing with CPENT AI.pdf",
+    "skills": [
+      "AI in Pentesting",
+      "CPENT",
+      "Threat Modeling"
+    ],
+    "description": "Specialized seminar exploring AI-driven penetration testing, automated vulnerability assessments, and modern exploit analysis.",
+    "image": "/certificates/_thumbnails/cert-cpent-ai.png",
+    "link": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf"
+  }
+]
+

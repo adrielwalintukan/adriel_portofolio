@@ -4,7 +4,7 @@ import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NAV_LINKS } from '@/lib/constants'
 import { Magnetic } from '@/components/animations'
-import { Button } from '@/components/ui'
+import { Button, QuickContactModal } from '@/components/ui'
 import { useDeviceDetect } from '@/hooks'
 
 /**
@@ -16,6 +16,7 @@ import { useDeviceDetect } from '@/hooks'
  */
 export const Navbar = memo(function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isContactOpen, setIsContactOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const { isTouchDevice } = useDeviceDetect()
@@ -112,7 +113,12 @@ export const Navbar = memo(function Navbar() {
 
         {/* CTA Button */}
         <div className="hidden md:block">
-          <Button href="#contact" variant="secondary" size="sm" className="px-6 py-2 h-10">
+          <Button
+            onClick={() => setIsContactOpen(true)}
+            variant="secondary"
+            size="sm"
+            className="px-6 py-2 h-10"
+          >
             Let&apos;s Talk
           </Button>
         </div>
@@ -164,9 +170,33 @@ export const Navbar = memo(function Navbar() {
                 {link.label}
               </motion.a>
             ))}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="pt-2"
+            >
+              <Button
+                onClick={() => {
+                  closeMenu()
+                  setIsContactOpen(true)
+                }}
+                variant="primary"
+                size="md"
+                className="px-8"
+              >
+                Let&apos;s Talk
+              </Button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Quick Contact Modal (Let's Talk) */}
+      <QuickContactModal
+        isOpen={isContactOpen}
+        onClose={() => setIsContactOpen(false)}
+      />
     </header>
   )
 })

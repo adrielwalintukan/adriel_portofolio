@@ -1,4 +1,4 @@
-import { type ReactNode, memo, forwardRef } from 'react'
+﻿import { type ReactNode, memo, forwardRef } from 'react'
 import { motion, type HTMLMotionProps } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Magnetic } from '@/components/animations'
@@ -11,6 +11,9 @@ interface ButtonProps extends HTMLMotionProps<'button'> {
   icon?: ReactNode
   className?: string
   href?: string
+  target?: string
+  rel?: string
+  download?: string
 }
 
 /**
@@ -19,7 +22,7 @@ interface ButtonProps extends HTMLMotionProps<'button'> {
  */
 export const Button = memo(
   forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-    { children, variant = 'primary', size = 'md', icon, className, href, ...props },
+    { children, variant = 'primary', size = 'md', icon, className, href, target, rel, download, ...props },
     ref
   ) {
     const { isTouchDevice } = useDeviceDetect()
@@ -76,7 +79,13 @@ export const Button = memo(
     if (href) {
       return (
         <Magnetic disabled={isTouchDevice} strength={0.15}>
-          <a href={href} className="inline-block">
+          <a
+            href={href}
+            download={download}
+            target={target}
+            rel={rel ?? (target === "_blank" ? "noopener noreferrer" : undefined)}
+            className="inline-block"
+          >
             {Component}
           </a>
         </Magnetic>

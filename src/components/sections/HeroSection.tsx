@@ -1,9 +1,8 @@
 import { memo } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, FileText } from 'lucide-react'
 import { FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi'
-import { StaggerContainer, TextReveal, Reveal } from '@/components/animations'
-import { HeroScene } from '@/components/3d'
+import { StaggerContainer, TextReveal, Reveal, HeroCodingAnimation } from '@/components/animations'
 import { Button, Badge } from '@/components/ui'
 
 /**
@@ -55,7 +54,11 @@ export const HeroSection = memo(function HeroSection() {
 
             <motion.div variants={{ hidden: { opacity: 0, y: 10 }, visible: { opacity: 1, y: 0 } }}>
               <Badge className="mb-4 sm:mb-6">
-                Available for new opportunities
+                <span className="relative flex h-2 w-2 mr-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                </span>
+                Available for opportunities
               </Badge>
             </motion.div>
 
@@ -101,7 +104,7 @@ export const HeroSection = memo(function HeroSection() {
               <a href="https://www.linkedin.com/in/adriel-walintukan-56ba48259/" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="LinkedIn">
                 <FiLinkedin className="h-6 w-6 sm:h-5 sm:w-5" />
               </a>
-              <a href="https://www.instagram.com/adrielw_/" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="Instagram">
+              <a href="https://www.instagram.com/walintukann.adriel/" target="_blank" rel="noreferrer" className="p-2 transition-all duration-300 hover:-translate-y-1 hover:text-accent hover:shadow-glow sm:p-0 sm:hover:shadow-none" aria-label="Instagram">
                 <FiInstagram className="h-6 w-6 sm:h-5 sm:w-5" />
               </a>
             </motion.div>
@@ -114,17 +117,16 @@ export const HeroSection = memo(function HeroSection() {
               <Button href="#contact" variant="primary" className="w-full sm:w-auto" icon={<ArrowRight className="h-4 w-4" />}>
                 Contact Me
               </Button>
-              <Button href="/resume.pdf" variant="secondary" className="w-full sm:w-auto">
+              <Button href="/Resume_Adriel_Walintukan.pdf" download="Resume_Adriel_Walintukan.pdf" target="_blank" rel="noopener noreferrer" variant="secondary" className="w-full sm:w-auto" icon={<FileText className="h-4 w-4" />}>
                 View Resume
               </Button>
             </motion.div>
           </StaggerContainer>
 
-          {/* RIGHT COLUMN: 3D Visual */}
-          {/* We keep the wrapper here to ensure layout space is maintained, but HeroScene itself hides on mobile */}
-          <div className="relative hidden h-[400px] w-full items-center justify-center lg:flex lg:h-[600px] xl:h-[700px] gpu-accelerated">
-            <Reveal direction="left" delay={0.3} className="h-full w-full">
-              <HeroScene />
+          {/* RIGHT COLUMN: Animated Developer Scene (Typing Animation) */}
+          <div className="relative flex w-full items-center justify-center py-6 lg:py-0 lg:h-[600px] xl:h-[700px]">
+            <Reveal direction="left" delay={0.3} className="w-full flex items-center justify-center">
+              <HeroCodingAnimation />
             </Reveal>
           </div>
         </div>

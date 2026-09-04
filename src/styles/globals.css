@@ -277,7 +277,9 @@
   opacity: 0.025;
   pointer-events: none;
   z-index: var(--z-behind);
-  /* STATIC — no animation. Saves GPU by not running grain keyframes */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  /* STATIC — GPU-isolated, no repaint on scroll */
 }
 
 @utility dot-grid {
@@ -359,12 +361,7 @@
   }
 }
 
-/* ============================================================
-   CUSTOM CURSOR LOGIC
-   ============================================================ */
-/* Hide default cursor on desktop when using CustomCursor */
-@media (pointer: fine) {
-  body, a, button, input, textarea, [role="button"], canvas {
-    cursor: none !important;
-  }
+/* Standard Interactive Cursor */
+a, button, [role="button"], input[type="submit"], input[type="button"] {
+  cursor: pointer;
 }

@@ -1,4 +1,4 @@
-import { type ReactNode, memo } from 'react'
+﻿import { type ReactNode, memo } from 'react'
 import { motion } from 'framer-motion'
 import { staggerContainer } from '@/lib/animations'
 import { useInView } from '@/hooks'
@@ -12,6 +12,8 @@ interface StaggerContainerProps {
 
 /**
  * Memoized container that staggers child animations on scroll.
+ * Optimized: triggers once upon view entry so child elements stay
+ * stable without re-animating or dropping frames during scrolling.
  */
 export const StaggerContainer = memo(function StaggerContainer({
   children,
@@ -20,8 +22,8 @@ export const StaggerContainer = memo(function StaggerContainer({
   staggerDelay = 0.08,
 }: StaggerContainerProps) {
   const [ref, inView] = useInView<HTMLDivElement>({
-    triggerOnce: false,
-    rootMargin: '50px',
+    triggerOnce: true,
+    rootMargin: '80px',
   })
 
   return (

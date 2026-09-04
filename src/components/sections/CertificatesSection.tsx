@@ -1,15 +1,18 @@
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { Section, SectionHeading } from '@/components/shared'
 import { InfiniteMarquee } from '@/components/animations'
-import { CertificateCard } from '@/components/ui'
+import { CertificateCard, CertificateModal } from '@/components/ui'
 import { AmbientGlow } from '@/components/effects'
-import { CERTIFICATES_DATA } from '@/lib/constants'
+import { CERTIFICATES_DATA, type Certificate } from '@/lib/constants'
 
 /**
  * Premium cinematic Certificates / Achievements Section.
- * Features a modern gallery grid layout with an expandable "View All" system.
+ * Features an infinite marquee showcase with interactive modal previews
+ * and direct one-click links to original PDF credentials.
  */
 export const CertificatesSection = memo(function CertificatesSection() {
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null)
+
   return (
     <Section id="certificates" className="relative overflow-hidden" fullWidth={true}>
       {/* Background Lighting */}
@@ -19,8 +22,8 @@ export const CertificatesSection = memo(function CertificatesSection() {
       <div className="section-container">
         <SectionHeading
           label="Certificates"
-          title="Learning Journey & Certifications"
-          description="Continuous learning through courses, certifications, and practical exploration across technology, development, design, and modern digital experiences."
+          title="Verified Credentials & Certifications"
+          description="Official certifications and credentials in Cybersecurity, Artificial Intelligence, Web Engineering, and Software Testing. Click any certificate to inspect details or open the original PDF."
         />
       </div>
 
@@ -32,11 +35,20 @@ export const CertificatesSection = memo(function CertificatesSection() {
               key={cert.id}
               className="shrink-0 w-[85vw] sm:w-[45vw] md:w-[35vw] lg:w-[28vw]"
             >
-              <CertificateCard certificate={cert} />
+              <CertificateCard
+                certificate={cert}
+                onSelectCertificate={setSelectedCertificate}
+              />
             </div>
           ))}
         </InfiniteMarquee>
       </div>
+
+      {/* Interactive Certificate Preview Modal */}
+      <CertificateModal
+        certificate={selectedCertificate}
+        onClose={() => setSelectedCertificate(null)}
+      />
     </Section>
   )
 })
