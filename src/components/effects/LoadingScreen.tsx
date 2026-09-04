@@ -29,6 +29,10 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
         // Wait for exit animation to finish before signaling completion
         setTimeout(() => {
           document.body.style.overflow = ''
+          if (typeof window !== 'undefined') {
+            (window as any).__APP_READY__ = true
+            window.dispatchEvent(new CustomEvent('app-ready'))
+          }
           onComplete()
         }, 800) // matches the exit duration
       }
