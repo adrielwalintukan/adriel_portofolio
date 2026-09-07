@@ -59,7 +59,7 @@ export const FeaturedProjectCard = memo(function FeaturedProjectCard({
 
       {/* Content Area at Bottom */}
       <div className="absolute inset-x-0 bottom-0 z-20 flex flex-col justify-end p-5 sm:p-6 lg:p-8 transition-transform duration-700 ease-out">
-        <h3 className="mb-3 font-display text-2xl sm:text-3xl font-bold tracking-tight text-white transition-colors group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-accent group-hover:to-neon-cyan drop-shadow-lg">
+        <h3 className="mb-3 font-display text-2xl sm:text-3xl font-bold tracking-tight text-white transition-colors duration-300 group-hover:text-accent drop-shadow-lg">
           {project.title}
         </h3>
         

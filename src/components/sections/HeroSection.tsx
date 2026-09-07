@@ -13,7 +13,7 @@ export const HeroSection = memo(function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-20"
+      className="relative flex min-h-[100svh] items-center justify-center overflow-visible pt-20"
     >
       <div className="section-container relative z-10 w-full">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-12">
