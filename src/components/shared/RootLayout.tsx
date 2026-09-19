@@ -17,12 +17,12 @@ export const RootLayout = memo(function RootLayout({ children }: RootLayoutProps
   useSmoothScroll()
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex min-h-screen w-full max-w-full flex-col overflow-x-hidden">
       <NoiseOverlay />
       <AmbientGlow variant="primary" />
       <AmbientGlow variant="secondary" />
       <Navbar />
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 w-full max-w-full overflow-x-hidden">{children}</main>
       <Footer />
     </div>
   )

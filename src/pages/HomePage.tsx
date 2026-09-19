@@ -20,16 +20,18 @@ function HomePage() {
         exit="exit"
       >
         {/* Ambient background orbs — static CSS, responsive sizing */}
-        <GradientOrb
-          className="left-1/4 top-0"
-          color="bg-accent/8"
-          size="w-64 h-64 sm:w-80 sm:h-80 md:w-[500px] md:h-[500px]"
-        />
-        <GradientOrb
-          className="right-0 top-1/3"
-          color="bg-neon-cyan/6"
-          size="w-48 h-48 sm:w-72 sm:h-72 md:w-[400px] md:h-[400px]"
-        />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <GradientOrb
+            className="left-1/4 top-0"
+            color="bg-accent/8"
+            size="w-64 h-64 sm:w-80 sm:h-80 md:w-[500px] md:h-[500px]"
+          />
+          <GradientOrb
+            className="right-0 top-1/3"
+            color="bg-neon-cyan/6"
+            size="w-48 h-48 sm:w-72 sm:h-72 md:w-[400px] md:h-[400px]"
+          />
+        </div>
 
         {/* ── SECTIONS ── */}
         <HeroSection />

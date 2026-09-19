@@ -13,7 +13,7 @@ export const HeroSection = memo(function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-[100svh] items-center justify-center overflow-visible pt-20"
+      className="relative flex min-h-[100svh] w-full max-w-full items-center justify-center pt-20"
     >
       <div className="section-container relative z-10 w-full">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-8 xl:gap-12">
@@ -71,15 +71,24 @@ export const HeroSection = memo(function HeroSection() {
               </motion.span>
             </h1>
 
-            {/* Typing Animation Subtitle */}
-            <div className="mb-6 min-h-[3.2rem] sm:min-h-[2.5rem] flex items-center justify-center lg:justify-start text-[1.2rem] font-semibold leading-tight sm:text-2xl lg:text-3xl text-foreground-muted">
-              <TypewriterText
-                text="Information System Student & Fullstack Developer"
-                delay={400}
-                speed={36}
-                className="text-foreground-muted text-center lg:text-left"
-                cursorClassName="text-accent font-bold"
-              />
+            {/* Typing Animation Subtitle — Zero-shift reserved container */}
+            <div className="relative mb-6 text-[1.2rem] font-semibold leading-tight sm:text-2xl lg:text-3xl text-foreground-muted">
+              {/* Invisible phantom text: reserves the exact full multiline space so the layout never shifts */}
+              <span className="invisible select-none pointer-events-none opacity-0" aria-hidden="true">
+                Information System Student &amp; Fullstack Developer
+                <span className="inline-block ml-1 font-mono font-bold">|</span>
+              </span>
+
+              {/* Active typewriter text positioned absolutely over the reserved space */}
+              <div className="absolute inset-0 flex items-start justify-center lg:justify-start">
+                <TypewriterText
+                  text="Information System Student & Fullstack Developer"
+                  delay={400}
+                  speed={36}
+                  className="text-foreground-muted text-center lg:text-left"
+                  cursorClassName="text-accent font-bold"
+                />
+              </div>
             </div>
 
             <motion.p
@@ -121,7 +130,7 @@ export const HeroSection = memo(function HeroSection() {
           </StaggerContainer>
 
           {/* RIGHT COLUMN: Animated Developer Scene (Typing Animation) */}
-          <div className="relative flex w-full items-center justify-center py-6 lg:py-0 lg:h-[600px] xl:h-[700px]">
+          <div className="relative flex w-full max-w-full items-center justify-center py-6 lg:py-0 lg:h-[600px] xl:h-[700px] overflow-hidden sm:overflow-visible">
             <Reveal direction="left" delay={0.3} className="w-full flex items-center justify-center">
               <HeroCodingAnimation />
             </Reveal>

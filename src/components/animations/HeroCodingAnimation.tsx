@@ -45,20 +45,20 @@ export const HeroCodingAnimation = memo(function HeroCodingAnimation({
       ref={cardRef}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      className={`relative flex items-center justify-center select-none ${className}`}
+      className={`relative flex w-full max-w-full items-center justify-center select-none overflow-hidden sm:overflow-visible ${className}`}
       style={{ perspective: 1200 }}
     >
       {/* Ambient Rotating Cyber Orbits */}
-      <div className="pointer-events-none absolute -inset-10 flex items-center justify-center">
+      <div className="pointer-events-none absolute -inset-10 flex items-center justify-center overflow-hidden sm:overflow-visible">
         {/* Outer orbital ring */}
-        <div className="absolute h-[380px] w-[380px] sm:h-[460px] sm:w-[460px] lg:h-[540px] lg:w-[540px] rounded-full border border-dashed border-accent/20 animate-[spin_40s_linear_infinite]" />
+        <div className="absolute h-[260px] w-[260px] xs:h-[340px] xs:w-[340px] sm:h-[460px] sm:w-[460px] lg:h-[540px] lg:w-[540px] rounded-full border border-dashed border-accent/20 animate-[spin_40s_linear_infinite]" />
         
         {/* Inner reverse orbital ring */}
-        <div className="absolute h-[320px] w-[320px] sm:h-[390px] sm:w-[390px] lg:h-[460px] lg:w-[460px] rounded-full border border-dotted border-neon-cyan/25 animate-[spin_25s_linear_infinite_reverse]" />
+        <div className="absolute h-[220px] w-[220px] xs:h-[290px] xs:w-[290px] sm:h-[390px] sm:w-[390px] lg:h-[460px] lg:w-[460px] rounded-full border border-dotted border-neon-cyan/25 animate-[spin_25s_linear_infinite_reverse]" />
 
         {/* Atmospheric Glow Pods */}
-        <div className="absolute -top-12 -right-12 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
-        <div className="absolute -bottom-12 -left-12 h-64 w-64 rounded-full bg-neon-cyan/20 blur-3xl" />
+        <div className="hidden sm:block absolute -top-12 -right-12 h-64 w-64 rounded-full bg-accent/20 blur-3xl" />
+        <div className="hidden sm:block absolute -bottom-8 -left-8 h-56 w-56 rounded-full bg-neon-cyan/15 blur-[80px]" />
       </div>
 
       {/* Main Glassmorphic Terminal Window with 3D Tilt */}
@@ -68,7 +68,7 @@ export const HeroCodingAnimation = memo(function HeroCodingAnimation({
           rotateY,
           transformStyle: 'preserve-3d',
         }}
-        className="relative z-10 w-full max-w-[420px] sm:max-w-[460px] overflow-hidden rounded-3xl border border-white/15 bg-surface/70 shadow-2xl backdrop-blur-2xl transition-shadow duration-500 hover:border-accent/50 hover:shadow-[0_0_50px_rgba(139,92,246,0.3)]"
+        className="relative z-10 w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[460px] overflow-hidden rounded-3xl border border-white/15 bg-surface/70 shadow-2xl backdrop-blur-2xl transition-shadow duration-500 hover:border-accent/50 hover:shadow-[0_0_50px_rgba(139,92,246,0.3)]"
       >
         {/* Window Title Bar */}
         <div className="flex items-center justify-between border-b border-white/10 bg-background/60 px-4 py-3 backdrop-blur-md">
