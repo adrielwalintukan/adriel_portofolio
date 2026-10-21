@@ -1,5 +1,4 @@
 export { Button } from './Button'
-export { Badge } from './Badge'
 export { TechBadge } from './TechBadge'
 export { ContactForm } from './ContactForm'
 export { ProjectGalleryModal } from './ProjectGalleryModal'

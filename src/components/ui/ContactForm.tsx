@@ -75,12 +75,12 @@ export function ContactForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="relative flex w-full flex-col gap-5 rounded-3xl border border-border/40 bg-surface/30 p-6 backdrop-blur-xl sm:p-8"
+      className="relative flex w-full flex-col gap-5 rounded-2xl border border-border bg-surface p-6 sm:p-8"
     >
       <div className="grid gap-5 sm:grid-cols-2">
         {/* Name Field */}
         <div className="group relative flex flex-col gap-2">
-          <label htmlFor="name" className="text-sm font-medium text-foreground-muted transition-colors group-focus-within:text-accent">
+          <label htmlFor="name" className="font-mono text-xs uppercase tracking-widest text-foreground-muted transition-colors group-focus-within:text-accent">
             Name
           </label>
           <input
@@ -90,13 +90,13 @@ export function ContactForm() {
             value={formData.name}
             onChange={handleChange}
             placeholder="Your Name"
-            className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
+            className="w-full rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
           />
         </div>
 
         {/* Email Field */}
         <div className="group relative flex flex-col gap-2">
-          <label htmlFor="email" className="text-sm font-medium text-foreground-muted transition-colors group-focus-within:text-accent">
+          <label htmlFor="email" className="font-mono text-xs uppercase tracking-widest text-foreground-muted transition-colors group-focus-within:text-accent">
             Email
           </label>
           <input
@@ -106,14 +106,14 @@ export function ContactForm() {
             value={formData.email}
             onChange={handleChange}
             placeholder="name@example.com"
-            className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
+            className="w-full rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
           />
         </div>
       </div>
 
       {/* Subject Field */}
       <div className="group relative flex flex-col gap-2">
-        <label htmlFor="subject" className="text-sm font-medium text-foreground-muted transition-colors group-focus-within:text-accent">
+        <label htmlFor="subject" className="font-mono text-xs uppercase tracking-widest text-foreground-muted transition-colors group-focus-within:text-accent">
           Subject
         </label>
         <input
@@ -123,13 +123,13 @@ export function ContactForm() {
           value={formData.subject}
           onChange={handleChange}
           placeholder="Project Collaboration / Inquiry"
-          className="w-full rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
+          className="w-full rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
         />
       </div>
 
       {/* Message Field */}
       <div className="group relative flex flex-col gap-2">
-        <label htmlFor="message" className="text-sm font-medium text-foreground-muted transition-colors group-focus-within:text-accent">
+        <label htmlFor="message" className="font-mono text-xs uppercase tracking-widest text-foreground-muted transition-colors group-focus-within:text-accent">
           Message
         </label>
         <textarea
@@ -139,7 +139,7 @@ export function ContactForm() {
           value={formData.message}
           onChange={handleChange}
           placeholder="Tell me about your project, idea, or timeline..."
-          className="w-full resize-none rounded-xl border border-border/50 bg-background/50 px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
+          className="w-full resize-none rounded-lg border border-border bg-background-secondary px-4 py-3 text-sm text-foreground outline-none transition-all duration-300 placeholder:text-foreground-muted/50 focus:border-accent focus:bg-background focus:ring-1 focus:ring-accent"
         />
       </div>
 
@@ -162,8 +162,8 @@ export function ContactForm() {
         type="submit"
         disabled={isSubmitting}
         className={cn(
-          "group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-foreground px-8 py-4 text-sm font-semibold text-background transition-all duration-500 cursor-pointer",
-          isSubmitting ? "opacity-80 cursor-wait" : "hover:bg-foreground/90 hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] hover:-translate-y-1"
+          "group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent px-8 py-4 font-display text-lg font-extrabold uppercase tracking-wide text-ink transition-colors duration-300 cursor-pointer",
+          isSubmitting ? "opacity-80 cursor-wait" : "hover:bg-accent-hover"
         )}
       >
         <span className="relative z-10 flex items-center gap-2">
@@ -176,11 +176,6 @@ export function ContactForm() {
             </>
           )}
         </span>
-
-        {/* Subtle hover gradient inside the button */}
-        {!isSubmitting && (
-          <div className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer" />
-        )}
       </button>
     </form>
   )

@@ -4,6 +4,7 @@ import {
   motion,
   useAnimationFrame,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from 'framer-motion'
 import type { PanInfo } from 'framer-motion'
@@ -38,6 +39,7 @@ export const InfiniteMarquee = ({
   className,
 }: InfiniteMarqueeProps) => {
   const baseX = useMotionValue(0)
+  const reduceMotion = useReducedMotion()
   const containerRef = useRef<HTMLDivElement>(null)
   const [contentWidth, setContentWidth] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
@@ -80,7 +82,7 @@ export const InfiniteMarquee = ({
     if (currentV !== 0) {
       // Apply momentum if it exists
       moveBy = currentV * (delta / 16)
-    } else if (!isHovered || !pauseOnHover) {
+    } else if ((!isHovered || !pauseOnHover) && !reduceMotion) {
       // Fallback to auto-scroll
       moveBy = dirMultiplier * speed * (delta / 1000)
     }
