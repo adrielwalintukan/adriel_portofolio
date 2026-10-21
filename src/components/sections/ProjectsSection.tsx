@@ -10,7 +10,6 @@ import {
 import { ArrowUpRight, Plus, Minus } from 'lucide-react'
 import { PROJECTS, SELECTED_PROJECT_IDS, type Project } from '@/lib/constants'
 import { ProjectGalleryModal } from '@/components/ui'
-import { useMediaQuery } from '@/hooks'
 import { cn } from '@/lib/utils'
 
 const SELECTED = SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === id)).filter(
@@ -47,6 +46,8 @@ const StackCard = memo(function StackCard({
       style={stacked ? { scale, top: `${96 + index * 20}px` } : undefined}
       className={cn(
         'relative grid origin-top overflow-hidden rounded-2xl bg-ink text-paper lg:grid-cols-[1fr_1.35fr]',
+        // single column on small screens: copy on top, screenshot takes whatever height is left
+        stacked && 'grid-rows-[auto_minmax(0,1fr)] lg:grid-rows-1',
         // cards must be direct siblings in one container: sticky only pins within its parent
         stacked && 'sticky h-[min(78svh,680px)]',
         stacked && depth > 0 && 'mb-[25svh]'
@@ -57,10 +58,10 @@ const StackCard = memo(function StackCard({
           <span className="text-accent">{pad(index + 1)}</span>
           <span className="text-foreground-subtle">{project.category}</span>
         </div>
-        <h3 className="mt-6 font-display text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase leading-[0.9] tracking-tight text-paper">
+        <h3 className="mt-4 font-display text-[clamp(2.25rem,5vw,4.5rem)] sm:mt-6 font-black uppercase leading-[0.9] tracking-tight text-paper">
           {project.title}
         </h3>
-        <p className="mt-4 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base">
+        <p className={cn('mt-4 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base', stacked && 'line-clamp-3 lg:line-clamp-none')}>
           {project.description}
         </p>
         <ul className="mt-6 flex flex-wrap gap-2">
@@ -75,7 +76,7 @@ const StackCard = memo(function StackCard({
         </ul>
         <button
           onClick={() => onSelect(project)}
-          className="group mt-8 inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover lg:mt-auto"
+          className="group mt-6 inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover lg:mt-auto"
         >
           View project
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-ink text-accent transition-transform group-hover:translate-x-1">
@@ -87,7 +88,7 @@ const StackCard = memo(function StackCard({
       <button
         onClick={() => onSelect(project)}
         aria-label={`Open ${project.title} gallery`}
-        className="group relative h-64 overflow-hidden bg-surface sm:h-80 lg:h-auto"
+        className={cn('group relative overflow-hidden bg-surface', stacked ? 'min-h-40 lg:min-h-0' : 'h-64 sm:h-80 lg:h-auto')}
       >
         <img
           src={project.image}
@@ -113,15 +114,14 @@ const StackCard = memo(function StackCard({
 })
 
 /**
- * Selected Work — featured projects as sticky stacked cards on desktop, a plain list on
- * mobile, plus an expandable list of the rest (PRD §6.3). All open the gallery modal.
+ * Selected Work — featured projects as sticky stacked cards (a plain list for reduced
+ * motion), plus an expandable list of the rest (PRD §6.3). All open the gallery modal.
  */
 export const ProjectsSection = memo(function ProjectsSection() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
   const [showAll, setShowAll] = useState(false)
-  const isDesktop = useMediaQuery('lg') // the fixed-height stacked card needs the two-column layout
   const reduceMotion = useReducedMotion()
-  const stacked = isDesktop && !reduceMotion
+  const stacked = !reduceMotion
   const listRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: listRef, offset: ['start start', 'end end'] })
 

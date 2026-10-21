@@ -15,7 +15,6 @@ const EASE = [0.16, 1, 0.3, 1] as const
 export const Navbar = memo(function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isContactOpen, setIsContactOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
   const [pastTop, setPastTop] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const { isTouchDevice } = useDeviceDetect()
@@ -28,10 +27,7 @@ export const Navbar = memo(function Navbar() {
     function handleScroll() {
       if (!ticking) {
         requestAnimationFrame(() => {
-          // header sits on the red hero until it has scrolled past (hero can be taller than the viewport on mobile)
-          const heroHeight = document.getElementById('hero')?.offsetHeight ?? window.innerHeight
           setPastTop(window.scrollY > 20)
-          setScrolled(window.scrollY > heroHeight - 80)
 
           const sections = NAV_LINKS.map(link => link.href.substring(1))
           const current = sections.find(section => {
@@ -92,15 +88,14 @@ export const Navbar = memo(function Navbar() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-colors duration-500',
-        scrolled
-          ? 'bg-ink/85 text-foreground backdrop-blur-md'
-          : cn('text-ink [--focus-ring:var(--color-ink)]', pastTop ? 'bg-accent' : 'bg-transparent')
+        // paper on the photo (dark hair on mobile, red on desktop); dark glass once content scrolls under it
+        pastTop ? 'bg-ink/85 text-foreground backdrop-blur-md' : 'bg-transparent text-paper [--focus-ring:var(--color-paper)]'
       )}
     >
       <nav className="section-container flex h-16 items-center justify-between sm:h-20">
         <Magnetic strength={0.12} disabled={isTouchDevice}>
           <a href="#hero" className="font-display text-2xl font-black tracking-tight sm:text-3xl">
-            AW<span className={scrolled ? 'text-accent' : 'text-paper'}>.</span>
+            AW<span className={pastTop ? 'text-accent' : undefined}>.</span>
           </a>
         </Magnetic>
 
@@ -123,7 +118,7 @@ export const Navbar = memo(function Navbar() {
             onClick={() => setIsOpen(true)}
             aria-expanded={isOpen}
             aria-controls="site-menu"
-            className="flex h-10 items-center gap-3 rounded-lg border border-current px-4 font-display text-sm font-extrabold uppercase tracking-wide transition-colors hover:bg-ink hover:text-paper"
+            className="flex h-10 items-center gap-3 rounded-lg border border-current px-4 font-display text-sm font-extrabold uppercase tracking-wide transition-colors hover:bg-paper hover:text-ink"
           >
             Menu
             <span className="flex flex-col gap-1" aria-hidden="true">
