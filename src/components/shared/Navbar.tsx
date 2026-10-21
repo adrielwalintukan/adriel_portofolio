@@ -106,7 +106,8 @@ export const Navbar = memo(function Navbar() {
           </div>
           <div>
             <p className="opacity-60">Local time</p>
-            <p className="font-semibold tabular-nums">
+            {/* the prerendered time is stale by the time the page hydrates */}
+            <p className="font-semibold tabular-nums" suppressHydrationWarning>
               {time} {CONTACT_INFO.timeZoneLabel}
             </p>
           </div>

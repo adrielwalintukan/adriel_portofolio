@@ -281,3 +281,23 @@ Lighthouse 12.6 di build produksi (`vite preview`), Chrome headless:
 - Sudah dilakukan: font Google dimuat async, preload foto hero (elemen LCP), `robots.txt`, section di bawah hero di-lazy-load, reduced-motion global (Framer `MotionConfig` + Lenis mati), skip link, focus ring yang terlihat di semua latar, project card stack hanya di ≥1024px.
 - Sisa peringatan kontras: kata yang belum "menyala" pada efek scroll-reveal (disengaja).
 - Langkah berikut untuk mobile ≥ 90: prerender HTML statis halaman (agar foto hero tampil sebelum JS jalan) dan konversi screenshot project PNG ke WebP (hemat ±700 KB).
+
+## 14. Optimasi mobile (21 Okt 2026)
+
+Lighthouse 12.6, build produksi (`vite preview`), mobile (4x CPU, slow 4G):
+
+| | Sebelum | Sesudah |
+|---|---|---|
+| Performance | 68 | 85 – 93 (beberapa run) |
+| FCP | 2.0 s | 1.7 – 2.1 s |
+| LCP | 6.2 s | 2.5 – 3.2 s |
+| TBT | 300 ms | 250 – 380 ms |
+| Desktop Performance | – | 99 (LCP 0.5 s) |
+
+Accessibility 96, Best Practices 100, SEO 100 (sisa peringatan kontras = efek scroll-reveal, disengaja).
+
+- **Prerender**: `npm run build` sekarang juga me-render halaman `/` ke HTML statis (`src/entry-server.tsx` + `scripts/prerender.mjs`), lalu React melakukan hydrate setelah paint pertama.
+- **Loader**: huruf "ADRIEL" pakai animasi CSS sehingga langsung jalan dari HTML; wipe dimulai setelah hydrate (paling cepat 1 s sejak navigasi).
+- **Hero**: teks hero tidak lagi fade dari opacity 0 (cukup slide), dan fade halaman (`pageTransition`) dihapus, sehingga teks hero sudah ter-paint di bawah loader dan dihitung sebagai LCP.
+- **Gambar**: 82 screenshot/foto dikonversi ke WebP (lebar maks 1600 px): 25 MB → 3.5 MB.
+- Catatan pengukuran: Chrome headless di environment ini kadang menunda paint pertama ±1.2 s secara acak (halaman uji yang sama bisa 230 ms atau 1.2 s), jadi skor bervariasi antar run.
