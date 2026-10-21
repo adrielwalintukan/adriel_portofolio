@@ -40,7 +40,7 @@ export const ContactSection = memo(function ContactSection() {
       {/* CTA card over a dimmed portrait */}
       <div ref={ctaRef} className="relative overflow-hidden px-[var(--spacing-container)] py-24 sm:py-32">
         <img
-          src="/images/adriel.jpg"
+          src="/images/adriel.webp"
           alt=""
           loading="lazy"
           className="absolute inset-0 h-full w-full object-cover object-[50%_30%] opacity-25 grayscale"

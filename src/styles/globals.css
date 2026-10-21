@@ -108,6 +108,17 @@
 /* ============================================================
    KEYFRAMES (GPU-optimized — use transform3d where possible)
    ============================================================ */
+/* Loader letters (LoadingScreen): CSS so they animate from the prerendered HTML */
+.intro-letter {
+  display: inline-block;
+  animation: intro-letter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes intro-letter {
+  from { transform: translate3d(0, 110%, 0); }
+  to { transform: none; }
+}
+
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }

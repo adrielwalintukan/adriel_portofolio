@@ -34,25 +34,25 @@ export const PROJECTS: Project[] = [
     title: 'DailyBoost AI',
     description: 'A productivity-focused AI application designed to improve task management and daily workflow efficiency.',
     longDescription: 'A comprehensive intelligent application focused on streamlining user workflows, budgeting, and interactive chat features. Designed with immersive mobile interfaces and real-time state synchronisation.',
-    image: '/projects/dailyboost_AI/DailyBoost_AI - Home Page.jpeg',
+    image: '/projects/dailyboost_AI/DailyBoost_AI - Home Page.webp',
     images: [
-      '/projects/dailyboost_AI/DailyBoost_AI - Home Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Home Page (cont.).jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Insight Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Goals Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Add Goals.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Add Goals (cont.).jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Add Budget Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Add Transaction Page Pemasukan.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Add Transaction Page Pengeluaran.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page Choose Model.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page History.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - History Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Profile Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Profile Page (cont.).jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - Login Page.jpeg',
-      '/projects/dailyboost_AI/DailyBoost_AI - SignUp Page.jpeg'
+      '/projects/dailyboost_AI/DailyBoost_AI - Home Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Home Page (cont.).webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Insight Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Goals Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Goals.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Goals (cont.).webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Budget Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Transaction Page Pemasukan.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Add Transaction Page Pengeluaran.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page Choose Model.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Chatbot AI Page History.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - History Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Profile Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Profile Page (cont.).webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - Login Page.webp',
+      '/projects/dailyboost_AI/DailyBoost_AI - SignUp Page.webp'
     ],
     technologies: ['AI Project', 'Fullstack', 'Mobile App', 'Interactive Design'],
     category: 'AI Project / Fullstack',
@@ -62,12 +62,12 @@ export const PROJECTS: Project[] = [
     id: 'AI_interview',
     title: 'AI Interview Simulator',
     description: 'An AI-powered interview simulation application focused on interactive conversation flow and user experience.',
-    image: '/projects/AI_interview/AI_Interview - Login.png',
+    image: '/projects/AI_interview/AI_Interview - Login.webp',
     images: [
-      '/projects/AI_interview/AI_Interview - Login.png',
-      '/projects/AI_interview/AI_Interview - Pilih_Skenario_Mahasiswa.png',
-      '/projects/AI_interview/AI_Interview - Hal_Interview_AI.png',
-      '/projects/AI_interview/AI_Interview - Dash_Dosen.png'
+      '/projects/AI_interview/AI_Interview - Login.webp',
+      '/projects/AI_interview/AI_Interview - Pilih_Skenario_Mahasiswa.webp',
+      '/projects/AI_interview/AI_Interview - Hal_Interview_AI.webp',
+      '/projects/AI_interview/AI_Interview - Dash_Dosen.webp'
     ],
     technologies: ['AI Project', 'Web App', 'UI/UX', 'Interactive Design'],
     category: 'AI Project',
@@ -77,13 +77,13 @@ export const PROJECTS: Project[] = [
     id: 'car_rental_website',
     title: 'Modern Car Rental Platform',
     description: 'A modern vehicle rental website with responsive booking-oriented user interface design.',
-    image: '/projects/car_rental_website/Web_Rental_Mobil - Home.png',
+    image: '/projects/car_rental_website/Web_Rental_Mobil - Home.webp',
     images: [
-      '/projects/car_rental_website/Web_Rental_Mobil - Home.png',
-      '/projects/car_rental_website/Web_Rental_Mobil - Mobil.png',
-      '/projects/car_rental_website/Web_Rental_Mobil - About.png',
-      '/projects/car_rental_website/Web_Rental_Mobil - Information.png',
-      '/projects/car_rental_website/Web_Rental_Mobil - Contact.png'
+      '/projects/car_rental_website/Web_Rental_Mobil - Home.webp',
+      '/projects/car_rental_website/Web_Rental_Mobil - Mobil.webp',
+      '/projects/car_rental_website/Web_Rental_Mobil - About.webp',
+      '/projects/car_rental_website/Web_Rental_Mobil - Information.webp',
+      '/projects/car_rental_website/Web_Rental_Mobil - Contact.webp'
     ],
     technologies: ['Web App', 'UI/UX', 'Frontend', 'Interactive Design'],
     category: 'Web App',
@@ -93,13 +93,13 @@ export const PROJECTS: Project[] = [
     id: 'kostfinder_unklab',
     title: 'KostFinder UNKLAB',
     description: 'A modern boarding house search and booking application tailored for university students with integrated price calculators.',
-    image: '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.png',
+    image: '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.webp',
     images: [
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.png',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Rekom_Kost.png',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Detail_Kost.png',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Booking_Kost.png',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Kalkulator_Sewa.png'
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.webp',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Rekom_Kost.webp',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Detail_Kost.webp',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Booking_Kost.webp',
+      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Kalkulator_Sewa.webp'
     ],
     technologies: ['Fullstack', 'Web App', 'Database', 'UI/UX'],
     category: 'Fullstack / UI/UX',
@@ -109,23 +109,23 @@ export const PROJECTS: Project[] = [
     id: 'system_library_mobile_app',
     title: 'System Library Mobile App',
     description: 'A comprehensive digital library management application featuring role-based dashboards, book tracking, and student visit gamification.',
-    image: '/projects/system_library_mobile_app/Home Page (Student) - System Library (MAD).jpeg',
+    image: '/projects/system_library_mobile_app/Home Page (Student) - System Library (MAD).webp',
     images: [
-      '/projects/system_library_mobile_app/Home Page (Student) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Books Page (Student) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Events Page (Student) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Leaderboard Page (Student) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Profile Page (Student) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Dashboard (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/View All Students Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/View All Events Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Add Event Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/View Event Participants Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Set Visit Code Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/View All Students Visit Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/View All Students Point Page (Admin) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Login Page (Student) - System Library (MAD).jpeg',
-      '/projects/system_library_mobile_app/Register Page (Student) - System Library (MAD).jpeg'
+      '/projects/system_library_mobile_app/Home Page (Student) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Books Page (Student) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Events Page (Student) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Leaderboard Page (Student) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Profile Page (Student) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Dashboard (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/View All Students Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/View All Events Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Add Event Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/View Event Participants Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Set Visit Code Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/View All Students Visit Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/View All Students Point Page (Admin) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Login Page (Student) - System Library (MAD).webp',
+      '/projects/system_library_mobile_app/Register Page (Student) - System Library (MAD).webp'
     ],
     technologies: ['Mobile App', 'Backend', 'Database', 'UI/UX'],
     category: 'Mobile App',
@@ -135,13 +135,13 @@ export const PROJECTS: Project[] = [
     id: 'system_management_klinik_sentosa',
     title: 'Klinik Sentosa Management System',
     description: 'An integrated healthcare facility management system providing customized workflows for administrators, doctors, and pharmacists.',
-    image: '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.jpeg',
+    image: '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.webp',
     images: [
-      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.jpeg',
-      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Admin.jpeg',
-      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Dokter.jpeg',
-      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Apoteker.jpeg',
-      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Kepala_Klinik.jpeg'
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.webp',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Admin.webp',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Dokter.webp',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Apoteker.webp',
+      '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Kepala_Klinik.webp'
     ],
     technologies: ['Fullstack', 'Backend', 'Database', 'Interactive Design'],
     category: 'Fullstack',
@@ -151,11 +151,11 @@ export const PROJECTS: Project[] = [
     id: 'web_infomation_ray',
     title: 'RAY Information Web Portal',
     description: 'An informational web portal focused on elegant content delivery, visual galleries, and clean user interfaces.',
-    image: '/projects/web_infomation_ray/Web_Informasi_RAY - Home.png',
+    image: '/projects/web_infomation_ray/Web_Informasi_RAY - Home.webp',
     images: [
-      '/projects/web_infomation_ray/Web_Informasi_RAY - Home.png',
-      '/projects/web_infomation_ray/Web_Informasi_RAY - About.png',
-      '/projects/web_infomation_ray/Web_Informasi_RAY - Gallery.png'
+      '/projects/web_infomation_ray/Web_Informasi_RAY - Home.webp',
+      '/projects/web_infomation_ray/Web_Informasi_RAY - About.webp',
+      '/projects/web_infomation_ray/Web_Informasi_RAY - Gallery.webp'
     ],
     technologies: ['Web App', 'Frontend', 'UI/UX'],
     category: 'Web App',
@@ -165,10 +165,10 @@ export const PROJECTS: Project[] = [
     id: 'web_portofolio_AI',
     title: 'AI Web Portfolio Showcase',
     description: 'A futuristic AI-augmented web portfolio designed to demonstrate intelligent chatbot integrations and dynamic themes.',
-    image: '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.png',
+    image: '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.webp',
     images: [
-      '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.png',
-      '/projects/web_portofolio_AI/Web_Portofolio_AI - Chatbot.png'
+      '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.webp',
+      '/projects/web_portofolio_AI/Web_Portofolio_AI - Chatbot.webp'
     ],
     technologies: ['AI Project', 'Web App', 'Frontend', 'Interactive Design'],
     category: 'AI Project',
@@ -178,14 +178,14 @@ export const PROJECTS: Project[] = [
     id: 'mobile_app_portofolio',
     title: 'Mobile Portfolio Experience',
     description: 'A native mobile app portfolio demonstration optimized for touch screens, custom gestures, and native transitions.',
-    image: '/projects/mobile_app_portofolio/Home Page - MAD Portofolio.jpeg',
+    image: '/projects/mobile_app_portofolio/Home Page - MAD Portofolio.webp',
     images: [
-      '/projects/mobile_app_portofolio/Home Page - MAD Portofolio.jpeg',
-      '/projects/mobile_app_portofolio/Home Page (cont.) - MAD Portofolio.jpeg',
-      '/projects/mobile_app_portofolio/Experience (Projects) - MAD Portofolio.jpeg',
-      '/projects/mobile_app_portofolio/Experience (Certificates) - MAD Portofolio.jpeg',
-      '/projects/mobile_app_portofolio/Experience (Organization) - MAD Portofolio.jpeg',
-      '/projects/mobile_app_portofolio/Education - MAD Portofolio.jpeg'
+      '/projects/mobile_app_portofolio/Home Page - MAD Portofolio.webp',
+      '/projects/mobile_app_portofolio/Home Page (cont.) - MAD Portofolio.webp',
+      '/projects/mobile_app_portofolio/Experience (Projects) - MAD Portofolio.webp',
+      '/projects/mobile_app_portofolio/Experience (Certificates) - MAD Portofolio.webp',
+      '/projects/mobile_app_portofolio/Experience (Organization) - MAD Portofolio.webp',
+      '/projects/mobile_app_portofolio/Education - MAD Portofolio.webp'
     ],
     technologies: ['Mobile App', 'UI/UX', 'Frontend'],
     category: 'Mobile App',
@@ -195,9 +195,9 @@ export const PROJECTS: Project[] = [
     id: 'carta_AI',
     title: 'Carta AI Assistant',
     description: 'A specialized intelligent assistant interface designed for streamlined contextual data visualization and conversational exploration.',
-    image: '/projects/carta_AI/Carta_AI.jpeg',
+    image: '/projects/carta_AI/Carta_AI.webp',
     images: [
-      '/projects/carta_AI/Carta_AI.jpeg'
+      '/projects/carta_AI/Carta_AI.webp'
     ],
     technologies: ['AI Project', 'UI/UX', 'Interactive Design'],
     category: 'AI Project',
@@ -207,9 +207,9 @@ export const PROJECTS: Project[] = [
     id: 'pablo_chatbot_AI',
     title: 'Pablo AI Chatbot',
     description: 'An intelligent chatbot interface providing natural language interactions and streamlined responses.',
-    image: '/projects/pablo_chatbot_AI/Pablo_Chatbot - AI.png',
+    image: '/projects/pablo_chatbot_AI/Pablo_Chatbot - AI.webp',
     images: [
-      '/projects/pablo_chatbot_AI/Pablo_Chatbot - AI.png'
+      '/projects/pablo_chatbot_AI/Pablo_Chatbot - AI.webp'
     ],
     technologies: ['AI Project', 'Frontend', 'Interactive Design'],
     category: 'AI Project',
@@ -219,9 +219,9 @@ export const PROJECTS: Project[] = [
     id: 'personal_portofolio',
     title: 'Cinematic Personal Portfolio',
     description: 'A high-performance cinematic digital showcase implementing state-of-the-art interactive layouts and visual elements.',
-    image: '/projects/personal_portofolio/Web_Portofolio.png',
+    image: '/projects/personal_portofolio/Web_Portofolio.webp',
     images: [
-      '/projects/personal_portofolio/Web_Portofolio.png'
+      '/projects/personal_portofolio/Web_Portofolio.webp'
     ],
     technologies: ['Web App', 'UI/UX', 'Frontend', 'Interactive Design'],
     category: 'Web App',
@@ -231,9 +231,9 @@ export const PROJECTS: Project[] = [
     id: 'portofolio_adriel',
     title: 'Adriel Web Portfolio Core',
     description: 'The comprehensive architectural foundation of the primary portfolio application built for premium user engagement.',
-    image: '/projects/project_featured.png',
+    image: '/projects/project_featured.webp',
     images: [
-      '/projects/project_featured.png'
+      '/projects/project_featured.webp'
     ],
     technologies: ['Fullstack', 'Web App', 'UI/UX', 'Interactive Design'],
     category: 'Fullstack',
@@ -419,7 +419,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Threat Detection"
     ],
     "description": "Comprehensive understanding of cyber threats, basic cryptography, network defense techniques, and privacy principles.",
-    "image": "/certificates/_thumbnails/cert-cisco-cybersecurity.png",
+    "image": "/certificates/_thumbnails/cert-cisco-cybersecurity.webp",
     "link": "/certificates/CISCO/Introduction_to_Cybersecurity_certificate.pdf"
   },
   {
@@ -438,7 +438,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Prompt Engineering"
     ],
     "description": "Certified credential for utilizing IBM Granite foundation models for intelligent code generation, unit testing, and code refactoring.",
-    "image": "/certificates/_thumbnails/cert-ibm-granite-code-gen.png",
+    "image": "/certificates/_thumbnails/cert-ibm-granite-code-gen.webp",
     "link": "/certificates/Generative AI - IBM/IBMDesign20250913-34-28yo6n.pdf"
   },
   {
@@ -456,7 +456,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Moodle Certified"
     ],
     "description": "Practical integration of Generative AI tools and assistants into modern software development lifecycles.",
-    "image": "/certificates/_thumbnails/cert-ibm-genai-software-dev.png",
+    "image": "/certificates/_thumbnails/cert-ibm-genai-software-dev.webp",
     "link": "/certificates/Generative AI - IBM/Completion Certificate _ SkillsBuild.pdf"
   },
   {
@@ -475,7 +475,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Responsive Design"
     ],
     "description": "Foundational masterclass in modern frontend architecture, interactive layouts, and user experience engineering.",
-    "image": "/certificates/_thumbnails/cert-simplilearn-frontend.png",
+    "image": "/certificates/_thumbnails/cert-simplilearn-frontend.webp",
     "link": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf"
   },
   {
@@ -493,7 +493,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Security Operations"
     ],
     "description": "Advanced security assessment methodologies, penetration test concepts, and security operational controls.",
-    "image": "/certificates/_thumbnails/cert-simplilearn-cissp.png",
+    "image": "/certificates/_thumbnails/cert-simplilearn-cissp.webp",
     "link": "/certificates/Simplilearn/Introduction to CISSP Security Assessment & Testing and Security Operations/Introduction to CISSP Security Assessment & Testing and Security Operations.pdf"
   },
   {
@@ -511,7 +511,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Information Security"
     ],
     "description": "Core cybersecurity principles, threat mitigation strategies, and defensive security measures.",
-    "image": "/certificates/_thumbnails/cert-simplilearn-cybersecurity.png",
+    "image": "/certificates/_thumbnails/cert-simplilearn-cybersecurity.webp",
     "link": "/certificates/Simplilearn/Introduction to Cyber Security/Introduction to Cyber Security.pdf"
   },
   {
@@ -530,7 +530,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Team Collaboration"
     ],
     "description": "Official certification of contribution as Web Developer developing and maintaining student organization web systems.",
-    "image": "/certificates/_thumbnails/cert-uvics-webdev.png",
+    "image": "/certificates/_thumbnails/cert-uvics-webdev.webp",
     "link": "/certificates/Web Dev - UVICS/Sertifikat-UVICS-WebDev.pdf"
   },
   {
@@ -548,7 +548,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "National Contest"
     ],
     "description": "Certificate of participation & achievement in the national Proxo Coris 2026 Mobile Application Development competition.",
-    "image": "/certificates/_thumbnails/cert-proxo-mobile-app.png",
+    "image": "/certificates/_thumbnails/cert-proxo-mobile-app.webp",
     "link": "/certificates/Mobile App Dev - Proxo/PARTICIPANT_MOBILE APP (Adriel).pdf"
   },
   {
@@ -565,7 +565,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Team Leadership"
     ],
     "description": "Certificate of appreciation awarded for dedicated participation and technical excellence.",
-    "image": "/certificates/_thumbnails/cert-proxo-appreciation.png",
+    "image": "/certificates/_thumbnails/cert-proxo-appreciation.webp",
     "link": "/certificates/Mobile App Dev - Proxo/Certificate of Appreciation_JAT.pdf"
   },
   {
@@ -583,7 +583,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Digital Media"
     ],
     "description": "Recognition for multimedia production and creative storytelling competition.",
-    "image": "/certificates/_thumbnails/cert-proxo-shortmovie.png",
+    "image": "/certificates/_thumbnails/cert-proxo-shortmovie.webp",
     "link": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf"
   },
   {
@@ -601,7 +601,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Worker Info Exchange"
     ],
     "description": "International seminar organized by CfDS UGM in collaboration with University of Oxford on digital society and data rights.",
-    "image": "/certificates/_thumbnails/cert-cfds-ugm.png",
+    "image": "/certificates/_thumbnails/cert-cfds-ugm.webp",
     "link": "/certificates/Center for Digital Society/Sertifikat Difussion 127 (124).pdf"
   },
   {
@@ -619,7 +619,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "IoT"
     ],
     "description": "Workshop on emerging intelligent robotics, automation, and intelligent system architectures.",
-    "image": "/certificates/_thumbnails/cert-iris-robotics.png",
+    "image": "/certificates/_thumbnails/cert-iris-robotics.webp",
     "link": "/certificates/IRIS/Sertifikat-IRIS.pdf"
   },
   {
@@ -637,7 +637,7 @@ export const CERTIFICATES_DATA: Certificate[] = [
       "Threat Modeling"
     ],
     "description": "Specialized seminar exploring AI-driven penetration testing, automated vulnerability assessments, and modern exploit analysis.",
-    "image": "/certificates/_thumbnails/cert-cpent-ai.png",
+    "image": "/certificates/_thumbnails/cert-cpent-ai.webp",
     "link": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf"
   }
 ]

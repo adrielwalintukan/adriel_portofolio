@@ -23,7 +23,7 @@ export const Footer = memo(function Footer() {
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-start">
           <div className="aspect-square w-40 overflow-hidden rounded-xl bg-ink sm:w-52">
             <img
-              src="/images/adriel.jpg"
+              src="/images/adriel.webp"
               alt=""
               loading="lazy"
               className="h-full w-full object-cover object-[50%_25%] grayscale contrast-125"

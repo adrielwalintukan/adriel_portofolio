@@ -10,8 +10,8 @@ import { useAppReady, useDeviceDetect, useMediaQuery } from '@/hooks'
 const SOCIAL_ICONS = { FiGithub, FiLinkedin, FiInstagram } as const
 const HERO_SOCIALS = SOCIAL_LINKS.filter((s) => s.icon in SOCIAL_ICONS)
 const NAME_LINES = ['Adriel', 'Walintukan']
-const PHOTO = '/images/adriel-walintukan.jpg'
-const ROBOT = '/images/robot.jpg'
+const PHOTO = '/images/adriel-walintukan.webp'
+const ROBOT = '/images/robot.webp'
 // hero-mask.png = union of both figures' silhouettes, same framing as the photos
 const XRAY_MASK =
   'radial-gradient(circle 170px at var(--mx, -999px) var(--my, -999px), #000 35%, transparent 100%), url(/images/hero-mask.png)'
@@ -43,9 +43,11 @@ export const HeroSection = memo(function HeroSection() {
     e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`)
   }
 
+  // slide only, no fade: the copy is painted (under the loader) from the prerendered HTML,
+  // which is what makes it count for LCP
   const fadeUp = (delay: number) => ({
-    initial: { opacity: 0, y: 16 },
-    animate: ready ? { opacity: 1, y: 0 } : undefined,
+    initial: { y: 16 },
+    animate: ready ? { y: 0 } : undefined,
     transition: { duration: 0.6, delay, ease: [0.16, 1, 0.3, 1] as const },
   })
 

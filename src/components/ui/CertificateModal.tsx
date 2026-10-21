@@ -181,5 +181,6 @@ export const CertificateModal = memo(function CertificateModal({
     </AnimatePresence>
   )
 
+  if (typeof document === 'undefined') return null // prerender: no body to portal into
   return createPortal(modalContent, document.body)
 })
