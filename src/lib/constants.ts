@@ -250,10 +250,14 @@ export const SELECTED_PROJECT_IDS = [
   'system_management_klinik_sentosa',
 ]
 
-export const ABOUT_STATS = [
-  { label: 'Years Experience', value: 2, suffix: '+' },
-  { label: 'Projects Completed', value: 13, suffix: '+' },
-  { label: 'Technologies', value: 10, suffix: '+' },
+// Other headline numbers (projects, technologies, certificates) are counted from the data below
+export const YEARS_EXPERIENCE = 2
+
+export const WORK_PROCESS = [
+  { title: 'Discover', description: 'I dig into the problem, the users and the goal before writing a single line of code.' },
+  { title: 'Design', description: 'I plan the architecture, data model and interface so the build has a clear direction.' },
+  { title: 'Build', description: 'I write clean, typed code, integrate AI where it adds real value, and test as I go.' },
+  { title: 'Ship', description: 'I deploy, gather feedback and iterate until it works well for real users.' },
 ]
 
 export const CORE_STRENGTHS = [

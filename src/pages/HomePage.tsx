@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import { pageTransition } from '@/lib/animations'
 import { RootLayout } from '@/components/shared/RootLayout'
 import { GradientOrb } from '@/components/effects'
-import { HeroSection, ProjectsSection, AboutSection, ExperienceSection, ContactSection, SkillsSection, CertificatesSection } from '@/components/sections'
+import { HeroSection, ProjectsSection, AboutSection, ExperienceSection, ContactSection, SkillsSection, CertificatesSection, HowIWorkSection, NumbersSection } from '@/components/sections'
 
 /**
  * Home page — the main portfolio landing page.
@@ -38,6 +38,8 @@ function HomePage() {
         <AboutSection />
         <ProjectsSection />
         <SkillsSection />
+        <HowIWorkSection />
+        <NumbersSection />
         <ExperienceSection />
         <CertificatesSection />
         <ContactSection />

@@ -1,76 +1,87 @@
 import { memo, useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { EXPERIENCE_TIMELINE } from '@/lib/constants'
-import { Section, SectionHeading } from '@/components/shared'
-import { StaggerContainer } from '@/components/animations'
-import { TimelineCard } from '@/components/ui'
-import { AmbientGlow } from '@/components/effects'
+import { Section } from '@/components/shared'
+import { Reveal } from '@/components/animations'
 
 /**
- * Premium cinematic Experience / Journey Timeline Section.
- * Features a scroll-linked glowing timeline and alternating cards.
+ * Experience — paper section with a two-column timeline inside one large card; the
+ * accent line grows with scroll progress (PRD §6.7).
  */
 export const ExperienceSection = memo(function ExperienceSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-
-  // Track scroll progress within this specific section
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start center', 'end center'],
-  })
-
-  // Map scroll progress to the height of the glowing line
-  const lineHeight = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
+  const listRef = useRef<HTMLOListElement>(null)
+  const { scrollYProgress } = useScroll({ target: listRef, offset: ['start center', 'end center'] })
+  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   return (
-    <Section id="experience" className="relative">
-      <AmbientGlow variant="secondary" className="right-[-10%] top-[30%] opacity-30" />
-      <AmbientGlow variant="primary" className="left-[-10%] top-[70%] opacity-30" />
+    <Section id="experience" className="bg-paper text-ink">
+      <div className="mb-12 text-center md:mb-16">
+        <span className="inline-block rounded-full bg-ink px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-accent">
+          My journey
+        </span>
+        <h2 className="mt-6 font-display text-[clamp(2.75rem,7vw,6.5rem)] font-black uppercase leading-[0.9] tracking-tight text-ink">
+          Turning ideas into
+          <br />
+          <span className="text-paper-dim">working</span> software
+        </h2>
+      </div>
 
-      <SectionHeading
-        label="Journey"
-        title="My Experience & Growth Timeline"
-        description="A timeline of learning, building, experimenting, and creating modern digital experiences through technology and design."
-      />
+      <div className="mx-auto max-w-5xl rounded-3xl border border-paper-line bg-white/50 p-4 sm:p-8 lg:p-12">
+        <div className="relative">
+          {/* Track + scroll-linked progress line (left on mobile, centered on md+) */}
+          <div
+            className="absolute bottom-2 left-[7px] top-2 w-px bg-paper-line md:left-1/2"
+            aria-hidden="true"
+          />
+          <motion.div
+            style={{ scaleY: lineScale }}
+            className="absolute bottom-2 left-[7px] top-2 w-px origin-top bg-accent md:left-1/2"
+            aria-hidden="true"
+          />
 
-      <div ref={containerRef} className="relative mx-auto mt-16 max-w-5xl px-4 sm:px-6 lg:px-8">
-        
-        {/* The static background line */}
-        <div className="absolute bottom-0 left-8 top-0 w-px bg-border/40 lg:left-1/2 lg:-translate-x-1/2" />
-        
-        {/* The animated glowing scroll progress line */}
-        <motion.div
-          className="absolute left-8 top-0 w-px bg-gradient-to-b from-accent via-neon-cyan to-transparent lg:left-1/2 lg:-translate-x-1/2"
-          style={{ height: lineHeight, willChange: 'height' }}
-        />
-
-        <StaggerContainer
-          delay={0.1}
-          staggerDelay={0.15}
-          className="relative flex flex-col gap-12 lg:gap-0"
-        >
-          {EXPERIENCE_TIMELINE.map((item, index) => {
-            const isEven = index % 2 === 0
-
-            return (
-              <div
+          <ol ref={listRef}>
+            {EXPERIENCE_TIMELINE.map((item, i) => (
+              <li
                 key={item.id}
-                className="relative flex w-full flex-col lg:flex-row lg:justify-between"
+                className="relative grid gap-3 pb-10 pl-8 last:pb-0 md:grid-cols-2 md:gap-16 md:pl-0"
               >
-                {/* Mobile-only node (desktop node is inside TimelineCard to handle alternating sides easily) */}
-                <div className="absolute -left-[5px] top-8 h-3 w-3 rounded-full border-2 border-accent bg-background lg:hidden" />
-                
-                {/* 
-                  On mobile, push content right of the line.
-                  On desktop, TimelineCard handles alternating sides.
-                */}
-                <div className="w-full pl-12 lg:pl-0">
-                  <TimelineCard item={item} isEven={isEven} />
-                </div>
-              </div>
-            )
-          })}
-        </StaggerContainer>
+                <span
+                  className="absolute left-0 top-1.5 h-[15px] w-[15px] rounded-full border-[3px] border-paper bg-accent md:left-1/2 md:-translate-x-1/2"
+                  aria-hidden="true"
+                />
+                <Reveal delay={i * 0.05} className="md:text-right">
+                  <h3 className="font-display text-2xl font-black uppercase leading-tight tracking-tight text-ink sm:text-3xl">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 text-sm font-medium text-ink">{item.role}</p>
+                  <p className="mt-1 font-mono text-xs uppercase tracking-wider text-paper-fg-muted">
+                    {item.year}
+                  </p>
+                </Reveal>
+                <Reveal delay={i * 0.05 + 0.05}>
+                  <span className="inline-block rounded-full border border-paper-line px-3 py-0.5 font-mono text-[11px] uppercase tracking-wider text-paper-fg-muted">
+                    {item.category}
+                  </span>
+                  <p className="mt-3 text-sm leading-relaxed text-paper-fg-muted sm:text-base">
+                    {item.description}
+                  </p>
+                  {item.technologies && (
+                    <ul className="mt-3 flex flex-wrap gap-2">
+                      {item.technologies.map((tech) => (
+                        <li
+                          key={tech}
+                          className="rounded-md bg-ink px-2.5 py-1 text-xs font-medium text-paper"
+                        >
+                          {tech}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </div>
       </div>
     </Section>
   )
