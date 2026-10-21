@@ -1,53 +1,212 @@
-import { memo, useState } from 'react'
-import { PROJECTS, type Project } from '@/lib/constants'
-import { Section, SectionHeading } from '@/components/shared'
-import { InfiniteMarquee } from '@/components/animations'
-import { FeaturedProjectCard, ProjectCard, ProjectGalleryModal } from '@/components/ui'
-import { AmbientGlow } from '@/components/effects'
+import { memo, useRef, useState } from 'react'
+import {
+  motion,
+  AnimatePresence,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from 'framer-motion'
+import { ArrowUpRight, Plus, Minus } from 'lucide-react'
+import { PROJECTS, SELECTED_PROJECT_IDS, type Project } from '@/lib/constants'
+import { ProjectGalleryModal } from '@/components/ui'
+import { useMediaQuery } from '@/hooks'
+import { cn } from '@/lib/utils'
+
+const SELECTED = SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === id)).filter(
+  (p): p is Project => !!p
+)
+const OTHERS = PROJECTS.filter((p) => !SELECTED_PROJECT_IDS.includes(p.id))
+const pad = (n: number) => String(n).padStart(2, '0')
+
+interface StackCardProps {
+  project: Project
+  index: number
+  stacked: boolean
+  /** Scroll progress through the whole card list (0 → 1) */
+  progress: MotionValue<number>
+  onSelect: (p: Project) => void
+}
+
+const StackCard = memo(function StackCard({
+  project,
+  index,
+  stacked,
+  progress,
+  onSelect,
+}: StackCardProps) {
+  const [portrait, setPortrait] = useState(false)
+  // Once later cards start sliding over this one, shrink it (deeper cards shrink more) and darken it
+  const depth = SELECTED.length - 1 - index
+  const start = index / SELECTED.length
+  const scale = useTransform(progress, [start, 1], [1, 1 - depth * 0.04])
+  const shade = useTransform(progress, [start, 1], [0, depth ? 0.5 : 0])
+
+  return (
+    <motion.article
+      style={stacked ? { scale, top: `${96 + index * 20}px` } : undefined}
+      className={cn(
+        'relative grid origin-top overflow-hidden rounded-2xl bg-ink text-paper lg:grid-cols-[1fr_1.35fr]',
+        // cards must be direct siblings in one container: sticky only pins within its parent
+        stacked && 'sticky h-[min(78svh,680px)]',
+        stacked && depth > 0 && 'mb-[25svh]'
+      )}
+    >
+      <div className="flex flex-col p-6 sm:p-8 lg:p-10">
+        <div className="flex items-center justify-between font-mono text-xs uppercase tracking-widest">
+          <span className="text-accent">{pad(index + 1)}</span>
+          <span className="text-foreground-subtle">{project.category}</span>
+        </div>
+        <h3 className="mt-6 font-display text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase leading-[0.9] tracking-tight text-paper">
+          {project.title}
+        </h3>
+        <p className="mt-4 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base">
+          {project.description}
+        </p>
+        <ul className="mt-6 flex flex-wrap gap-2">
+          {project.technologies.map((t) => (
+            <li
+              key={t}
+              className="rounded-full border border-border-hover px-3 py-1 text-xs text-foreground-muted"
+            >
+              {t}
+            </li>
+          ))}
+        </ul>
+        <button
+          onClick={() => onSelect(project)}
+          className="group mt-8 inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover lg:mt-auto"
+        >
+          View project
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-ink text-accent transition-transform group-hover:translate-x-1">
+            <ArrowUpRight className="h-4 w-4" />
+          </span>
+        </button>
+      </div>
+
+      <button
+        onClick={() => onSelect(project)}
+        aria-label={`Open ${project.title} gallery`}
+        className="group relative h-64 overflow-hidden bg-surface sm:h-80 lg:h-auto"
+      >
+        <img
+          src={project.image}
+          alt=""
+          loading={index === 0 ? 'eager' : 'lazy'}
+          onLoad={(e) => setPortrait(e.currentTarget.naturalHeight > e.currentTarget.naturalWidth)}
+          // phone screenshots are portrait: show them whole instead of cropping
+          className={cn(
+            'absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-[1.03]',
+            portrait ? 'object-contain p-6' : 'object-cover object-top'
+          )}
+        />
+      </button>
+
+      {stacked && (
+        <motion.div
+          style={{ opacity: shade }}
+          className="pointer-events-none absolute inset-0 bg-ink"
+        />
+      )}
+    </motion.article>
+  )
+})
 
 /**
- * Premium Project Showcase Section.
- * Implements a responsive Bento Grid to display featured and secondary projects.
- * Features a smooth expandable "View All" system and immersive local gallery overlay.
+ * Selected Work — featured projects as sticky stacked cards on desktop, a plain list on
+ * mobile, plus an expandable list of the rest (PRD §6.3). All open the gallery modal.
  */
 export const ProjectsSection = memo(function ProjectsSection() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null)
+  const [showAll, setShowAll] = useState(false)
+  const isDesktop = useMediaQuery('lg') // the fixed-height stacked card needs the two-column layout
+  const reduceMotion = useReducedMotion()
+  const stacked = isDesktop && !reduceMotion
+  const listRef = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: listRef, offset: ['start start', 'end end'] })
 
   return (
-    <Section id="projects" className="relative" fullWidth={true}>
-      <AmbientGlow variant="secondary" className="top-1/4 opacity-50" />
-
+    <section id="projects" className="relative bg-paper py-16 text-ink sm:py-20 md:py-28">
       <div className="section-container">
-        <SectionHeading
-          label="Featured Work"
-          title="Selected Projects & Digital Experiences"
-          description="A collection of modern, interactive, and high-performance projects focused on design, scalability, and user experience."
-        />
-      </div>
+        <div className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
+          <div>
+            <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent-strong">
+              Selected work
+            </p>
+            <h2 className="font-display text-[clamp(3.5rem,11vw,10rem)] font-black uppercase leading-[0.85] tracking-tight text-ink">
+              Selected
+              <br />
+              <span className="text-paper-dim">Work</span>
+            </h2>
+          </div>
+          <p className="max-w-xs text-sm text-paper-fg-muted sm:text-base">
+            {pad(SELECTED.length)} featured projects across AI, web and mobile. Click any project to
+            browse its screenshots.
+          </p>
+        </div>
 
-      {/* INFINITE MARQUEE SHOWCASE */}
-      <div className="mt-8 sm:mt-12 w-full overflow-hidden">
-        <InfiniteMarquee direction="left" speed={25} pauseOnHover={true}>
-          {PROJECTS.map((project, idx) => {
-            const isFeatured = project.featured;
-            return (
-              <div
-                key={`${project.id}-${idx}`}
-                className="shrink-0 transition-transform duration-500 w-[85vw] sm:w-[45vw] md:w-[35vw] lg:w-[28vw]"
+        <div ref={listRef} className={cn('flex flex-col', stacked ? 'gap-0' : 'gap-6')}>
+          {SELECTED.map((project, i) => (
+            <StackCard
+              key={project.id}
+              project={project}
+              index={i}
+              stacked={stacked}
+              progress={scrollYProgress}
+              onSelect={setSelectedProject}
+            />
+          ))}
+        </div>
+
+        <div className="mt-16 md:mt-24">
+          <button
+            onClick={() => setShowAll((v) => !v)}
+            aria-expanded={showAll}
+            aria-controls="more-projects"
+            className="flex w-full items-center justify-between border-b-2 border-ink pb-4 font-display text-3xl font-black uppercase tracking-tight sm:text-5xl"
+          >
+            <span>
+              More projects <span className="text-paper-dim">({pad(OTHERS.length)})</span>
+            </span>
+            {showAll ? <Minus className="h-8 w-8" /> : <Plus className="h-8 w-8" />}
+          </button>
+
+          <AnimatePresence initial={false}>
+            {showAll && (
+              <motion.ul
+                id="more-projects"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
               >
-                {isFeatured ? (
-                  <FeaturedProjectCard project={project} onSelectProject={setSelectedProject} />
-                ) : (
-                  <ProjectCard project={project} onSelectProject={setSelectedProject} />
-                )}
-              </div>
-            )
-          })}
-        </InfiniteMarquee>
+                {OTHERS.map((project, i) => (
+                  <li key={project.id} className="border-b border-paper-line">
+                    <button
+                      onClick={() => setSelectedProject(project)}
+                      className="group grid w-full grid-cols-[3rem_1fr_auto] items-center gap-4 py-5 text-left sm:grid-cols-[4rem_1fr_14rem_auto]"
+                    >
+                      <span className="font-mono text-xs text-paper-fg-muted">
+                        {pad(SELECTED.length + i + 1)}
+                      </span>
+                      <span className="font-display text-2xl font-extrabold uppercase tracking-tight transition-colors group-hover:text-accent-strong sm:text-3xl">
+                        {project.title}
+                      </span>
+                      <span className="hidden text-sm text-paper-fg-muted sm:block">
+                        {project.category}
+                      </span>
+                      <ArrowUpRight className="h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                    </button>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* GLOBAL CINEMATIC GALLERY MODAL OVERLAY */}
       <ProjectGalleryModal project={selectedProject} onClose={() => setSelectedProject(null)} />
-    </Section>
+    </section>
   )
 })

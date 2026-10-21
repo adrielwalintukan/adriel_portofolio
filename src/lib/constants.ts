@@ -241,10 +241,23 @@ export const PROJECTS: Project[] = [
   }
 ]
 
-export const ABOUT_STATS = [
-  { label: 'Years Experience', value: 2, suffix: '+' },
-  { label: 'Projects Completed', value: 13, suffix: '+' },
-  { label: 'Technologies', value: 10, suffix: '+' },
+// Shown as large stacked cards in Selected Work; the rest go in the "View all" list
+export const SELECTED_PROJECT_IDS = [
+  'dailyboost_AI',
+  'AI_interview',
+  'kostfinder_unklab',
+  'system_library_mobile_app',
+  'system_management_klinik_sentosa',
+]
+
+// Other headline numbers (projects, technologies, certificates) are counted from the data below
+export const YEARS_EXPERIENCE = 2
+
+export const WORK_PROCESS = [
+  { title: 'Discover', description: 'I dig into the problem, the users and the goal before writing a single line of code.' },
+  { title: 'Design', description: 'I plan the architecture, data model and interface so the build has a clear direction.' },
+  { title: 'Build', description: 'I write clean, typed code, integrate AI where it adds real value, and test as I go.' },
+  { title: 'Ship', description: 'I deploy, gather feedback and iterate until it works well for real users.' },
 ]
 
 export const CORE_STRENGTHS = [
@@ -314,6 +327,9 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
 export const CONTACT_INFO = {
   email: 'adrielwalintukan27@gmail.com',
   location: 'Indonesia',
+  city: 'Manado, Indonesia',
+  timeZone: 'Asia/Makassar',
+  timeZoneLabel: 'WITA',
   availability: 'Available for collaboration & opportunities',
 }
 
@@ -326,6 +342,7 @@ export const SOCIAL_LINKS = [
 
 export interface SkillCategory {
   category: string;
+  description: string;
   skills: { name: string; level: number; icon: string }[];
 }
 
@@ -347,6 +364,7 @@ export interface Certificate {
 export const SKILLS_DATA: SkillCategory[] = [
   {
     category: 'Fullstack & Backend / AI',
+    description: 'APIs, databases and AI features that power real products.',
     skills: [
       { name: 'Python', level: 90, icon: 'python' },
       { name: 'FastAPI', level: 85, icon: 'fastapi' },
@@ -362,6 +380,7 @@ export const SKILLS_DATA: SkillCategory[] = [
   },
   {
     category: 'Frontend & Mobile',
+    description: 'Fast, responsive interfaces for the web and cross-platform mobile apps.',
     skills: [
       { name: 'React Native', level: 90, icon: 'react' },
       { name: 'Expo', level: 85, icon: 'expo' },
@@ -374,6 +393,7 @@ export const SKILLS_DATA: SkillCategory[] = [
   },
   {
     category: 'Tools & Design',
+    description: 'Version control, UI design and testing to ship with confidence.',
     skills: [
       { name: 'Git', level: 90, icon: 'git' },
       { name: 'GitHub', level: 90, icon: 'github' },

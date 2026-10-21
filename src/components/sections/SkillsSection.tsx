@@ -1,64 +1,132 @@
-import { memo } from 'react'
-import { motion } from 'framer-motion'
-import { Section, SectionHeading } from '@/components/shared'
-import { StaggerContainer } from '@/components/animations'
-import { TechSkillCard } from '@/components/ui'
-import { AmbientGlow } from '@/components/effects'
-import { SKILLS_DATA } from '@/lib/constants'
+import { memo, useRef, useState } from 'react'
+import { motion, AnimatePresence, useMotionValueEvent, useReducedMotion, useScroll } from 'framer-motion'
+import { SKILLS_DATA, type SkillCategory } from '@/lib/constants'
+import { getSkillIcon } from '@/lib/skillIcons'
+import { useMediaQuery } from '@/hooks'
+import { cn } from '@/lib/utils'
+
+const COUNT = SKILLS_DATA.length
+const pad = (n: number) => String(n).padStart(2, '0')
+const SEGMENT_VH = 80 // scroll distance per category while pinned
+
+function CategoryCard({ group }: { group: SkillCategory }) {
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8 lg:p-10">
+      <h3 className="font-display text-4xl font-black uppercase leading-none tracking-tight text-foreground sm:text-5xl">
+        {group.category}
+      </h3>
+      <p className="mt-3 max-w-md text-sm text-foreground-muted sm:text-base">{group.description}</p>
+      <ul className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {group.skills.map((skill) => (
+          <li
+            key={skill.name}
+            className="flex items-center gap-3 rounded-lg border border-border bg-background-secondary px-3 py-3 text-sm font-medium text-foreground"
+          >
+            <span className="text-xl" aria-hidden="true">
+              {getSkillIcon(skill.icon, skill.name)}
+            </span>
+            {skill.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function Heading() {
+  return (
+    <>
+      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">Skills</p>
+      <h2 className="font-display text-[clamp(3.5rem,10vw,9rem)] font-black uppercase leading-[0.85] tracking-tight text-foreground">
+        What
+        <br />
+        <span className="text-foreground-subtle">I do</span>
+      </h2>
+    </>
+  )
+}
 
 /**
- * Premium cinematic Skills Section.
- * Categorized grid layout showcasing technical capabilities.
+ * What I Do — pinned section on desktop: scrolling steps through skill categories with a
+ * 01/03 counter (PRD §6.4). Mobile and reduced motion get a plain stacked list.
  */
 export const SkillsSection = memo(function SkillsSection() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [active, setActive] = useState(0)
+  const isDesktop = useMediaQuery('lg')
+  const reduceMotion = useReducedMotion()
+  const pinned = isDesktop && !reduceMotion
+
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    setActive(Math.min(COUNT - 1, Math.floor(v * COUNT)))
+  })
+
+  // Jump to the middle of a category's scroll segment
+  const goTo = (i: number) => {
+    if (!ref.current) return
+    const segment = (window.innerHeight * SEGMENT_VH) / 100
+    window.scrollTo({ top: ref.current.offsetTop + segment * (i + 0.5), behavior: 'smooth' })
+  }
+
+  if (!pinned) {
+    return (
+      <section id="skills" className="bg-ink py-16 sm:py-20">
+        <div className="section-container">
+          <Heading />
+          <div className="mt-12 flex flex-col gap-6">
+            {SKILLS_DATA.map((group) => (
+              <CategoryCard key={group.category} group={group} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
   return (
-    <Section id="skills" className="relative overflow-hidden">
-      <AmbientGlow variant="secondary" className="right-[-5%] top-[10%] opacity-20" />
-      <AmbientGlow variant="primary" className="left-[-10%] top-[80%] opacity-20" />
-
-      <SectionHeading
-        label="Skills"
-        title="Technologies & Creative Capabilities"
-        description="A collection of modern technologies, frameworks, tools, and creative skills used to build scalable and immersive digital experiences."
-      />
-
-      <div className="section-container relative z-10 mt-16 w-full">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:gap-16">
-          {SKILLS_DATA.map((categoryGroup, index) => (
-            <motion.div
-              key={categoryGroup.category}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="flex flex-col"
-            >
-              <div className="mb-6 flex items-center gap-4">
-                <div className="h-px w-8 bg-accent/50" />
-                <h3 className="font-display text-xl font-bold tracking-tight text-foreground">
-                  {categoryGroup.category}
-                </h3>
-              </div>
-
-              <StaggerContainer
-                delay={0.2}
-                staggerDelay={0.1}
-                className="flex flex-wrap justify-center md:justify-start gap-4 sm:gap-6"
-              >
-                {categoryGroup.skills.map((skill) => (
-                  <motion.div
-                    key={skill.name}
-                    variants={{ hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1 } }}
-                    className="w-28 sm:w-32"
-                  >
-                    <TechSkillCard name={skill.name} icon={skill.icon} />
-                  </motion.div>
+    <section id="skills" className="bg-ink">
+      <div ref={ref} style={{ height: `${100 + COUNT * SEGMENT_VH}vh` }}>
+        <div className="sticky top-0 flex h-[100svh] items-center">
+          <div className="section-container grid w-full grid-cols-[1fr_1.25fr] items-center gap-16">
+            <div>
+              <Heading />
+              <p className="mt-10 font-display text-5xl font-black tabular-nums text-foreground">
+                {pad(active + 1)}
+                <span className="text-2xl text-foreground-subtle"> / {pad(COUNT)}</span>
+              </p>
+              <ul className="mt-6 space-y-1">
+                {SKILLS_DATA.map((group, i) => (
+                  <li key={group.category}>
+                    <button
+                      onClick={() => goTo(i)}
+                      aria-current={i === active ? 'step' : undefined}
+                      className={cn(
+                        'font-display text-xl font-extrabold uppercase tracking-wide transition-colors hover:text-foreground',
+                        i === active ? 'text-accent' : 'text-foreground-subtle'
+                      )}
+                    >
+                      {group.category}
+                    </button>
+                  </li>
                 ))}
-              </StaggerContainer>
-            </motion.div>
-          ))}
+              </ul>
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 40 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -40 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <CategoryCard group={SKILLS_DATA[active]} />
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
-    </Section>
+    </section>
   )
 })

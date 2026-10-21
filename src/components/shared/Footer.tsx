@@ -1,90 +1,95 @@
 import { memo } from 'react'
-import { motion } from 'framer-motion'
-import { FiArrowUp } from 'react-icons/fi'
-import { SOCIAL_LINKS } from '@/lib/constants'
+import { ArrowUp } from 'lucide-react'
 import { FiGithub, FiLinkedin, FiInstagram, FiMail } from 'react-icons/fi'
 import type { IconType } from 'react-icons'
+import { CONTACT_INFO, SOCIAL_LINKS } from '@/lib/constants'
 
-// Map string icon names from constants to actual React Icons
-const IconMap: Record<string, IconType> = {
-  FiGithub,
-  FiLinkedin,
-  FiInstagram,
-  FiMail,
-}
+const IconMap: Record<string, IconType> = { FiGithub, FiLinkedin, FiInstagram, FiMail }
+
+const FOOTER_LINKS = [
+  { label: 'Home', href: '#hero' },
+  { label: 'About', href: '#about' },
+  { label: 'Work', href: '#projects' },
+  { label: 'Contact', href: '#contact' },
+]
 
 /**
- * Premium cinematic Footer.
- * Features minimal branding, smooth scroll to top, and a subtle glowing top border.
+ * Footer — full accent block with portrait, contact, links and the name set edge to edge (PRD §6.11).
  */
 export const Footer = memo(function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const currentYear = new Date().getFullYear()
-
   return (
-    <footer className="relative mt-20 overflow-hidden bg-background pt-16 pb-8">
-      {/* Subtle top border glow */}
-      <div className="absolute left-1/2 top-0 h-px w-full max-w-7xl -translate-x-1/2 bg-gradient-to-r from-transparent via-border/60 to-transparent" />
-      <div className="absolute left-1/2 top-0 h-[2px] w-1/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-accent/30 to-transparent blur-sm" />
-
-      <div className="section-container relative z-10 flex flex-col items-center justify-between gap-8 sm:flex-row">
-        
-        {/* Left: Branding & Copyright */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col items-center sm:items-start"
-        >
-          <a href="#hero" className="mb-2 font-display text-xl font-black tracking-tighter text-foreground transition-colors hover:text-accent">
-            AW<span className="text-accent">.</span>
-          </a>
-          <p className="text-sm font-medium text-foreground-muted">
-            &copy; {currentYear} Adriel Walintukan. All rights reserved.
-          </p>
-        </motion.div>
-
-        {/* Center/Right: Socials & Back to Top */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="flex items-center gap-6"
-        >
-          <div className="flex items-center gap-4">
-            {SOCIAL_LINKS.map((link) => {
-              const Icon = IconMap[link.icon]
-              return (
-                <a
-                  key={link.name}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground-muted transition-colors hover:text-accent hover:-translate-y-0.5"
-                  aria-label={link.name}
-                >
-                  {Icon && <Icon className="h-4 w-4" />}
-                </a>
-              )
-            })}
+    <footer className="overflow-hidden bg-accent text-ink [--focus-ring:var(--color-ink)]">
+      <div className="section-container pt-16 sm:pt-20">
+        <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-start">
+          {/* bg-accent so the multiply blend has red to tint against */}
+          <div className="aspect-square w-40 overflow-hidden rounded-xl bg-accent sm:w-52">
+            <img
+              src="/images/adriel.jpg"
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover object-[50%_25%] grayscale contrast-125 mix-blend-multiply"
+            />
           </div>
+          <div className="sm:text-right">
+            <p className="font-display text-5xl font-black uppercase leading-none tracking-tight sm:text-6xl">Let&apos;s chat</p>
+            <p className="mt-5 font-mono text-xs uppercase tracking-widest">/email</p>
+            <a href={`mailto:${CONTACT_INFO.email}`} className="text-lg font-medium underline-offset-4 hover:underline">
+              {CONTACT_INFO.email}
+            </a>
+            <p className="mt-3 font-mono text-xs uppercase tracking-widest">/based in</p>
+            <p className="text-lg font-medium">{CONTACT_INFO.city}</p>
+          </div>
+        </div>
 
-          <div className="h-4 w-px bg-border" />
-
+        <div className="mt-16 flex flex-wrap items-center justify-between gap-6">
+          <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            {FOOTER_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="font-display text-2xl font-extrabold uppercase tracking-wide underline-offset-4 hover:underline"
+              >
+                {link.label}
+              </a>
+            ))}
+            <span className="flex gap-2">
+              {SOCIAL_LINKS.map((link) => {
+                const Icon = IconMap[link.icon]
+                return (
+                  <a
+                    key={link.name}
+                    href={link.url}
+                    target={link.url.startsWith('mailto:') ? undefined : '_blank'}
+                    rel="noreferrer"
+                    aria-label={link.name}
+                    className="flex h-9 w-9 items-center justify-center rounded-md bg-ink text-paper transition-colors hover:bg-paper hover:text-ink"
+                  >
+                    {Icon && <Icon className="h-4 w-4" />}
+                  </a>
+                )
+              })}
+            </span>
+          </nav>
           <button
-            onClick={scrollToTop}
-            className="group flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-surface/30 backdrop-blur-sm transition-all hover:border-accent/40 hover:bg-surface/60 hover:shadow-glow"
-            aria-label="Scroll to top"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="group flex items-center gap-2 font-display text-2xl font-extrabold uppercase tracking-wide"
           >
-            <FiArrowUp className="h-4 w-4 text-foreground-subtle transition-transform group-hover:-translate-y-1 group-hover:text-accent" />
+            Back to top
+            <ArrowUp className="h-5 w-5 transition-transform group-hover:-translate-y-1" />
           </button>
-        </motion.div>
+        </div>
+      </div>
 
+      <p
+        aria-hidden="true"
+        className="mt-8 whitespace-nowrap text-center font-display text-[12vw] font-black uppercase leading-[0.8] tracking-tight"
+      >
+        Adriel Walintukan
+      </p>
+
+      <div className="section-container flex justify-between gap-4 py-5 font-mono text-xs uppercase">
+        <span>&copy; {new Date().getFullYear()} Adriel Walintukan</span>
+        <span>Built with React &amp; Framer Motion</span>
       </div>
     </footer>
   )

@@ -6,7 +6,7 @@ import { useDeviceDetect } from '@/hooks'
 
 interface ButtonProps extends HTMLMotionProps<'button'> {
   children: ReactNode
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+  variant?: 'primary' | 'ink' | 'secondary' | 'outline' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   icon?: ReactNode
   className?: string
@@ -28,13 +28,16 @@ export const Button = memo(
     const { isTouchDevice } = useDeviceDetect()
 
     const baseStyles =
-      'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full font-medium transition-all duration-300 will-change-transform'
+      'group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-lg font-display font-extrabold uppercase tracking-wide transition-all duration-300 will-change-transform'
 
     const variants = {
       primary:
-        'bg-accent text-white shadow-glow hover:bg-accent-hover hover:shadow-glow-lg',
+        'bg-accent text-ink hover:bg-accent-hover',
+      // for use on accent-colored backgrounds
+      ink:
+        'bg-ink text-paper hover:bg-surface',
       secondary:
-        'glass-strong glow-border text-foreground hover:bg-surface-hover hover:shadow-glow',
+        'border border-border-hover bg-transparent text-foreground hover:border-foreground',
       outline:
         'border border-border bg-transparent text-foreground hover:border-accent/50 hover:bg-accent/10',
       ghost:
@@ -49,15 +52,16 @@ export const Button = memo(
 
     const content = (
       <>
-        {/* Glow effect behind primary buttons */}
-        {variant === 'primary' && (
-          <span className="absolute inset-0 z-0 bg-gradient-to-r from-accent to-neon-purple opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-50" />
-        )}
-        
-        <span className="relative z-10 flex items-center gap-2">
+        <span className="relative z-10 flex items-center gap-3">
           {children}
           {icon && (
-            <span className="transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-0">
+            <span
+              className={cn(
+                'flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-0',
+                variant === 'primary' && 'h-7 w-7 rounded-md bg-ink text-accent',
+                variant === 'ink' && 'h-7 w-7 rounded-md bg-accent text-ink'
+              )}
+            >
               {icon}
             </span>
           )}

@@ -1,34 +1,38 @@
-import { useState, useEffect, useCallback, memo } from 'react'
+import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { NAV_LINKS } from '@/lib/constants'
+import { CONTACT_INFO, NAV_LINKS, SOCIAL_LINKS } from '@/lib/constants'
 import { Magnetic } from '@/components/animations'
 import { Button, QuickContactModal } from '@/components/ui'
-import { useDeviceDetect } from '@/hooks'
+import { useDeviceDetect, useLocalTime } from '@/hooks'
+
+const EASE = [0.16, 1, 0.3, 1] as const
 
 /**
- * Premium navbar — performance optimized:
- * - Magnetic disabled on touch devices
- * - Simplified mobile overlay (no clip-path animation)
- * - Passive scroll listener
- * - Memoized
+ * Minimal header (logo · location · local time · Menu) plus a fullscreen menu
+ * (PRD §6.12): ESC closes it, focus is trapped inside and returned on close.
  */
 export const Navbar = memo(function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isContactOpen, setIsContactOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [pastTop, setPastTop] = useState(false)
   const [activeSection, setActiveSection] = useState('')
   const { isTouchDevice } = useDeviceDetect()
+  const time = useLocalTime(CONTACT_INFO.timeZone)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let ticking = false
     function handleScroll() {
       if (!ticking) {
         requestAnimationFrame(() => {
-          setScrolled(window.scrollY > 50)
-          
-          // Simple active section detection
+          // header sits on the red hero until it has scrolled past (hero can be taller than the viewport on mobile)
+          const heroHeight = document.getElementById('hero')?.offsetHeight ?? window.innerHeight
+          setPastTop(window.scrollY > 20)
+          setScrolled(window.scrollY > heroHeight - 80)
+
           const sections = NAV_LINKS.map(link => link.href.substring(1))
           const current = sections.find(section => {
             const el = document.getElementById(section)
@@ -39,164 +43,209 @@ export const Navbar = memo(function Navbar() {
             return false
           })
           if (current) setActiveSection(current)
-          
+
           ticking = false
         })
         ticking = true
       }
     }
     window.addEventListener('scroll', handleScroll, { passive: true })
-    // Initial check
     handleScroll()
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Lock body scroll when mobile menu is open
+  const closeMenu = useCallback(() => setIsOpen(false), [])
+
+  // Scroll lock, ESC to close, focus trap, focus restore
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!isOpen) return
+    document.body.style.overflow = 'hidden'
+    const menuButton = menuButtonRef.current
+    overlayRef.current?.querySelector<HTMLElement>('button, a')?.focus()
+
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setIsOpen(false)
+        return
+      }
+      if (e.key !== 'Tab' || !overlayRef.current) return
+      const focusable = overlayRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
+    document.addEventListener('keydown', onKeyDown)
     return () => {
+      document.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = ''
+      menuButton?.focus()
     }
   }, [isOpen])
-
-  const closeMenu = useCallback(() => setIsOpen(false), [])
 
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-        scrolled ? 'glass-strong shadow-glow-lg border-b border-border/50' : 'bg-transparent border-b border-transparent'
+        'fixed top-0 left-0 right-0 z-50 transition-colors duration-500',
+        scrolled
+          ? 'bg-ink/85 text-foreground backdrop-blur-md'
+          : cn('text-ink [--focus-ring:var(--color-ink)]', pastTop ? 'bg-accent' : 'bg-transparent')
       )}
     >
-      <nav className="section-container flex h-16 items-center justify-between sm:h-18 md:h-20">
-        {/* Logo */}
+      <nav className="section-container flex h-16 items-center justify-between sm:h-20">
         <Magnetic strength={0.12} disabled={isTouchDevice}>
-          <a
-            href="#hero"
-            className="relative font-display text-2xl font-black tracking-tighter text-foreground sm:text-3xl"
-            onClick={closeMenu}
-          >
-            AW<span className="text-accent">.</span>
+          <a href="#hero" className="font-display text-2xl font-black tracking-tight sm:text-3xl">
+            AW<span className={scrolled ? 'text-accent' : 'text-paper'}>.</span>
           </a>
         </Magnetic>
 
-        {/* Desktop Nav */}
-        <div className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((link) => {
-            const isActive = activeSection === link.href.substring(1)
-            return (
-              <Magnetic key={link.href} strength={0.08} disabled={isTouchDevice}>
-                <a
-                  href={link.href}
-                  className={cn(
-                    "group relative px-4 py-2 text-sm font-medium transition-colors hover:text-foreground",
-                    isActive ? "text-foreground" : "text-foreground-muted"
-                  )}
-                >
-                  {link.label}
-                  {/* Subtle active indicator dot */}
-                  <span 
-                    className={cn(
-                      "absolute -bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-accent transition-all duration-300",
-                      isActive ? "opacity-100 scale-100 shadow-glow" : "opacity-0 scale-0 group-hover:opacity-50 group-hover:scale-100"
-                    )} 
-                  />
-                </a>
-              </Magnetic>
-            )
-          })}
+        <div className="hidden gap-12 font-mono text-xs uppercase leading-tight md:flex">
+          <div>
+            <p className="opacity-60">Based in</p>
+            <p className="font-semibold">{CONTACT_INFO.city}</p>
+          </div>
+          <div>
+            <p className="opacity-60">Local time</p>
+            <p className="font-semibold tabular-nums">
+              {time} {CONTACT_INFO.timeZoneLabel}
+            </p>
+          </div>
         </div>
 
-        {/* CTA Button */}
-        <div className="hidden md:block">
-          <Button
-            onClick={() => setIsContactOpen(true)}
-            variant="secondary"
-            size="sm"
-            className="px-6 py-2 h-10"
+        <Magnetic strength={0.15} disabled={isTouchDevice}>
+          <button
+            ref={menuButtonRef}
+            onClick={() => setIsOpen(true)}
+            aria-expanded={isOpen}
+            aria-controls="site-menu"
+            className="flex h-10 items-center gap-3 rounded-lg border border-current px-4 font-display text-sm font-extrabold uppercase tracking-wide transition-colors hover:bg-ink hover:text-paper"
           >
-            Let&apos;s Talk
-          </Button>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="relative z-50 p-2 md:hidden"
-          aria-label="Toggle menu"
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={isOpen ? "close" : "open"}
-              initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
-              animate={{ opacity: 1, rotate: 0, scale: 1 }}
-              exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
-              transition={{ duration: 0.2 }}
-            >
-              {isOpen ? (
-                <X className="h-6 w-6 text-foreground" />
-              ) : (
-                <Menu className="h-6 w-6 text-foreground" />
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </button>
+            Menu
+            <span className="flex flex-col gap-1" aria-hidden="true">
+              <span className="h-px w-4 bg-current" />
+              <span className="h-px w-4 bg-current" />
+            </span>
+          </button>
+        </Magnetic>
       </nav>
 
-      {/* Mobile Menu Overlay — simple opacity transition (no clip-path for perf) */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 flex flex-col items-center justify-center gap-8 bg-background/80 backdrop-blur-xl md:hidden"
+            id="site-menu"
+            ref={overlayRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site menu"
+            initial={{ clipPath: 'inset(0 0 100% 0)' }}
+            animate={{ clipPath: 'inset(0 0 0% 0)' }}
+            exit={{ clipPath: 'inset(0 0 100% 0)' }}
+            transition={{ duration: 0.6, ease: [0.87, 0, 0.13, 1] }}
+            className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-ink text-foreground [--focus-ring:var(--color-accent)]"
           >
-            {NAV_LINKS.map((link, i) => (
-              <motion.a
-                key={link.href}
-                href={link.href}
+            <div className="section-container flex h-16 shrink-0 items-center justify-between border-b border-border sm:h-20">
+              <span className="font-display text-2xl font-black uppercase tracking-tight text-accent sm:text-3xl">
+                Adriel Walintukan
+              </span>
+              <button
                 onClick={closeMenu}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 + i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                className="font-display text-2xl font-bold tracking-tight text-foreground transition-colors active:text-accent sm:text-3xl"
+                className="h-10 rounded-lg border border-border-hover px-4 font-mono text-xs uppercase tracking-wider transition-colors hover:border-foreground"
               >
-                {link.label}
-              </motion.a>
-            ))}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="pt-2"
-            >
-              <Button
-                onClick={() => {
-                  closeMenu()
-                  setIsContactOpen(true)
-                }}
-                variant="primary"
-                size="md"
-                className="px-8"
+                Close [Esc]
+              </button>
+            </div>
+
+            <div className="section-container grid flex-1 gap-12 py-10 md:grid-cols-2">
+              <div>
+                <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">Navigation</p>
+                <ul>
+                  {NAV_LINKS.map((link, i) => {
+                    const isActive = activeSection === link.href.substring(1)
+                    return (
+                      <motion.li
+                        key={link.href}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.25 + i * 0.05, duration: 0.6, ease: EASE }}
+                      >
+                        <a
+                          href={link.href}
+                          onClick={closeMenu}
+                          aria-current={isActive ? 'location' : undefined}
+                          className={cn(
+                            'block font-display text-5xl font-black uppercase leading-[1.05] tracking-tight transition-colors hover:text-accent focus-visible:text-accent sm:text-6xl',
+                            isActive ? 'text-foreground' : 'text-foreground-subtle'
+                          )}
+                        >
+                          {link.label}
+                        </a>
+                      </motion.li>
+                    )
+                  })}
+                </ul>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.45, duration: 0.6 }}
+                className="flex flex-col gap-10 md:pt-8"
               >
-                Let&apos;s Talk
-              </Button>
-            </motion.div>
+                <div>
+                  <p className="mb-3 font-mono text-xs uppercase tracking-widest text-accent">Get in touch</p>
+                  <a href={`mailto:${CONTACT_INFO.email}`} className="text-xl font-medium hover:text-accent sm:text-2xl">
+                    {CONTACT_INFO.email}
+                  </a>
+                  <p className="mt-2 text-sm text-foreground-muted">{CONTACT_INFO.availability}</p>
+                  <div className="mt-6">
+                    <Button
+                      onClick={() => {
+                        closeMenu()
+                        setIsContactOpen(true)
+                      }}
+                      variant="primary"
+                    >
+                      Let&apos;s talk
+                    </Button>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-3 font-mono text-xs uppercase tracking-widest text-accent">Socials</p>
+                  <ul className="flex flex-wrap gap-x-6 gap-y-2">
+                    {SOCIAL_LINKS.filter((s) => s.name !== 'Email').map((s) => (
+                      <li key={s.name}>
+                        <a href={s.url} target="_blank" rel="noreferrer" className="text-lg hover:text-accent">
+                          {s.name} ↗
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-3 font-mono text-xs uppercase tracking-widest text-accent">Based in</p>
+                  <p className="text-lg">{CONTACT_INFO.city}</p>
+                </div>
+              </motion.div>
+            </div>
+
+            <div className="section-container flex shrink-0 justify-between border-t border-border py-5 font-mono text-xs uppercase text-foreground-subtle">
+              <span>&copy; {new Date().getFullYear()} Adriel Walintukan</span>
+              <span className="tabular-nums">
+                {time} {CONTACT_INFO.timeZoneLabel}
+              </span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Quick Contact Modal (Let's Talk) */}
-      <QuickContactModal
-        isOpen={isContactOpen}
-        onClose={() => setIsContactOpen(false)}
-      />
+      <QuickContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
     </header>
   )
 })

@@ -1,46 +1,23 @@
-import { memo } from 'react'
+import { lazy, memo, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { pageTransition } from '@/lib/animations'
 import { RootLayout } from '@/components/shared/RootLayout'
-import { GradientOrb } from '@/components/effects'
-import { HeroSection, ProjectsSection, AboutSection, ExperienceSection, ContactSection, SkillsSection, CertificatesSection } from '@/components/sections'
+import { HeroSection } from '@/components/sections/HeroSection'
+
+// Everything below the fold ships as its own chunk so first paint only evaluates the hero
+const BelowFold = lazy(() => import('./BelowFold'))
 
 /**
  * Home page — the main portfolio landing page.
- * Optimized: removed filter blur animation, responsive sizing,
- * GPU-accelerated transforms only.
  */
 function HomePage() {
   return (
     <RootLayout>
-      <motion.div
-        variants={pageTransition}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        {/* Ambient background orbs — static CSS, responsive sizing */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <GradientOrb
-            className="left-1/4 top-0"
-            color="bg-accent/8"
-            size="w-64 h-64 sm:w-80 sm:h-80 md:w-[500px] md:h-[500px]"
-          />
-          <GradientOrb
-            className="right-0 top-1/3"
-            color="bg-neon-cyan/6"
-            size="w-48 h-48 sm:w-72 sm:h-72 md:w-[400px] md:h-[400px]"
-          />
-        </div>
-
-        {/* ── SECTIONS ── */}
+      <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit">
         <HeroSection />
-        <AboutSection />
-        <SkillsSection />
-        <ProjectsSection />
-        <ExperienceSection />
-        <CertificatesSection />
-        <ContactSection />
+        <Suspense fallback={<div className="min-h-[100svh] bg-ink" />}>
+          <BelowFold />
+        </Suspense>
       </motion.div>
     </RootLayout>
   )
