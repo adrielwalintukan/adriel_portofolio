@@ -92,7 +92,9 @@ export const Navbar = memo(function Navbar() {
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-colors duration-500',
-        scrolled ? 'bg-ink/85 text-foreground backdrop-blur-md' : pastTop ? 'bg-accent text-ink' : 'bg-transparent text-ink'
+        scrolled
+          ? 'bg-ink/85 text-foreground backdrop-blur-md'
+          : cn('text-ink [--focus-ring:var(--color-ink)]', pastTop ? 'bg-accent' : 'bg-transparent')
       )}
     >
       <nav className="section-container flex h-16 items-center justify-between sm:h-20">
@@ -144,7 +146,7 @@ export const Navbar = memo(function Navbar() {
             animate={{ clipPath: 'inset(0 0 0% 0)' }}
             exit={{ clipPath: 'inset(0 0 100% 0)' }}
             transition={{ duration: 0.6, ease: [0.87, 0, 0.13, 1] }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-ink text-foreground"
+            className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-ink text-foreground [--focus-ring:var(--color-accent)]"
           >
             <div className="section-container flex h-16 shrink-0 items-center justify-between border-b border-border sm:h-20">
               <span className="font-display text-2xl font-black uppercase tracking-tight text-accent sm:text-3xl">

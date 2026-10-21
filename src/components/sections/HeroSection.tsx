@@ -36,7 +36,7 @@ export const HeroSection = memo(function HeroSection() {
   })
 
   return (
-    <section id="hero" ref={ref} className="relative min-h-[100svh] w-full overflow-hidden bg-accent text-ink">
+    <section id="hero" ref={ref} className="relative min-h-[100svh] w-full overflow-hidden bg-accent text-ink [--focus-ring:var(--color-ink)]">
       {/* Desktop portrait — bleeds off the right edge */}
       <motion.div
         className="pointer-events-none absolute inset-y-0 right-0 hidden w-[50%] lg:block"
@@ -66,7 +66,7 @@ export const HeroSection = memo(function HeroSection() {
         {/* Mobile portrait */}
         {/* bg-accent: this sits in the z-10 stacking context, so it needs its own red to multiply onto */}
         <div className="relative -mx-[var(--spacing-container)] mt-6 aspect-[4/5] overflow-hidden bg-accent lg:hidden">
-          <img src={PHOTO} alt="" width={960} height={1280} className={photoClass} />
+          <img src={PHOTO} alt="" fetchPriority="high" width={960} height={1280} className={photoClass} />
         </div>
 
         <div className="mt-8 grid items-end gap-10 lg:mt-auto lg:max-w-[50%] lg:grid-cols-[1fr_auto] lg:gap-12">

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | v1.1 — aksen diputuskan (signal red). Fase 0 berjalan |
+| **Status** | v1.2 — Fase 0–5 selesai di branch `redesign` (belum di-merge ke `main`) |
 | **Tanggal** | 21 Oktober 2026 |
 | **Pemilik** | Adriel Walintukan |
 | **Referensi** | Template "Matteo — Motion Artist Portfolio" (jiro.build), hanya sebagai inspirasi gaya, bukan disalin |
@@ -264,3 +264,20 @@ Setiap fase di-commit terpisah, dan situs tetap bisa di-build di akhir setiap fa
 | Teks raksasa membuat horizontal scroll | `clamp()` + `overflow-x: clip` di section + uji 320px |
 | Animasi scroll per kata berat jika paragraf panjang | Batasi ±40 kata, pakai satu `useScroll` per paragraf |
 | Gaya terlalu mirip Matteo | Beda aksen, beda konten section (Work, Skills, Certificates), copywriting sendiri, tidak memakai aset atau kode template |
+
+## 13. Hasil Fase 5 (21 Okt 2026)
+
+Lighthouse 12.6 di build produksi (`vite preview`), Chrome headless:
+
+| | Mobile (4x CPU, slow 4G) | Desktop |
+|---|---|---|
+| Performance | 73 – 81 (target 90 belum tercapai) | 98 |
+| Accessibility | 96 | – |
+| Best Practices | 100 | – |
+| SEO | 100 | – |
+| LCP | ~4.0 s (target < 2.5 s belum tercapai) | 0.8 s |
+| CLS | 0.016 | – |
+
+- Sudah dilakukan: font Google dimuat async, preload foto hero (elemen LCP), `robots.txt`, section di bawah hero di-lazy-load, reduced-motion global (Framer `MotionConfig` + Lenis mati), skip link, focus ring yang terlihat di semua latar, project card stack hanya di ≥1024px.
+- Sisa peringatan kontras: kata yang belum "menyala" pada efek scroll-reveal (disengaja).
+- Langkah berikut untuk mobile ≥ 90: prerender HTML statis halaman (agar foto hero tampil sebelum JS jalan) dan konversi screenshot project PNG ke WebP (hemat ±700 KB).

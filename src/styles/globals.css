@@ -370,3 +370,9 @@
 a, button, [role="button"], input[type="submit"], input[type="button"] {
   cursor: pointer;
 }
+
+/* Keyboard focus ring. Red sections set --focus-ring to ink so the ring stays visible there. */
+:focus-visible {
+  outline: 3px solid var(--focus-ring, var(--color-accent));
+  outline-offset: 3px;
+}

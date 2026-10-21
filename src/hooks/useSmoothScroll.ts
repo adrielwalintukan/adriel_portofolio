@@ -11,7 +11,8 @@ export function useSmoothScroll(): void {
   useEffect(() => {
     // Skip on mobile and touch devices for native 120Hz/60Hz compositor scrolling
     const isMobileOrTouch = window.innerWidth < 768 || 'ontouchstart' in window
-    if (isMobileOrTouch) return
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (isMobileOrTouch || reduceMotion) return
 
     const lenis = new Lenis({
       duration: 0.6,

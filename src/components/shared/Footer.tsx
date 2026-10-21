@@ -18,7 +18,7 @@ const FOOTER_LINKS = [
  */
 export const Footer = memo(function Footer() {
   return (
-    <footer className="overflow-hidden bg-accent text-ink">
+    <footer className="overflow-hidden bg-accent text-ink [--focus-ring:var(--color-ink)]">
       <div className="section-container pt-16 sm:pt-20">
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-start">
           {/* bg-accent so the multiply blend has red to tint against */}

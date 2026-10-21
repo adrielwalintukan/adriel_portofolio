@@ -1,33 +1,23 @@
-import { memo } from 'react'
+import { lazy, memo, Suspense } from 'react'
 import { motion } from 'framer-motion'
 import { pageTransition } from '@/lib/animations'
 import { RootLayout } from '@/components/shared/RootLayout'
-import { HeroSection, ProjectsSection, AboutSection, ExperienceSection, ContactSection, SkillsSection, CertificatesSection, HowIWorkSection, NumbersSection } from '@/components/sections'
+import { HeroSection } from '@/components/sections/HeroSection'
+
+// Everything below the fold ships as its own chunk so first paint only evaluates the hero
+const BelowFold = lazy(() => import('./BelowFold'))
 
 /**
  * Home page — the main portfolio landing page.
- * Optimized: removed filter blur animation, responsive sizing,
- * GPU-accelerated transforms only.
  */
 function HomePage() {
   return (
     <RootLayout>
-      <motion.div
-        variants={pageTransition}
-        initial="initial"
-        animate="animate"
-        exit="exit"
-      >
-        {/* ── SECTIONS ── */}
+      <motion.div variants={pageTransition} initial="initial" animate="animate" exit="exit">
         <HeroSection />
-        <AboutSection />
-        <ProjectsSection />
-        <SkillsSection />
-        <HowIWorkSection />
-        <NumbersSection />
-        <ExperienceSection />
-        <CertificatesSection />
-        <ContactSection />
+        <Suspense fallback={<div className="min-h-[100svh] bg-ink" />}>
+          <BelowFold />
+        </Suspense>
       </motion.div>
     </RootLayout>
   )

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { MotionConfig } from 'framer-motion'
 import HomePage from '@/pages/HomePage'
 import { LoadingScreen } from '@/components/effects'
 
@@ -10,11 +11,12 @@ export function AppRouter() {
   const [isAppReady, setIsAppReady] = useState(false)
 
   return (
-    <>
+    // reducedMotion="user": framer skips transform animations when the OS asks for reduced motion
+    <MotionConfig reducedMotion="user">
       {!isAppReady && <LoadingScreen onComplete={() => setIsAppReady(true)} />}
-      
+
       {/* 
-        We render the router immediately so background assets (images, 3D) begin preloading.
+        We render the router immediately so background assets (images) begin preloading.
         The LoadingScreen overlays everything with z-[999] and locks the scroll.
       */}
       <BrowserRouter>
@@ -22,6 +24,6 @@ export function AppRouter() {
           <Route path="/" element={<HomePage />} />
         </Routes>
       </BrowserRouter>
-    </>
+    </MotionConfig>
   )
 }
