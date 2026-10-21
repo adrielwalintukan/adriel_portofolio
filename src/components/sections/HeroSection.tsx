@@ -40,7 +40,7 @@ export const HeroSection = memo(function HeroSection() {
                 <div className="absolute -inset-2 animate-[spin_15s_linear_infinite_reverse] rounded-[48px] border border-neon-cyan/10 border-b-neon-cyan/60" />
 
                 {/* Portrait Container */}
-                <div className="relative h-full w-full overflow-hidden rounded-[40px] border border-border/40 bg-surface/50 shadow-[0_0_30px_rgba(108,92,231,0.2)]">
+                <div className="relative h-full w-full overflow-hidden rounded-[40px] border border-border/40 bg-surface/50">
                   <div className="absolute inset-0 z-10 bg-gradient-to-t from-background/90 via-background/10 to-transparent" />
                   <img
                     src="/images/adriel_profile.png"

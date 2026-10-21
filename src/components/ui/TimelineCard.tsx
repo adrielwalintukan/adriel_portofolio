@@ -31,7 +31,7 @@ export const TimelineCard = memo(function TimelineCard({
       {/* Node connecting the card to the timeline line (desktop only) */}
       <div
         className={cn(
-          'absolute top-8 hidden h-4 w-4 rounded-full border-2 border-accent bg-background shadow-[0_0_10px_rgba(0,255,255,0.5)] lg:block',
+          'absolute top-8 hidden h-4 w-4 rounded-full border-2 border-accent bg-background lg:block',
           isEven ? '-right-[8px]' : '-left-[8px]'
         )}
       />

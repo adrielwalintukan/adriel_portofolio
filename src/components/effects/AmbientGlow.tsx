@@ -17,11 +17,11 @@ export const AmbientGlow = memo(function AmbientGlow({
 }: AmbientGlowProps) {
   const gradients: Record<string, string> = {
     primary:
-      'radial-gradient(ellipse 600px 400px at 30% 40%, rgba(108, 92, 231, 0.08) 0%, transparent 70%)',
+      'radial-gradient(ellipse 600px 400px at 30% 40%, rgba(255, 51, 68, 0.06) 0%, transparent 70%)',
     secondary:
-      'radial-gradient(ellipse 500px 350px at 70% 30%, rgba(0, 240, 255, 0.06) 0%, transparent 70%)',
+      'radial-gradient(ellipse 500px 350px at 70% 30%, rgba(255, 51, 68, 0.05) 0%, transparent 70%)',
     accent:
-      'radial-gradient(ellipse 400px 300px at 50% 60%, rgba(168, 85, 247, 0.06) 0%, transparent 70%)',
+      'radial-gradient(ellipse 400px 300px at 50% 60%, rgba(255, 51, 68, 0.04) 0%, transparent 70%)',
   }
 
   return (

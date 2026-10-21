@@ -12,7 +12,7 @@ export const AchievementCard = memo(function AchievementCard() {
       <div className="absolute inset-0 -z-10 bg-gradient-to-br from-accent/0 to-neon-cyan/0 opacity-0 transition-opacity duration-500 group-hover:from-accent/10 group-hover:to-neon-cyan/10 group-hover:opacity-100" />
       
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-accent/50 bg-accent/10 shadow-[0_0_15px_rgba(108,92,231,0.3)]">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-accent/50 bg-accent/10">
           <FiAward className="h-6 w-6 text-accent" />
         </div>
         

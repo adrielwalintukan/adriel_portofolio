@@ -58,7 +58,7 @@ export const ExperienceSection = memo(function ExperienceSection() {
                 className="relative flex w-full flex-col lg:flex-row lg:justify-between"
               >
                 {/* Mobile-only node (desktop node is inside TimelineCard to handle alternating sides easily) */}
-                <div className="absolute -left-[5px] top-8 h-3 w-3 rounded-full border-2 border-accent bg-background shadow-[0_0_10px_rgba(0,255,255,0.5)] lg:hidden" />
+                <div className="absolute -left-[5px] top-8 h-3 w-3 rounded-full border-2 border-accent bg-background lg:hidden" />
                 
                 {/* 
                   On mobile, push content right of the line.

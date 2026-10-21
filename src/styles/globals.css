@@ -1,50 +1,56 @@
 @import 'tailwindcss';
 
 /* ============================================================
-   DESIGN TOKENS — Dark Futuristic Theme (Performance-Optimized)
+   DESIGN TOKENS — Editorial Signal-Red Theme (see docs/redesign/PRD.md §4.2)
    ============================================================ */
 @theme {
   /* ── Color Palette ── */
-  --color-background: #06060b;
-  --color-background-secondary: #0c0c14;
-  --color-background-tertiary: #12121e;
-  --color-surface: #161625;
-  --color-surface-hover: #1c1c30;
+  --color-ink: #07080a;
+  --color-paper: #f2efea;
 
-  --color-foreground: #e8e8f0;
-  --color-foreground-muted: #8888a8;
-  --color-foreground-subtle: #555570;
+  --color-background: #07080a;
+  --color-background-secondary: #0d0e11;
+  --color-background-tertiary: #131418;
+  --color-surface: #17181c;
+  --color-surface-hover: #1e1f24;
 
-  --color-border: #1e1e35;
-  --color-border-hover: #2a2a48;
+  --color-foreground: #f2efea;
+  --color-foreground-muted: #a3a3a3;
+  --color-foreground-subtle: #7a7a7a;
 
-  --color-accent: #6c5ce7;
-  --color-accent-hover: #7c6cf7;
-  --color-accent-glow: rgba(108, 92, 231, 0.35);
+  --color-border: #222328;
+  --color-border-hover: #34353b;
 
-  --color-neon-cyan: #00f0ff;
-  --color-neon-purple: #a855f7;
-  --color-neon-pink: #ec4899;
-  --color-neon-blue: #3b82f6;
-  --color-neon-green: #22d3ee;
+  --color-accent: #ff3344;
+  --color-accent-hover: #ff5563;
+  /* small accent text on --color-paper; #ff3344 is too light there */
+  --color-accent-strong: #c8102e;
+  --color-accent-glow: rgba(255, 51, 68, 0.35);
 
-  --color-gradient-start: #7c3aed;
-  --color-gradient-mid: #a78bfa;
-  --color-gradient-end: #f472b6;
+  /* Legacy decorative colors — collapsed to the single accent + neutral until sections are rebuilt */
+  --color-neon-cyan: #a3a3a3;
+  --color-neon-purple: #ff3344;
+  --color-neon-pink: #ff3344;
+  --color-neon-blue: #a3a3a3;
+  --color-neon-green: #a3a3a3;
 
-  --color-card: rgba(22, 22, 37, 0.6);
-  --color-card-hover: rgba(28, 28, 48, 0.8);
+  --color-gradient-start: #ff3344;
+  --color-gradient-mid: #ff5563;
+  --color-gradient-end: #ff3344;
 
-  --color-ring: rgba(108, 92, 231, 0.5);
+  --color-card: rgba(23, 24, 28, 0.6);
+  --color-card-hover: rgba(30, 31, 36, 0.8);
+
+  --color-ring: rgba(255, 51, 68, 0.5);
 
   --color-destructive: #ef4444;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
 
   /* ── Typography ── */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
-  --font-display: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
 
   /* ── Spacing ── */
   --spacing-section: 6rem;
@@ -59,8 +65,8 @@
   --radius-full: 9999px;
 
   /* ── Shadows ── */
-  --shadow-glow: 0 0 15px rgba(108, 92, 231, 0.12);
-  --shadow-glow-lg: 0 0 40px rgba(108, 92, 231, 0.15);
+  --shadow-glow: none;
+  --shadow-glow-lg: none;
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.25);
   --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.35);
 
@@ -119,8 +125,8 @@
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 15px rgba(108, 92, 231, 0.1); }
-  50% { box-shadow: 0 0 25px rgba(108, 92, 231, 0.2); }
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 51, 68, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(255, 51, 68, 0.2); }
 }
 
 @keyframes float {
@@ -205,7 +211,7 @@
   }
 
   ::selection {
-    background-color: rgba(108, 92, 231, 0.3);
+    background-color: rgba(255, 51, 68, 0.3);
     color: #fff;
   }
 
@@ -246,12 +252,12 @@
 
 @utility text-gradient {
   color: var(--color-accent);
-  text-shadow: 0 0 24px rgba(99, 102, 241, 0.25);
+  text-shadow: none;
 }
 
 /* Glass — reduced blur for performance (16px → 10px) */
 @utility glass {
-  background: rgba(22, 22, 37, 0.55);
+  background: rgba(23, 24, 28, 0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -259,15 +265,15 @@
 
 /* Glass strong — reduced blur (24px → 14px), higher opacity to compensate */
 @utility glass-strong {
-  background: rgba(22, 22, 37, 0.8);
+  background: rgba(23, 24, 28, 0.8);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 @utility glow-border {
-  box-shadow: 0 0 0 1px rgba(108, 92, 231, 0.25),
-              0 0 15px rgba(108, 92, 231, 0.08);
+  box-shadow: 0 0 0 1px rgba(255, 51, 68, 0.25),
+              0 0 15px rgba(255, 51, 68, 0.08);
 }
 
 /* Responsive container with fluid padding */
@@ -357,7 +363,7 @@
   .glass-strong {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: rgba(22, 22, 37, 0.92);
+    background: rgba(23, 24, 28, 0.92);
   }
 
   .noise-overlay {

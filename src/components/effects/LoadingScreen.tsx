@@ -83,7 +83,7 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
               <div className="relative h-px w-48 overflow-hidden bg-border sm:w-64">
                 {/* Actual Progress */}
                 <motion.div
-                  className="absolute left-0 top-0 h-full bg-accent shadow-[0_0_10px_rgba(0,255,255,0.8)]"
+                  className="absolute left-0 top-0 h-full bg-accent"
                   style={{ width: `${progress}%` }}
                 />
               </div>

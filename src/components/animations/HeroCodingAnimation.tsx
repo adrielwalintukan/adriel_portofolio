@@ -68,7 +68,7 @@ export const HeroCodingAnimation = memo(function HeroCodingAnimation({
           rotateY,
           transformStyle: 'preserve-3d',
         }}
-        className="relative z-10 w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[460px] overflow-hidden rounded-3xl border border-white/15 bg-surface/70 shadow-2xl backdrop-blur-2xl transition-shadow duration-500 hover:border-accent/50 hover:shadow-[0_0_50px_rgba(139,92,246,0.3)]"
+        className="relative z-10 w-full max-w-[340px] xs:max-w-[380px] sm:max-w-[460px] overflow-hidden rounded-3xl border border-white/15 bg-surface/70 shadow-2xl backdrop-blur-2xl transition-shadow duration-500 hover:border-accent/50 hover:shadow-[0_0_50px_rgba(255,51,68,0.3)]"
       >
         {/* Window Title Bar */}
         <div className="flex items-center justify-between border-b border-white/10 bg-background/60 px-4 py-3 backdrop-blur-md">
