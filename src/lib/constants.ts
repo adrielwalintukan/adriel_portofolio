@@ -314,6 +314,9 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
 export const CONTACT_INFO = {
   email: 'adrielwalintukan27@gmail.com',
   location: 'Indonesia',
+  city: 'Manado, Indonesia',
+  timeZone: 'Asia/Makassar',
+  timeZoneLabel: 'WITA',
   availability: 'Available for collaboration & opportunities',
 }
 

@@ -35,16 +35,23 @@ export const TextReveal = memo(function TextReveal({
 
   let charIndex = 0
 
+  // The in-view trigger sits on this unclipped wrapper: masked letters start fully
+  // hidden, so an IntersectionObserver on them would never fire.
   return (
-    <span aria-label={text} role="text" className={cn('inline-flex flex-wrap gap-x-[0.25em]', className)}>
+    <motion.span
+      aria-label={text}
+      role="text"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: !repeat, margin: '-20px' }}
+      className={cn('inline-flex flex-wrap gap-x-[0.25em]', className)}
+    >
       {words.map((word, w) =>
         by === 'word' ? (
           <motion.span
             key={`${word}-${w}`}
             aria-hidden="true"
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: !repeat, margin: '-20px' }}
+            variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
             transition={{ duration: 0.4, delay: delay + w * step, ease }}
             className="inline-block"
           >
@@ -58,9 +65,7 @@ export const TextReveal = memo(function TextReveal({
               return (
                 <motion.span
                   key={i}
-                  initial={{ y: '110%' }}
-                  whileInView={{ y: '0%' }}
-                  viewport={{ once: !repeat, margin: '-20px' }}
+                  variants={{ hidden: { y: '110%' }, visible: { y: '0%' } }}
                   transition={{ duration: 0.6, delay: delay + i * step, ease }}
                   className="inline-block"
                 >
@@ -71,6 +76,6 @@ export const TextReveal = memo(function TextReveal({
           </span>
         )
       )}
-    </span>
+    </motion.span>
   )
 })

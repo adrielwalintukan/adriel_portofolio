@@ -6,7 +6,7 @@ import { useDeviceDetect } from '@/hooks'
 
 interface ButtonProps extends HTMLMotionProps<'button'> {
   children: ReactNode
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+  variant?: 'primary' | 'ink' | 'secondary' | 'outline' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   icon?: ReactNode
   className?: string
@@ -33,6 +33,9 @@ export const Button = memo(
     const variants = {
       primary:
         'bg-accent text-ink hover:bg-accent-hover',
+      // for use on accent-colored backgrounds
+      ink:
+        'bg-ink text-paper hover:bg-surface',
       secondary:
         'border border-border-hover bg-transparent text-foreground hover:border-foreground',
       outline:
@@ -55,7 +58,8 @@ export const Button = memo(
             <span
               className={cn(
                 'flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-0',
-                variant === 'primary' && 'h-7 w-7 rounded-md bg-ink text-accent'
+                variant === 'primary' && 'h-7 w-7 rounded-md bg-ink text-accent',
+                variant === 'ink' && 'h-7 w-7 rounded-md bg-accent text-ink'
               )}
             >
               {icon}

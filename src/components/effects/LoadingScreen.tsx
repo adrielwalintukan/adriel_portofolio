@@ -1,94 +1,79 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { TextReveal } from '@/components/animations'
+
+const SESSION_KEY = 'aw-intro-seen'
+const HOLD_MS = 800 // letters finish revealing at ~0.8s
+const EXIT_MS = 450
+
+function shouldSkipIntro(): boolean {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true
+  try {
+    return sessionStorage.getItem(SESSION_KEY) === '1'
+  } catch {
+    return false
+  }
+}
 
 /**
- * Premium cinematic loading screen that displays before the website reveals itself.
+ * Intro screen: "ADRIEL" slides up letter by letter, then the screen wipes upward.
+ * Shown once per browser session (PRD §6.0); skipped for reduced motion.
  */
 export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
-  const [progress, setProgress] = useState(0)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [skip] = useState(shouldSkipIntro)
+  const [isLoaded, setIsLoaded] = useState(skip)
 
   useEffect(() => {
-    // Lock scroll while loading
-    document.body.style.overflow = 'hidden'
-
-    // Simulate loading progress
-    const duration = 2000 // 2 seconds total loading time
-    const intervalTime = 20
-    const steps = duration / intervalTime
-
-    let currentStep = 0
-    const interval = setInterval(() => {
-      currentStep++
-      setProgress(Math.min((currentStep / steps) * 100, 100))
-
-      if (currentStep >= steps) {
-        clearInterval(interval)
-        setIsLoaded(true)
-        
-        // Wait for exit animation to finish before signaling completion
-        setTimeout(() => {
-          document.body.style.overflow = ''
-          if (typeof window !== 'undefined') {
-            (window as any).__APP_READY__ = true
-            window.dispatchEvent(new CustomEvent('app-ready'))
-          }
-          onComplete()
-        }, 800) // matches the exit duration
+    function finish() {
+      document.body.style.overflow = ''
+      try {
+        sessionStorage.setItem(SESSION_KEY, '1')
+      } catch {
+        // storage blocked (private mode) — intro just plays again next visit
       }
-    }, intervalTime)
+      window.__APP_READY__ = true
+      window.dispatchEvent(new CustomEvent('app-ready'))
+      onComplete()
+    }
+
+    if (skip) {
+      finish()
+      return
+    }
+
+    document.body.style.overflow = 'hidden'
+    let exitTimer: ReturnType<typeof setTimeout>
+    const holdTimer = setTimeout(() => {
+      setIsLoaded(true)
+      exitTimer = setTimeout(finish, EXIT_MS)
+    }, HOLD_MS)
 
     return () => {
-      clearInterval(interval)
+      clearTimeout(holdTimer)
+      clearTimeout(exitTimer)
       document.body.style.overflow = ''
     }
-  }, [onComplete])
+  }, [skip, onComplete])
 
   return (
     <AnimatePresence>
       {!isLoaded && (
         <motion.div
           key="loading-screen"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, y: -50 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-background"
+          initial={{ clipPath: 'inset(0 0 0% 0)' }}
+          exit={{ clipPath: 'inset(0 0 100% 0)' }}
+          transition={{ duration: EXIT_MS / 1000, ease: [0.87, 0, 0.13, 1] }}
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-ink"
         >
-          {/* Ambient Glow */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[50vh] w-[50vw] rounded-full bg-accent/5 blur-[100px]" />
-
-          <div className="relative z-10 flex flex-col items-center gap-8">
-            {/* Logo Reveal */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              className="font-display text-4xl font-black tracking-tighter text-foreground sm:text-5xl"
-            >
-              AW<span className="text-accent">.</span>
-            </motion.div>
-
-            {/* Loading Status */}
-            <div className="flex flex-col items-center gap-4">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5, duration: 1 }}
-                className="font-mono text-xs tracking-[0.2em] text-foreground-muted uppercase"
-              >
-                Initializing Experience
-              </motion.div>
-
-              {/* Progress Bar Container */}
-              <div className="relative h-px w-48 overflow-hidden bg-border sm:w-64">
-                {/* Actual Progress */}
-                <motion.div
-                  className="absolute left-0 top-0 h-full bg-accent"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-            </div>
-          </div>
+          <TextReveal
+            text="ADRIEL"
+            by="char"
+            staggerDelay={0.04}
+            className="font-display text-6xl font-black uppercase leading-none text-paper sm:text-8xl"
+          />
+          <span className="absolute bottom-8 left-1/2 -translate-x-1/2 font-mono text-xs uppercase tracking-[0.3em] text-foreground-subtle">
+            Portfolio &copy; {new Date().getFullYear()}
+          </span>
         </motion.div>
       )}
     </AnimatePresence>
