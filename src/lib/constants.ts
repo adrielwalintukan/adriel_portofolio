@@ -241,6 +241,15 @@ export const PROJECTS: Project[] = [
   }
 ]
 
+// Shown as large stacked cards in Selected Work; the rest go in the "View all" list
+export const SELECTED_PROJECT_IDS = [
+  'dailyboost_AI',
+  'AI_interview',
+  'kostfinder_unklab',
+  'system_library_mobile_app',
+  'system_management_klinik_sentosa',
+]
+
 export const ABOUT_STATS = [
   { label: 'Years Experience', value: 2, suffix: '+' },
   { label: 'Projects Completed', value: 13, suffix: '+' },
@@ -329,6 +338,7 @@ export const SOCIAL_LINKS = [
 
 export interface SkillCategory {
   category: string;
+  description: string;
   skills: { name: string; level: number; icon: string }[];
 }
 
@@ -350,6 +360,7 @@ export interface Certificate {
 export const SKILLS_DATA: SkillCategory[] = [
   {
     category: 'Fullstack & Backend / AI',
+    description: 'APIs, databases and AI features that power real products.',
     skills: [
       { name: 'Python', level: 90, icon: 'python' },
       { name: 'FastAPI', level: 85, icon: 'fastapi' },
@@ -365,6 +376,7 @@ export const SKILLS_DATA: SkillCategory[] = [
   },
   {
     category: 'Frontend & Mobile',
+    description: 'Fast, responsive interfaces for the web and cross-platform mobile apps.',
     skills: [
       { name: 'React Native', level: 90, icon: 'react' },
       { name: 'Expo', level: 85, icon: 'expo' },
@@ -377,6 +389,7 @@ export const SKILLS_DATA: SkillCategory[] = [
   },
   {
     category: 'Tools & Design',
+    description: 'Version control, UI design and testing to ship with confidence.',
     skills: [
       { name: 'Git', level: 90, icon: 'git' },
       { name: 'GitHub', level: 90, icon: 'github' },

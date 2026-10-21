@@ -36,8 +36,8 @@ function HomePage() {
         {/* ── SECTIONS ── */}
         <HeroSection />
         <AboutSection />
-        <SkillsSection />
         <ProjectsSection />
+        <SkillsSection />
         <ExperienceSection />
         <CertificatesSection />
         <ContactSection />

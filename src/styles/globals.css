@@ -7,6 +7,10 @@
   /* ── Color Palette ── */
   --color-ink: #07080a;
   --color-paper: #f2efea;
+  /* text/lines on paper sections: dim = large secondary text (3.4:1), fg-muted = body text (6.8:1) */
+  --color-paper-dim: #85817b;
+  --color-paper-fg-muted: #55524d;
+  --color-paper-line: #d6d2cb;
 
   --color-background: #07080a;
   --color-background-secondary: #0d0e11;
@@ -157,7 +161,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    overflow-x: hidden;
+    overflow-x: clip; /* clip, not hidden: hidden makes a scroll container and breaks position: sticky */
     max-width: 100vw;
     width: 100%;
     position: relative;
@@ -167,7 +171,7 @@
     font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-foreground);
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100vw;
     width: 100%;
     position: relative;
@@ -180,7 +184,7 @@
   #root {
     width: 100%;
     max-width: 100%;
-    overflow-x: hidden;
+    overflow-x: clip;
     min-height: 100vh;
     display: flex;
     flex-direction: column;

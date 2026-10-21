@@ -1,5 +1,3 @@
-import { memo } from 'react'
-import { motion } from 'framer-motion'
 import { FiDatabase, FiHexagon, FiCheckCircle } from 'react-icons/fi'
 import {
   SiPython,
@@ -21,17 +19,9 @@ import {
   SiTestinglibrary,
   SiPostman
 } from 'react-icons/si'
-import { cn } from '@/lib/utils'
 
-interface TechSkillCardProps {
-  name: string
-  level?: number
-  icon?: string
-  className?: string
-}
-
-// Icon mapping function matching both icon code and skill name
-const getIcon = (iconName?: string, skillName?: string) => {
+/** Brand icon for a skill, matched on its icon code and name. */
+export const getSkillIcon = (iconName?: string, skillName?: string) => {
   const key = `${iconName || ''} ${skillName || ''}`.toLowerCase().trim()
 
   if (key.includes('fastapi')) return <SiFastapi className="text-[#009688]" />
@@ -57,42 +47,3 @@ const getIcon = (iconName?: string, skillName?: string) => {
   if (key.includes('convex')) return <FiHexagon className="text-neon-cyan" />
   return <FiCheckCircle className="text-accent" />
 }
-
-/**
- * Premium cinematic floating badge for individual technical skills.
- * Features official brand icons and smooth hovering dynamics.
- */
-export const TechSkillCard = memo(function TechSkillCard({ name, icon, className }: TechSkillCardProps) {
-  // Generate a random float delay so they bob up and down asynchronously
-  const floatDelay = Math.random() * 2;
-  const floatDuration = 3 + Math.random() * 2;
-
-  return (
-    <motion.div
-      animate={{ y: [0, -6, 0] }}
-      transition={{ 
-        duration: floatDuration, 
-        repeat: Infinity, 
-        ease: "easeInOut",
-        delay: floatDelay
-      }}
-      className={cn(
-        "group relative flex flex-col items-center justify-center p-5 aspect-square overflow-hidden rounded-2xl border border-white/5 bg-surface/30 backdrop-blur-md transition-all duration-500 hover:border-accent/40 hover:bg-surface/50 hover:-translate-y-2 hover:shadow-glow cursor-pointer",
-        className
-      )}
-    >
-      {/* Subtle ambient glow on hover */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-accent/5 to-neon-cyan/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100 mix-blend-overlay" />
-      
-      {/* Icon Container */}
-      <div className="relative z-10 flex h-12 w-12 items-center justify-center text-4xl drop-shadow-md transition-transform duration-500 group-hover:scale-110 mb-3">
-        {getIcon(icon, name)}
-      </div>
-
-      {/* Skill Name */}
-      <span className="relative z-10 text-center font-display text-xs sm:text-sm font-semibold tracking-wide text-foreground-subtle transition-colors duration-300 group-hover:text-foreground">
-        {name}
-      </span>
-    </motion.div>
-  )
-})
