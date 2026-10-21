@@ -2,22 +2,16 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TextReveal } from '@/components/animations'
 
-const SESSION_KEY = 'aw-intro-seen'
 const HOLD_MS = 800 // letters finish revealing at ~0.8s
 const EXIT_MS = 450
 
 function shouldSkipIntro(): boolean {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true
-  try {
-    return sessionStorage.getItem(SESSION_KEY) === '1'
-  } catch {
-    return false
-  }
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 /**
  * Intro screen: "ADRIEL" slides up letter by letter, then the screen wipes upward.
- * Shown once per browser session (PRD §6.0); skipped for reduced motion.
+ * Plays on every page load; skipped for reduced motion.
  */
 export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   const [skip] = useState(shouldSkipIntro)
@@ -26,11 +20,6 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
   useEffect(() => {
     function finish() {
       document.body.style.overflow = ''
-      try {
-        sessionStorage.setItem(SESSION_KEY, '1')
-      } catch {
-        // storage blocked (private mode) — intro just plays again next visit
-      }
       window.__APP_READY__ = true
       window.dispatchEvent(new CustomEvent('app-ready'))
       onComplete()

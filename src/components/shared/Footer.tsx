@@ -21,13 +21,12 @@ export const Footer = memo(function Footer() {
     <footer className="overflow-hidden bg-accent text-ink [--focus-ring:var(--color-ink)]">
       <div className="section-container pt-16 sm:pt-20">
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-start">
-          {/* bg-accent so the multiply blend has red to tint against */}
-          <div className="aspect-square w-40 overflow-hidden rounded-xl bg-accent sm:w-52">
+          <div className="aspect-square w-40 overflow-hidden rounded-xl bg-ink sm:w-52">
             <img
               src="/images/adriel.jpg"
               alt=""
               loading="lazy"
-              className="h-full w-full object-cover object-[50%_25%] grayscale contrast-125 mix-blend-multiply"
+              className="h-full w-full object-cover object-[50%_25%] grayscale contrast-125"
             />
           </div>
           <div className="sm:text-right">
