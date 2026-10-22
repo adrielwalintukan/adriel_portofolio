@@ -159,34 +159,6 @@ export const PROJECTS: Project[] = [
     featured: false,
   },
   {
-    id: 'web_infomation_ray',
-    title: 'RAY Information Web Portal',
-    description: 'An informational web portal focused on elegant content delivery, visual galleries, and clean user interfaces.',
-    image: '/projects/web_infomation_ray/Web_Informasi_RAY - Home.webp',
-    images: [
-      '/projects/web_infomation_ray/Web_Informasi_RAY - Home.webp',
-      '/projects/web_infomation_ray/Web_Informasi_RAY - About.webp',
-      '/projects/web_infomation_ray/Web_Informasi_RAY - Gallery.webp'
-    ],
-    technologies: ['Web App', 'Frontend', 'UI/UX'],
-    category: 'Web App',
-    featured: false,
-  },
-  {
-    id: 'web_portofolio_AI',
-    title: 'AI Web Portfolio Showcase',
-    description: 'A futuristic AI-augmented web portfolio designed to demonstrate intelligent chatbot integrations and dynamic themes.',
-    image: '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.webp',
-    images: [
-      '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.webp',
-      '/projects/web_portofolio_AI/Web_Portofolio_AI - Chatbot.webp'
-    ],
-    repoUrl: 'https://github.com/adrielwalintukan/web-portofolio-ai',
-    technologies: ['AI Project', 'Web App', 'Frontend', 'Interactive Design'],
-    category: 'AI Project',
-    featured: false,
-  },
-  {
     id: 'mobile_app_portofolio',
     title: 'Mobile Portfolio Experience',
     description: 'A native mobile app portfolio demonstration optimized for touch screens, custom gestures, and native transitions.',
@@ -226,31 +198,6 @@ export const PROJECTS: Project[] = [
     ],
     technologies: ['AI Project', 'Frontend', 'Interactive Design'],
     category: 'AI Project',
-    featured: false,
-  },
-  {
-    id: 'personal_portofolio',
-    title: 'Cinematic Personal Portfolio',
-    description: 'A high-performance cinematic digital showcase implementing state-of-the-art interactive layouts and visual elements.',
-    image: '/projects/personal_portofolio/Web_Portofolio.webp',
-    images: [
-      '/projects/personal_portofolio/Web_Portofolio.webp'
-    ],
-    technologies: ['Web App', 'UI/UX', 'Frontend', 'Interactive Design'],
-    category: 'Web App',
-    featured: false,
-  },
-  {
-    id: 'portofolio_adriel',
-    title: 'Adriel Web Portfolio Core',
-    description: 'The comprehensive architectural foundation of the primary portfolio application built for premium user engagement.',
-    image: '/projects/project_featured.webp',
-    images: [
-      '/projects/project_featured.webp'
-    ],
-    repoUrl: 'https://github.com/adrielwalintukan/adriel_portofolio',
-    technologies: ['Fullstack', 'Web App', 'UI/UX', 'Interactive Design'],
-    category: 'Fullstack',
     featured: false,
   }
 ]
