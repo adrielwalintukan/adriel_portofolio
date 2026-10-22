@@ -7,7 +7,7 @@ import {
   PROJECTS,
   SKILLS_DATA,
   SOCIAL_LINKS,
-} from '../src/lib/constants'
+} from '../src/lib/constants.js' // .js: Vercel runs this as plain Node ESM, which needs the extension
 
 // alias that follows Google's current Flash model, so a model retirement doesn't break the terminal
 const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest'
@@ -89,13 +89,18 @@ export async function POST(request: Request): Promise<Response> {
   const input = parse(await request.json().catch(() => null))
   if (!input) return json(400, { error: 'bad_request' })
 
-  const payload = JSON.stringify({
+  const payload = (model: string) => JSON.stringify({
     systemInstruction: { parts: [{ text: SYSTEM }] },
     contents: [...input.history, { role: 'user', text: input.question }].map((t) => ({
       role: t.role,
       parts: [{ text: t.text }],
     })),
-    generationConfig: { temperature: 0.4, maxOutputTokens: 400, thinkingConfig: { thinkingBudget: 0 } },
+    generationConfig: {
+      temperature: 0.4,
+      maxOutputTokens: 400,
+      // Flash: skip thinking for speed. Flash-Lite rejects thinkingBudget 0 (400) and thinks minimally anyway
+      ...(model === FALLBACK_MODEL ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
+    },
   })
   // Flash is sometimes overloaded (503/429); the lighter model usually still has capacity
   let res: Response | null = null
@@ -103,7 +108,7 @@ export async function POST(request: Request): Promise<Response> {
     res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: payload,
+      body: payload(model),
     }).catch(() => null)
     if (res && res.status !== 503 && res.status !== 429) break
   }
