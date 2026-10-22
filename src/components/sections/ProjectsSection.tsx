@@ -19,6 +19,7 @@ const SELECTED = SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === 
 )
 const OTHERS = PROJECTS.filter((p) => !SELECTED_PROJECT_IDS.includes(p.id))
 const pad = (n: number) => String(n).padStart(2, '0')
+const SOUND_EVENT = 'project-video-sound'
 
 interface StackCardProps {
   project: Project
@@ -41,7 +42,7 @@ const StackCard = memo(function StackCard({
   const [videoRef, videoInView] = useInView<HTMLVideoElement>({ threshold: 0.3, triggerOnce: false })
   const articleRef = useRef<HTMLElement>(null)
   const [covered, setCovered] = useState(false)
-  // sticky cards stay "in view" under the next card, so also check whether the next one has slid over half of this
+  // sticky cards stay "in view" under the next card, so also check whether the next one has slid over a quarter of this
   // (scroll events, not `progress`: that clamps at 1 before the last cards finish sliding in)
   useEffect(() => {
     const el = articleRef.current
@@ -49,7 +50,7 @@ const StackCard = memo(function StackCard({
     if (!project.video || !el || !next) return
     const check = () => {
       const box = el.getBoundingClientRect()
-      setCovered(next.getBoundingClientRect().top < box.top + box.height / 2)
+      setCovered(next.getBoundingClientRect().top < box.top + box.height * 0.75)
     }
     check()
     window.addEventListener('scroll', check, { passive: true })
@@ -63,11 +64,25 @@ const StackCard = memo(function StackCard({
     else v.pause()
   }, [videoInView, covered, reduceMotion, videoRef])
   const [muted, setMuted] = useState(true)
+  // only one card plays sound: turning it on here mutes every other card
+  useEffect(() => {
+    if (!project.video) return
+    const onOther = (e: Event) => {
+      if ((e as CustomEvent<string>).detail === project.id || !videoRef.current) return
+      videoRef.current.muted = true
+      setMuted(true)
+    }
+    window.addEventListener(SOUND_EVENT, onOther)
+    return () => window.removeEventListener(SOUND_EVENT, onOther)
+  }, [project.video, project.id, videoRef])
   const toggleSound = () => {
     const v = videoRef.current
     if (!v) return
     v.muted = !v.muted
-    if (!v.muted && v.paused) v.play().catch(() => {})
+    if (!v.muted) {
+      window.dispatchEvent(new CustomEvent(SOUND_EVENT, { detail: project.id }))
+      if (v.paused) v.play().catch(() => {})
+    }
     setMuted(v.muted)
   }
   // the gallery plays the same video with sound: silence the card so they don't overlap

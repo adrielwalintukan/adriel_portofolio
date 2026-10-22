@@ -37,7 +37,8 @@ export const PROJECTS: Project[] = [
     title: 'DailyBoost AI',
     description: 'A productivity-focused AI application designed to improve task management and daily workflow efficiency.',
     longDescription: 'A comprehensive intelligent application focused on streamlining user workflows, budgeting, and interactive chat features. Designed with immersive mobile interfaces and real-time state synchronisation.',
-    image: '/projects/dailyboost_AI/DailyBoost_AI - Home Page.webp',
+    image: '/projects/dailyboost_AI/DailyBoost_AI - Poster.webp',
+    video: '/projects/dailyboost_AI/dailyboost-promo.mp4',
     images: [
       '/projects/dailyboost_AI/DailyBoost_AI - Home Page.webp',
       '/projects/dailyboost_AI/DailyBoost_AI - Home Page (cont.).webp',
