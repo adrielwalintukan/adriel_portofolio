@@ -26,6 +26,9 @@ export interface Project {
   technologies: string[]
   category: string
   featured?: boolean
+  /** muted looping clip shown in the featured card instead of the cover image */
+  video?: string
+  repoUrl?: string
 }
 
 export const PROJECTS: Project[] = [
@@ -54,23 +57,29 @@ export const PROJECTS: Project[] = [
       '/projects/dailyboost_AI/DailyBoost_AI - Login Page.webp',
       '/projects/dailyboost_AI/DailyBoost_AI - SignUp Page.webp'
     ],
+    repoUrl: 'https://github.com/adrielwalintukan/DailyBoostAI_MAD',
     technologies: ['AI Project', 'Fullstack', 'Mobile App', 'Interactive Design'],
     category: 'AI Project / Fullstack',
     featured: true,
   },
   {
     id: 'AI_interview',
-    title: 'AI Interview Simulator',
-    description: 'An AI-powered interview simulation application focused on interactive conversation flow and user experience.',
-    image: '/projects/AI_interview/AI_Interview - Login.webp',
+    title: 'Interview AI',
+    description: 'Requirements-interview practice with real-time 3D AI clients who hide key facts until students ask the right questions.',
+    longDescription: 'A platform for schools and campuses to practise requirements-elicitation interviews. Students talk by voice with six real-time 3D AI characters (clients, business owners, partners), each hiding facts that only surface when the questions are precise. After the session the AI grades the transcript against a rubric and teachers review the result. Live in production at interview-ai-id.vercel.app.',
+    image: '/projects/interview_ai/Interview AI - Poster.webp',
     images: [
-      '/projects/AI_interview/AI_Interview - Login.webp',
-      '/projects/AI_interview/AI_Interview - Pilih_Skenario_Mahasiswa.webp',
-      '/projects/AI_interview/AI_Interview - Hal_Interview_AI.webp',
-      '/projects/AI_interview/AI_Interview - Dash_Dosen.webp'
+      '/projects/interview_ai/Interview AI - Landing.webp',
+      '/projects/interview_ai/Interview AI - Ruang Wawancara.webp',
+      '/projects/interview_ai/Interview AI - Laporan Sesi.webp',
+      '/projects/interview_ai/Interview AI - Dashboard Pengajar.webp',
+      '/projects/interview_ai/Interview AI - Karakter.webp',
+      '/projects/interview_ai/Interview AI - Masuk.webp'
     ],
-    technologies: ['AI Project', 'Web App', 'UI/UX', 'Interactive Design'],
-    category: 'AI Project',
+    video: '/projects/interview_ai/interview-ai-promo.mp4',
+    repoUrl: 'https://github.com/adrielwalintukan/interviewAI',
+    technologies: ['Next.js', 'TypeScript', 'Gemini Live API', 'React Three Fiber', 'Supabase', 'Tailwind CSS'],
+    category: 'AI Project / Fullstack',
     featured: false,
   },
   {
@@ -127,6 +136,7 @@ export const PROJECTS: Project[] = [
       '/projects/system_library_mobile_app/Login Page (Student) - System Library (MAD).webp',
       '/projects/system_library_mobile_app/Register Page (Student) - System Library (MAD).webp'
     ],
+    repoUrl: 'https://github.com/adrielwalintukan/UNKLAB_Library_Mobile_Application',
     technologies: ['Mobile App', 'Backend', 'Database', 'UI/UX'],
     category: 'Mobile App',
     featured: false,
@@ -143,6 +153,7 @@ export const PROJECTS: Project[] = [
       '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Apoteker.webp',
       '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Kepala_Klinik.webp'
     ],
+    repoUrl: 'https://github.com/adrielwalintukan/InformationSystemKlinikSentosa_SAD',
     technologies: ['Fullstack', 'Backend', 'Database', 'Interactive Design'],
     category: 'Fullstack',
     featured: false,
@@ -170,6 +181,7 @@ export const PROJECTS: Project[] = [
       '/projects/web_portofolio_AI/Web_Portofolio_AI - Home.webp',
       '/projects/web_portofolio_AI/Web_Portofolio_AI - Chatbot.webp'
     ],
+    repoUrl: 'https://github.com/adrielwalintukan/web-portofolio-ai',
     technologies: ['AI Project', 'Web App', 'Frontend', 'Interactive Design'],
     category: 'AI Project',
     featured: false,
@@ -199,6 +211,7 @@ export const PROJECTS: Project[] = [
     images: [
       '/projects/carta_AI/Carta_AI.webp'
     ],
+    repoUrl: 'https://github.com/adrielwalintukan/cartaAI',
     technologies: ['AI Project', 'UI/UX', 'Interactive Design'],
     category: 'AI Project',
     featured: false,
@@ -235,6 +248,7 @@ export const PROJECTS: Project[] = [
     images: [
       '/projects/project_featured.webp'
     ],
+    repoUrl: 'https://github.com/adrielwalintukan/adriel_portofolio',
     technologies: ['Fullstack', 'Web App', 'UI/UX', 'Interactive Design'],
     category: 'Fullstack',
     featured: false,

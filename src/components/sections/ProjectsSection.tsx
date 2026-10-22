@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import {
   motion,
   AnimatePresence,
@@ -7,9 +7,11 @@ import {
   useTransform,
   type MotionValue,
 } from 'framer-motion'
-import { ArrowUpRight, Plus, Minus } from 'lucide-react'
+import { ArrowUpRight, Plus, Minus, Volume2, VolumeX } from 'lucide-react'
+import { FiGithub } from 'react-icons/fi'
 import { PROJECTS, SELECTED_PROJECT_IDS, type Project } from '@/lib/constants'
 import { ProjectGalleryModal } from '@/components/ui'
+import { useInView } from '@/hooks'
 import { cn } from '@/lib/utils'
 
 const SELECTED = SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === id)).filter(
@@ -35,6 +37,45 @@ const StackCard = memo(function StackCard({
   onSelect,
 }: StackCardProps) {
   const [portrait, setPortrait] = useState(false)
+  const reduceMotion = useReducedMotion()
+  const [videoRef, videoInView] = useInView<HTMLVideoElement>({ threshold: 0.3, triggerOnce: false })
+  const articleRef = useRef<HTMLElement>(null)
+  const [covered, setCovered] = useState(false)
+  // sticky cards stay "in view" under the next card, so also check whether the next one has slid over half of this
+  // (scroll events, not `progress`: that clamps at 1 before the last cards finish sliding in)
+  useEffect(() => {
+    const el = articleRef.current
+    const next = el?.nextElementSibling
+    if (!project.video || !el || !next) return
+    const check = () => {
+      const box = el.getBoundingClientRect()
+      setCovered(next.getBoundingClientRect().top < box.top + box.height / 2)
+    }
+    check()
+    window.addEventListener('scroll', check, { passive: true })
+    return () => window.removeEventListener('scroll', check)
+  }, [project.video])
+  // play only while on screen and uncovered; preload="none" means nothing downloads until then
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v || reduceMotion) return
+    if (videoInView && !covered) v.play().catch(() => {})
+    else v.pause()
+  }, [videoInView, covered, reduceMotion, videoRef])
+  const [muted, setMuted] = useState(true)
+  const toggleSound = () => {
+    const v = videoRef.current
+    if (!v) return
+    v.muted = !v.muted
+    if (!v.muted && v.paused) v.play().catch(() => {})
+    setMuted(v.muted)
+  }
+  // the gallery plays the same video with sound: silence the card so they don't overlap
+  const open = () => {
+    if (videoRef.current) videoRef.current.muted = true
+    setMuted(true)
+    onSelect(project)
+  }
   // Once later cards start sliding over this one, shrink it (deeper cards shrink more) and darken it
   const depth = SELECTED.length - 1 - index
   const start = index / SELECTED.length
@@ -43,6 +84,7 @@ const StackCard = memo(function StackCard({
 
   return (
     <motion.article
+      ref={articleRef}
       style={stacked ? { scale, top: `${96 + index * 20}px` } : undefined}
       className={cn(
         'relative grid origin-top overflow-hidden rounded-2xl bg-ink text-paper lg:grid-cols-[1fr_1.35fr]',
@@ -74,22 +116,51 @@ const StackCard = memo(function StackCard({
             </li>
           ))}
         </ul>
-        <button
-          onClick={() => onSelect(project)}
-          className="group mt-6 inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover lg:mt-auto"
-        >
-          View project
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-ink text-accent transition-transform group-hover:translate-x-1">
-            <ArrowUpRight className="h-4 w-4" />
-          </span>
-        </button>
+        <div className="mt-6 flex flex-wrap items-center gap-3 lg:mt-auto">
+          <button
+            onClick={open}
+            className="group inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover"
+          >
+            View project
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-ink text-accent transition-transform group-hover:translate-x-1">
+              <ArrowUpRight className="h-4 w-4" />
+            </span>
+          </button>
+          {project.repoUrl && (
+            <a
+              href={project.repoUrl}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`${project.title} source code on GitHub`}
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-border-hover px-4 font-display text-base font-extrabold uppercase tracking-wide text-paper transition-colors hover:border-paper"
+            >
+              <FiGithub className="h-4 w-4" />
+              Code
+            </a>
+          )}
+        </div>
       </div>
 
+      <div className={cn('relative overflow-hidden', project.video ? 'bg-black' : 'bg-surface', stacked ? 'min-h-40 lg:min-h-0' : 'h-64 sm:h-80 lg:h-auto')}>
       <button
-        onClick={() => onSelect(project)}
+        onClick={open}
         aria-label={`Open ${project.title} gallery`}
-        className={cn('group relative overflow-hidden bg-surface', stacked ? 'min-h-40 lg:min-h-0' : 'h-64 sm:h-80 lg:h-auto')}
+        className="group absolute inset-0"
       >
+        {project.video ? (
+          <video
+            ref={videoRef}
+            src={project.video}
+            poster={project.image}
+            muted
+            loop
+            playsInline
+            preload="none"
+            aria-hidden="true"
+            // whole 16:9 frame, letterboxed, so captions and UI in the clip aren't cut off
+            className="absolute inset-0 h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
+          />
+        ) : (
         <img
           src={project.image}
           alt=""
@@ -101,7 +172,19 @@ const StackCard = memo(function StackCard({
             portrait ? 'object-contain p-6' : 'object-cover object-top'
           )}
         />
+        )}
       </button>
+      {project.video && (
+        <button
+          onClick={toggleSound}
+          aria-label={muted ? 'Turn sound on' : 'Mute video'}
+          aria-pressed={!muted}
+          className="absolute bottom-4 left-4 flex h-10 w-10 items-center justify-center rounded-full border border-border-hover bg-ink/80 text-paper backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
+      )}
+      </div>
 
       {stacked && (
         <motion.div

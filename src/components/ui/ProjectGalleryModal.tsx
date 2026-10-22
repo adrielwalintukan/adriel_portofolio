@@ -1,6 +1,6 @@
 import { memo, useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
-import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
+import { FiX, FiChevronLeft, FiChevronRight, FiGithub } from 'react-icons/fi'
 import { type Project } from '@/lib/constants'
 import { TechBadge } from './TechBadge'
 
@@ -28,8 +28,10 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
     }
   }, [project])
 
-  const images = project?.images || []
+  // the promo video, when there is one, is the first slide
+  const images = project ? [...(project.video ? [project.video] : []), ...project.images] : []
   const totalImages = images.length
+  const isVideo = !!project?.video && currentIndex === 0
 
   const handleNext = useCallback(() => {
     if (totalImages <= 1) return
@@ -149,7 +151,8 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  drag={totalImages > 1 ? 'x' : false}
+                  // no swipe on the video: dragging would fight the seek bar
+                  drag={totalImages > 1 && !isVideo ? 'x' : false}
                   dragConstraints={{ left: 0, right: 0 }}
                   dragElastic={0.2}
                   onDragEnd={(_, info) => {
@@ -162,12 +165,30 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
                   }}
                   className="relative flex h-full w-full items-center justify-center cursor-grab active:cursor-grabbing"
                 >
+                  {isVideo ? (
+                    <video
+                      src={images[0]}
+                      poster={project.image}
+                      controls
+                      playsInline
+                      // try with sound; if the browser's autoplay policy refuses, start muted (unmute via controls)
+                      ref={(v) => {
+                        if (!v || !v.paused || v.currentTime > 0) return
+                        v.play().catch(() => {
+                          v.muted = true
+                          v.play().catch(() => {})
+                        })
+                      }}
+                      className="max-h-full max-w-full rounded-lg bg-black drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)]"
+                    />
+                  ) : (
                   <img
                     src={images[currentIndex]}
                     alt={`${project.title} screenshot ${currentIndex + 1}`}
                     loading="lazy"
                     className="max-h-full max-w-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] select-none rounded-lg"
                   />
+                  )}
                 </motion.div>
               </AnimatePresence>
             ) : (
@@ -212,6 +233,17 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
               {project.technologies.map((tech) => (
                 <TechBadge key={tech} name={tech} />
               ))}
+              {project.repoUrl && (
+                <a
+                  href={project.repoUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="ml-auto inline-flex items-center gap-2 rounded-lg border border-border-hover px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent sm:text-sm"
+                >
+                  <FiGithub className="h-4 w-4" />
+                  View code
+                </a>
+              )}
             </div>
 
             {/* Touch helper message for mobile viewports */}
