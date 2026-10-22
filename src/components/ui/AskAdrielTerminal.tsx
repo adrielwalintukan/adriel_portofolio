@@ -72,6 +72,27 @@ export default function AskAdrielTerminal({ onClose }: { onClose: () => void }) 
   useEffect(() => {
     inputRef.current?.focus()
   }, [])
+  // the page behind must not scroll while the terminal is open (matters most on phones, where it fills the screen)
+  useEffect(() => {
+    const els = [document.documentElement, document.body]
+    const prev = els.map((el) => el.style.overflow)
+    els.forEach((el) => (el.style.overflow = 'hidden'))
+    return () => els.forEach((el, i) => (el.style.overflow = prev[i]))
+  }, [])
+  // phones: the on-screen keyboard overlays fixed elements, so fit the panel to the visible area above it
+  const [view, setView] = useState<{ top: number; height: number } | null>(null)
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv || window.matchMedia('(min-width: 640px)').matches) return
+    const fit = () => setView({ top: vv.offsetTop, height: vv.height })
+    fit()
+    vv.addEventListener('resize', fit)
+    vv.addEventListener('scroll', fit)
+    return () => {
+      vv.removeEventListener('resize', fit)
+      vv.removeEventListener('scroll', fit)
+    }
+  }, [])
   useEffect(() => {
     scrollDown()
   }, [lines, busy, scrollDown])
@@ -119,6 +140,9 @@ export default function AskAdrielTerminal({ onClose }: { onClose: () => void }) 
       role="dialog"
       aria-label="Ask Adriel terminal"
       onKeyDown={onKeyDown}
+      data-lenis-prevent
+      // 80px clears the site header, 12px matches bottom-3
+      style={view ? { top: view.top + 80, height: Math.max(160, view.height - 92), bottom: 'auto' } : undefined}
       initial={{ opacity: 0, y: 24, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 24, scale: 0.98 }}
@@ -134,7 +158,7 @@ export default function AskAdrielTerminal({ onClose }: { onClose: () => void }) 
         </button>
       </div>
 
-      <div ref={logRef} data-lenis-prevent aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-4 leading-relaxed">
+      <div ref={logRef} aria-live="polite" className="flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4 leading-relaxed">
         {lines.map((l) => (
           <p
             key={l.id}

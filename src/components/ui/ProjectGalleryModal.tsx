@@ -140,7 +140,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
             </button>
           </div>
 
-          {/* Main Image Viewport with Slide & Swipe Support */}
+          {/* Main media viewport */}
           <div className="relative flex flex-1 items-center justify-center overflow-hidden bg-background/40 p-2 sm:p-4">
             {totalImages > 0 ? (
               <AnimatePresence initial={false} custom={direction} mode="wait">
@@ -151,19 +151,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
                   initial="enter"
                   animate="center"
                   exit="exit"
-                  // no swipe on the video: dragging would fight the seek bar
-                  drag={totalImages > 1 && !isVideo ? 'x' : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.2}
-                  onDragEnd={(_, info) => {
-                    const swipeThreshold = 50
-                    if (info.offset.x < -swipeThreshold) {
-                      handleNext()
-                    } else if (info.offset.x > swipeThreshold) {
-                      handlePrev()
-                    }
-                  }}
-                  className="relative flex h-full w-full items-center justify-center cursor-grab active:cursor-grabbing"
+                  className="relative flex h-full w-full items-center justify-center"
                 >
                   {isVideo ? (
                     <video
@@ -195,19 +183,19 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
               <div className="text-sm text-foreground-muted">No images available</div>
             )}
 
-            {/* Desktop Navigation Arrows Overlay */}
+            {/* Navigation arrows (all screen sizes) */}
             {totalImages > 1 && (
               <>
                 <button
                   onClick={handlePrev}
-                  className="absolute left-3 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-surface/70 p-3 text-foreground backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-accent/20 hover:text-accent hover:shadow-glow sm:flex"
+                  className="absolute left-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-surface/70 p-3 text-foreground backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-accent/20 hover:text-accent hover:shadow-glow"
                   aria-label="Previous Image"
                 >
                   <FiChevronLeft className="h-6 w-6" />
                 </button>
                 <button
                   onClick={handleNext}
-                  className="absolute right-3 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-surface/70 p-3 text-foreground backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-accent/20 hover:text-accent hover:shadow-glow sm:flex"
+                  className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center rounded-full border border-border/40 bg-surface/70 p-3 text-foreground backdrop-blur-md transition-all duration-300 hover:border-accent/50 hover:bg-accent/20 hover:text-accent hover:shadow-glow"
                   aria-label="Next Image"
                 >
                   <FiChevronRight className="h-6 w-6" />
@@ -246,12 +234,6 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
               )}
             </div>
 
-            {/* Touch helper message for mobile viewports */}
-            {totalImages > 1 && (
-              <div className="text-center text-[11px] text-foreground-muted sm:hidden pt-1">
-                Swipe horizontally to browse gallery
-              </div>
-            )}
           </div>
         </motion.div>
       </div>
