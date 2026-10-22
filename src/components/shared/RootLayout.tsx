@@ -1,6 +1,7 @@
 import { type ReactNode, memo } from 'react'
 import { Navbar } from '@/components/shared/Navbar'
 import { Footer } from '@/components/shared/Footer'
+import { AskAdriel } from '@/components/ui'
 import { useSmoothScroll } from '@/hooks'
 
 interface RootLayoutProps {
@@ -26,6 +27,7 @@ export const RootLayout = memo(function RootLayout({ children }: RootLayoutProps
         {children}
       </main>
       <Footer />
+      <AskAdriel />
     </div>
   )
 })
