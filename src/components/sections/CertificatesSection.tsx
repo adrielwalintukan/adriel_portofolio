@@ -1,12 +1,14 @@
 import { memo, useState, type MouseEvent } from 'react'
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, ChevronDown } from 'lucide-react'
 import { Section } from '@/components/shared'
 import { CertificateModal } from '@/components/ui'
 import { CERTIFICATES_DATA, type Certificate } from '@/lib/constants'
 import { useDeviceDetect } from '@/hooks'
+import { cn } from '@/lib/utils'
 
 const pad = (n: number) => String(n).padStart(2, '0')
+const PREVIEW = 7 // rows shown before "Show all"; the list is ordered best-known issuer first
 
 /**
  * Certificates — scannable table (issuer · title · date). On desktop the hovered row's
@@ -15,6 +17,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
 export const CertificatesSection = memo(function CertificatesSection() {
   const [selected, setSelected] = useState<Certificate | null>(null)
   const [hovered, setHovered] = useState<Certificate | null>(null)
+  const [expanded, setExpanded] = useState(false)
+  const shown = expanded ? CERTIFICATES_DATA : CERTIFICATES_DATA.slice(0, PREVIEW)
   const { isTouchDevice } = useDeviceDetect()
 
   const x = useMotionValue(0)
@@ -59,7 +63,7 @@ export const CertificatesSection = memo(function CertificatesSection() {
         </div>
 
         <ul>
-          {CERTIFICATES_DATA.map((cert) => (
+          {shown.map((cert) => (
             <li key={cert.id} className="border-b border-border last:border-b-0">
               <button
                 onClick={() => setSelected(cert)}
@@ -115,6 +119,19 @@ export const CertificatesSection = memo(function CertificatesSection() {
           </AnimatePresence>
         )}
       </div>
+
+      {CERTIFICATES_DATA.length > PREVIEW && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            className="group inline-flex h-12 items-center gap-2 rounded-full border border-border-hover px-6 font-mono text-xs uppercase tracking-widest text-foreground transition-colors hover:border-accent hover:text-accent"
+          >
+            {expanded ? 'Show less' : `Show all ${pad(CERTIFICATES_DATA.length)}`}
+            <ChevronDown className={cn('h-4 w-4 transition-transform', expanded && 'rotate-180')} />
+          </button>
+        </div>
+      )}
 
       <CertificateModal certificate={selected} onClose={() => setSelected(null)} />
     </Section>

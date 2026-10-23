@@ -18,7 +18,8 @@ const STATS = [
     note: 'Building web, mobile and AI projects since starting university.',
   },
   {
-    value: PROJECTS.length,
+    // shipped work only; in-development projects are listed but not counted
+    value: PROJECTS.filter((p) => !p.inDevelopment).length,
     suffix: '',
     label: 'Projects shipped',
     note: 'From AI assistants to clinic and library management systems.',

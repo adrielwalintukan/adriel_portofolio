@@ -152,6 +152,12 @@ const StackCard = memo(function StackCard({
           ))}
         </ul>
         <div className="mt-6 flex flex-wrap items-center gap-3 lg:mt-auto">
+          {project.inDevelopment ? (
+            <span className="inline-flex h-11 items-center gap-2 rounded-lg border border-dashed border-border-hover px-4 font-mono text-xs uppercase tracking-widest text-foreground-muted">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-accent" aria-hidden="true" />
+              In development
+            </span>
+          ) : (
           <button
             onClick={open}
             className="group inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover"
@@ -161,6 +167,7 @@ const StackCard = memo(function StackCard({
               <ArrowUpRight className="h-4 w-4" />
             </span>
           </button>
+          )}
           {project.repoUrl && (
             <a
               href={project.repoUrl}
@@ -177,6 +184,13 @@ const StackCard = memo(function StackCard({
       </div>
 
       <div className={cn('relative overflow-hidden', project.video ? 'bg-black' : 'bg-surface', stacked ? 'min-h-40 lg:min-h-0' : 'h-64 sm:h-80 lg:h-auto')}>
+      {project.inDevelopment ? (
+        // nothing to show or open yet: screenshots and video come once the project ships
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-accent">Preview coming soon</p>
+          <p className="max-w-xs text-sm text-foreground-muted">Screenshots and a video will be added when the first version ships.</p>
+        </div>
+      ) : (
       <button
         onClick={open}
         aria-label={`Open ${project.title} gallery`}
@@ -210,6 +224,7 @@ const StackCard = memo(function StackCard({
         />
         )}
       </button>
+      )}
       {project.video && (
         <button
           onClick={toggleSound}
@@ -301,7 +316,22 @@ export const ProjectsSection = memo(function ProjectsSection() {
                 transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 className="overflow-hidden"
               >
-                {OTHERS.map((project, i) => (
+                {OTHERS.map((project, i) =>
+                  project.inDevelopment ? (
+                    // no gallery yet, so the row isn't a button
+                    <li key={project.id} className="border-b border-paper-line">
+                      <div className="grid w-full grid-cols-[3rem_1fr_auto] items-center gap-4 py-5 text-left sm:grid-cols-[4rem_1fr_14rem_auto]">
+                        <span className="font-mono text-xs text-paper-fg-muted">{pad(SELECTED.length + i + 1)}</span>
+                        <span className="font-display text-2xl font-extrabold uppercase tracking-tight text-paper-fg-muted sm:text-3xl">
+                          {project.title}
+                        </span>
+                        <span className="hidden text-sm text-paper-fg-muted sm:block">{project.category}</span>
+                        <span className="rounded-full border border-dashed border-paper-line px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-paper-fg-muted">
+                          In development
+                        </span>
+                      </div>
+                    </li>
+                  ) : (
                   <li key={project.id} className="border-b border-paper-line">
                     <button
                       onClick={() => setSelectedProject(project)}
@@ -319,7 +349,8 @@ export const ProjectsSection = memo(function ProjectsSection() {
                       <ArrowUpRight className="h-5 w-5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                     </button>
                   </li>
-                ))}
+                  )
+                )}
               </motion.ul>
             )}
           </AnimatePresence>

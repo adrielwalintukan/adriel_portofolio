@@ -20,7 +20,7 @@ const COMMANDS: Record<string, () => string> = {
   projects: () =>
     SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === id))
       .filter((p) => !!p)
-      .map((p, i) => `  0${i + 1}  ${p.title}  [${p.category}]`)
+      .map((p, i) => `  0${i + 1}  ${p.title}  [${p.category}]${p.inDevelopment ? '  (in development)' : ''}`)
       .join('\n') + '\n  More with screenshots: scroll to Selected Work.',
   skills: () => SKILLS_DATA.map((g) => `  ${g.category}: ${g.skills.map((s) => s.name).join(', ')}`).join('\n'),
   contact: () =>
