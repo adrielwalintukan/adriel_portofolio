@@ -20,6 +20,8 @@ const SELECTED = SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === 
 const OTHERS = PROJECTS.filter((p) => !SELECTED_PROJECT_IDS.includes(p.id))
 const pad = (n: number) => String(n).padStart(2, '0')
 const SOUND_EVENT = 'project-video-sound'
+// the visitor's sound choice, shared by every card: on by default, the mute button turns it off everywhere
+let soundWanted = true
 
 interface StackCardProps {
   project: Project
@@ -56,21 +58,40 @@ const StackCard = memo(function StackCard({
     window.addEventListener('scroll', check, { passive: true })
     return () => window.removeEventListener('scroll', check)
   }, [project.video])
-  // play only while on screen and uncovered; preload="none" means nothing downloads until then
+  // play only while on screen and uncovered, with sound unless the visitor muted; preload="none" means nothing downloads until then
   useEffect(() => {
     const v = videoRef.current
     if (!v || reduceMotion) return
-    if (videoInView && !covered) v.play().catch(() => {})
-    else v.pause()
-  }, [videoInView, covered, reduceMotion, videoRef])
+    if (!videoInView || covered) return v.pause()
+    v.muted = !soundWanted
+    if (!v.muted) window.dispatchEvent(new CustomEvent(SOUND_EVENT, { detail: project.id }))
+    const gesture = new AbortController()
+    v.play().catch(() => {
+      // browsers block autoplay with sound until the visitor clicks, taps or types on the page (scrolling doesn't count):
+      // start muted, then turn the sound on at that first gesture
+      v.muted = true
+      v.play().catch(() => {})
+      const unlock = (e: Event) => {
+        // a press on the sound button is handled by its own click
+        if ((e.target as Element | null)?.closest?.('[data-sound-toggle]')) return
+        gesture.abort()
+        if (!soundWanted || v.paused) return
+        v.muted = false
+        window.dispatchEvent(new CustomEvent(SOUND_EVENT, { detail: project.id }))
+      }
+      window.addEventListener('pointerdown', unlock, { signal: gesture.signal })
+      window.addEventListener('keydown', unlock, { signal: gesture.signal })
+    })
+    return () => gesture.abort()
+  }, [videoInView, covered, reduceMotion, videoRef, project.id])
+  // icon follows the element, whoever changed it
   const [muted, setMuted] = useState(true)
-  // only one card plays sound: turning it on here mutes every other card
+  // only one card plays sound: sound starting here mutes every other card
   useEffect(() => {
     if (!project.video) return
     const onOther = (e: Event) => {
       if ((e as CustomEvent<string>).detail === project.id || !videoRef.current) return
       videoRef.current.muted = true
-      setMuted(true)
     }
     window.addEventListener(SOUND_EVENT, onOther)
     return () => window.removeEventListener(SOUND_EVENT, onOther)
@@ -78,17 +99,16 @@ const StackCard = memo(function StackCard({
   const toggleSound = () => {
     const v = videoRef.current
     if (!v) return
-    v.muted = !v.muted
-    if (!v.muted) {
+    soundWanted = v.muted
+    v.muted = !soundWanted
+    if (soundWanted) {
       window.dispatchEvent(new CustomEvent(SOUND_EVENT, { detail: project.id }))
       if (v.paused) v.play().catch(() => {})
     }
-    setMuted(v.muted)
   }
   // the gallery plays the same video with sound: silence the card so they don't overlap
   const open = () => {
     if (videoRef.current) videoRef.current.muted = true
-    setMuted(true)
     onSelect(project)
   }
   // Once later cards start sliding over this one, shrink it (deeper cards shrink more) and darken it
@@ -171,6 +191,7 @@ const StackCard = memo(function StackCard({
             loop
             playsInline
             preload="none"
+            onVolumeChange={(e) => setMuted(e.currentTarget.muted)}
             aria-hidden="true"
             // whole 16:9 frame, letterboxed, so captions and UI in the clip aren't cut off
             className="absolute inset-0 h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.03]"
@@ -192,6 +213,7 @@ const StackCard = memo(function StackCard({
       {project.video && (
         <button
           onClick={toggleSound}
+          data-sound-toggle
           aria-label={muted ? 'Turn sound on' : 'Mute video'}
           aria-pressed={!muted}
           className="absolute bottom-4 left-4 flex h-10 w-10 items-center justify-center rounded-full border border-border-hover bg-ink/80 text-paper backdrop-blur-sm transition-colors hover:border-accent hover:text-accent"
