@@ -144,8 +144,10 @@ export const PROJECTS: Project[] = [
   {
     id: 'system_management_klinik_sentosa',
     title: 'Klinik Sentosa Management System',
-    description: 'An integrated healthcare facility management system providing customized workflows for administrators, doctors, and pharmacists.',
-    image: '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.webp',
+    description: 'Web-based clinic system that runs one patient flow across four roles: registration, live queue, doctor exam and prescription, pharmacy and billing.',
+    longDescription: 'Replaces paper and scattered records at a clinic with one shared flow. Admins register patients with auto-generated medical record numbers, manage doctor schedules and track the live queue (waiting, examined, pharmacy, paying, done). Doctors record complaints and diagnoses and write digital prescriptions linked to pharmacy stock; pharmacists verify and prepare them and get low-stock alerts; billing totals doctor fees and medicine automatically. The clinic head sees revenue and visit reports, staff and doctor performance. Built as a team project with a React front end and a FastAPI back end.',
+    image: '/projects/system_management_klinik_sentosa/Klinik_Sentosa - Poster.webp',
+    video: '/projects/system_management_klinik_sentosa/klinik-sentosa-promo.mp4',
     images: [
       '/projects/system_management_klinik_sentosa/Sistem_Klinik-Login.webp',
       '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Admin.webp',
@@ -154,8 +156,8 @@ export const PROJECTS: Project[] = [
       '/projects/system_management_klinik_sentosa/Sistem_Klinik-Dash_Kepala_Klinik.webp'
     ],
     repoUrl: 'https://github.com/adrielwalintukan/InformationSystemKlinikSentosa_SAD',
-    technologies: ['Fullstack', 'Backend', 'Database', 'Interactive Design'],
-    category: 'Fullstack',
+    technologies: ['React', 'Vite', 'Tailwind CSS', 'Zustand', 'FastAPI', 'SQLite'],
+    category: 'Fullstack / Web App',
     featured: false,
   },
   {
