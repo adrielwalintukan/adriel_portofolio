@@ -2,8 +2,8 @@ export const NAV_LINKS = [
   { label: 'Home', href: '#hero' },
   { label: 'About', href: '#about' },
   { label: 'Projects', href: '#projects' },
-  { label: 'Skills', href: '#skills' },
   { label: 'Experience', href: '#experience' },
+  { label: 'Skills', href: '#skills' },
   { label: 'Certificates', href: '#certificates' },
   { label: 'Contact', href: '#contact' },
 ] as const
@@ -21,7 +21,8 @@ export interface Project {
   title: string
   description: string
   longDescription?: string
-  image: string
+  /** cover image; optional only for in-development projects */
+  image?: string
   images: string[]
   technologies: string[]
   category: string
@@ -29,6 +30,8 @@ export interface Project {
   /** muted looping clip shown in the featured card instead of the cover image */
   video?: string
   repoUrl?: string
+  /** listed with a "coming soon" placeholder: no media, not clickable, not counted */
+  inDevelopment?: boolean
 }
 
 export const PROJECTS: Project[] = [
@@ -84,6 +87,45 @@ export const PROJECTS: Project[] = [
     featured: false,
   },
   {
+    id: 'rinegetan_connect',
+    title: 'Rinegetan Connect',
+    description: 'Information and ministry platform for the GMAHK Rinegetan church, with public Bible-study courses that admins and editors publish.',
+    images: [],
+    repoUrl: 'https://github.com/adrielwalintukan/Rinegetan-Connect',
+    technologies: ['Next.js', 'TypeScript', 'Supabase', 'Tailwind CSS', 'Framer Motion'],
+    category: 'Web App',
+    inDevelopment: true,
+  },
+  {
+    id: 'rumah_makan_sipil',
+    title: 'Rumah Makan Sipil',
+    description: "Mobile-first food ordering for a local restaurant: scan the QR, order from your phone, pay by QRIS or cash, and orders reach the seller's dashboard in real time.",
+    images: [],
+    repoUrl: 'https://github.com/adrielwalintukan/Rumah-Makan-Sipil',
+    technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'shadcn/ui', 'Supabase'],
+    category: 'Web App',
+    inDevelopment: true,
+  },
+  {
+    id: 'kostfinder_unklab',
+    title: 'KostFinder UNKLAB',
+    description: 'Directory of university-approved boarding houses near UNKLAB: search and filter, compare photos and facilities, estimate the rent, then book with the owner over WhatsApp.',
+    longDescription: "Built for UNKLAB students looking for a room in Airmadidi. Search by name or area, filter by men's or women's housing and price range, and sort the results; filters live in the URL, so a search can be shared. Each listing has a swipeable photo gallery, facilities and its location. The rent calculator totals monthly rent plus utilities over the stay, and the booking form validates the details and sends a ready-made request to the owner on WhatsApp. Mobile-first with a bottom tab bar, and tidy on desktop. Final project for Web Design, built as a team.",
+    image: '/projects/kostfinder_unklab/KostFinder - Poster.webp',
+    video: '/projects/kostfinder_unklab/kostfinder-promo.mp4',
+    images: [
+      '/projects/kostfinder_unklab/KostFinder - Beranda.webp',
+      '/projects/kostfinder_unklab/KostFinder - Detail Kost.webp',
+      '/projects/kostfinder_unklab/KostFinder - Booking.webp',
+      '/projects/kostfinder_unklab/KostFinder - Kalkulator Sewa.webp',
+      '/projects/kostfinder_unklab/KostFinder - Desktop.webp'
+    ],
+    repoUrl: 'https://github.com/adrielwalintukan/project-web-design',
+    technologies: ['React', 'Vite', 'Tailwind CSS', 'React Router', 'View Transitions API'],
+    category: 'Web App / UI/UX',
+    featured: false,
+  },
+  {
     id: 'car_rental_website',
     title: 'Modern Car Rental Platform',
     description: 'A modern vehicle rental website with responsive booking-oriented user interface design.',
@@ -97,22 +139,6 @@ export const PROJECTS: Project[] = [
     ],
     technologies: ['Web App', 'UI/UX', 'Frontend', 'Interactive Design'],
     category: 'Web App',
-    featured: false,
-  },
-  {
-    id: 'kostfinder_unklab',
-    title: 'KostFinder UNKLAB',
-    description: 'A modern boarding house search and booking application tailored for university students with integrated price calculators.',
-    image: '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.webp',
-    images: [
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Home.webp',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Rekom_Kost.webp',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Detail_Kost.webp',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Booking_Kost.webp',
-      '/projects/kostfinder_unklab/KostFinder_UNKLAB - Kalkulator_Sewa.webp'
-    ],
-    technologies: ['Fullstack', 'Web App', 'Database', 'UI/UX'],
-    category: 'Fullstack / UI/UX',
     featured: false,
   },
   {
@@ -222,7 +248,7 @@ export const PROJECTS: Project[] = [
 export const SELECTED_PROJECT_IDS = [
   'dailyboost_AI',
   'AI_interview',
-  'kostfinder_unklab',
+  'rinegetan_connect',
   'carta_AI',
   'system_management_klinik_sentosa',
 ]
@@ -230,12 +256,6 @@ export const SELECTED_PROJECT_IDS = [
 // Other headline numbers (projects, technologies, certificates) are counted from the data below
 export const YEARS_EXPERIENCE = 2
 
-export const WORK_PROCESS = [
-  { title: 'Discover', description: 'I dig into the problem, the users and the goal before writing a single line of code.' },
-  { title: 'Design', description: 'I plan the architecture, data model and interface so the build has a clear direction.' },
-  { title: 'Build', description: 'I write clean, typed code, integrate AI where it adds real value, and test as I go.' },
-  { title: 'Ship', description: 'I deploy, gather feedback and iterate until it works well for real users.' },
-]
 
 export const CORE_STRENGTHS = [
   'AI Integration',
@@ -253,6 +273,8 @@ export interface TimelineItem {
   description: string
   category: string
   technologies?: string[]
+  /** organisation logo shown beside the title */
+  logo?: string
 }
 
 export const EXPERIENCE_TIMELINE: TimelineItem[] = [
@@ -261,6 +283,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     year: 'Jun 2026 — Present',
     title: 'System Development Intern',
     role: 'LLDIKTI Wilayah XVI (Remote)',
+    logo: '/logo-experience/lldikti16.webp',
     description: 'Developing and engineering enterprise information systems utilizing Laravel, Blade, Vite, and PostgreSQL architectures.',
     category: 'Experience',
     technologies: ['Laravel', 'Blade', 'Vite', 'PostgreSQL'],
@@ -270,6 +293,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     year: 'Aug 2024 — Aug 2025',
     title: 'Web Developer',
     role: 'UVICS (Unklab Virtue in Computer Science)',
+    logo: '/logo-experience/uvics.webp',
     description: 'Developed and maintained modern web applications, focusing on clean architecture, performance, and responsive user interfaces.',
     category: 'Experience',
     technologies: ['React', 'Next.js', 'Tailwind CSS'],
@@ -279,6 +303,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     year: '2023 — 2027',
     title: 'Information System',
     role: 'Klabat University',
+    logo: '/logo-experience/unklab.webp',
     description: 'Pursuing a degree in Information Systems, building a strong foundation in software engineering, algorithms, and systems architecture.',
     category: 'Education',
   },
@@ -287,6 +312,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     year: '2026',
     title: 'Division Sports',
     role: 'BEM Unklab 2026',
+    logo: '/logo-experience/bem-unklab.webp',
     description: 'Active committee member in the Student Executive Board, organizing and managing faculty sports programs and events.',
     category: 'Organization',
   },
@@ -295,6 +321,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     year: 'Present',
     title: 'Member',
     role: 'UVICS & VOCS Choir',
+    logo: '/logo-experience/vocs.webp',
     description: 'Active participant in Unklab Virtue in Computer Science and the Voice of Computer Science (VOCS Choir).',
     category: 'Organization',
   },
@@ -382,6 +409,24 @@ export const SKILLS_DATA: SkillCategory[] = [
 
 export const CERTIFICATES_DATA: Certificate[] = [
   {
+    "id": "cert-anthropic-ai-fluency",
+    "title": "AI Fluency: Framework & Foundations",
+    "issuer": "Anthropic",
+    "year": "2026",
+    "date": "2026",
+    "category": "Artificial Intelligence",
+    "pdf": "/certificates/Anthropic/Anthropic - Al Fluency Framework & Foundations.pdf",
+    "pdf_rel": "Anthropic\\Anthropic - Al Fluency Framework & Foundations.pdf",
+    "skills": [
+      "AI Fluency",
+      "Human-AI Collaboration",
+      "Responsible AI"
+    ],
+    "description": "Anthropic's course on working with AI effectively, efficiently, ethically and safely, built with University College Cork and Ringling College.",
+    "image": "/certificates/_thumbnails/cert-anthropic-ai-fluency.webp",
+    "link": "/certificates/Anthropic/Anthropic - Al Fluency Framework & Foundations.pdf"
+  },
+  {
     "id": "cert-cisco-cybersecurity",
     "title": "Introduction to Cybersecurity",
     "issuer": "Cisco Networking Academy",
@@ -437,23 +482,60 @@ export const CERTIFICATES_DATA: Certificate[] = [
     "link": "/certificates/Generative AI - IBM/Completion Certificate _ SkillsBuild.pdf"
   },
   {
-    "id": "cert-simplilearn-frontend",
-    "title": "Introduction to Front End Development",
-    "issuer": "Simplilearn SkillUp",
+    "id": "cert-dicoding-aws-cloud-genai",
+    "title": "Cloud Computing & Generative AI Basics on AWS",
+    "issuer": "Dicoding × AWS",
+    "year": "2026",
+    "date": "Oct 2026",
+    "category": "Cloud Computing",
+    "pdf": "/certificates/Dicoding/Cloud Computing & Generative AI Basics on AWS.pdf",
+    "pdf_rel": "Dicoding\\Cloud Computing & Generative AI Basics on AWS.pdf",
+    "skills": [
+      "AWS Cloud",
+      "EC2 & S3",
+      "IAM & Security",
+      "Generative AI"
+    ],
+    "description": "Competency certificate (valid until 2029) covering AWS compute, global infrastructure, networking, storage, security, pricing and AWS AI services, aligned with the Cloud Practitioner exam.",
+    "image": "/certificates/_thumbnails/cert-dicoding-aws-cloud-genai.webp",
+    "link": "/certificates/Dicoding/Cloud Computing & Generative AI Basics on AWS.pdf"
+  },
+  {
+    "id": "cert-dicoding-kiro-sdd",
+    "title": "Spec-Driven Development with Kiro",
+    "issuer": "Dicoding × AWS",
+    "year": "2026",
+    "date": "Oct 2026",
+    "category": "Software Engineering",
+    "pdf": "/certificates/Dicoding/Spec-Driven Development dengan Kiro.pdf",
+    "pdf_rel": "Dicoding\\Spec-Driven Development dengan Kiro.pdf",
+    "skills": [
+      "Spec-Driven Development",
+      "Kiro",
+      "AI-Assisted Coding",
+      "Code Quality"
+    ],
+    "description": "Competency certificate (valid until 2029) on building complete, documented features with Kiro, moving from requirements to design to implementation tasks.",
+    "image": "/certificates/_thumbnails/cert-dicoding-kiro-sdd.webp",
+    "link": "/certificates/Dicoding/Spec-Driven Development dengan Kiro.pdf"
+  },
+  {
+    "id": "cert-cpent-ai",
+    "title": "The Future of Penetration Testing with CPENT AI",
+    "issuer": "EC-Council / Cybersecurity Seminar",
     "year": "2025",
     "date": "2025",
-    "category": "Web Development",
-    "pdf": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf",
-    "pdf_rel": "Simplilearn\\Introduction to Front End Development\\Introduction to Front End Development.pdf",
+    "category": "Cybersecurity",
+    "pdf": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf",
+    "pdf_rel": "The Future of Penetration Testing with CPENT AI\\The Future of Penetration Testing with CPENT AI.pdf",
     "skills": [
-      "HTML5",
-      "CSS3",
-      "JavaScript",
-      "Responsive Design"
+      "AI in Pentesting",
+      "CPENT",
+      "Threat Modeling"
     ],
-    "description": "Foundational masterclass in modern frontend architecture, interactive layouts, and user experience engineering.",
-    "image": "/certificates/_thumbnails/cert-simplilearn-frontend.webp",
-    "link": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf"
+    "description": "Specialized seminar exploring AI-driven penetration testing, automated vulnerability assessments, and modern exploit analysis.",
+    "image": "/certificates/_thumbnails/cert-cpent-ai.webp",
+    "link": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf"
   },
   {
     "id": "cert-simplilearn-cissp",
@@ -492,6 +574,25 @@ export const CERTIFICATES_DATA: Certificate[] = [
     "link": "/certificates/Simplilearn/Introduction to Cyber Security/Introduction to Cyber Security.pdf"
   },
   {
+    "id": "cert-simplilearn-frontend",
+    "title": "Introduction to Front End Development",
+    "issuer": "Simplilearn SkillUp",
+    "year": "2025",
+    "date": "2025",
+    "category": "Web Development",
+    "pdf": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf",
+    "pdf_rel": "Simplilearn\\Introduction to Front End Development\\Introduction to Front End Development.pdf",
+    "skills": [
+      "HTML5",
+      "CSS3",
+      "JavaScript",
+      "Responsive Design"
+    ],
+    "description": "Foundational masterclass in modern frontend architecture, interactive layouts, and user experience engineering.",
+    "image": "/certificates/_thumbnails/cert-simplilearn-frontend.webp",
+    "link": "/certificates/Simplilearn/Introduction to Front End Development/Introduction to Front End Development.pdf"
+  },
+  {
     "id": "cert-uvics-webdev",
     "title": "Web Development Specialist",
     "issuer": "UVICS (UNKLAB Virtue in Computer Science)",
@@ -511,27 +612,9 @@ export const CERTIFICATES_DATA: Certificate[] = [
     "link": "/certificates/Web Dev - UVICS/Sertifikat-UVICS-WebDev.pdf"
   },
   {
-    "id": "cert-proxo-mobile-app",
-    "title": "Proxo Coris 2026 — Mobile App Development",
-    "issuer": "Proxo Coris National Competition",
-    "year": "2026",
-    "date": "May 2026",
-    "category": "Competition / Award",
-    "pdf": "/certificates/Mobile App Dev - Proxo/PARTICIPANT_MOBILE APP (Adriel).pdf",
-    "pdf_rel": "Mobile App Dev - Proxo\\PARTICIPANT_MOBILE APP (Adriel).pdf",
-    "skills": [
-      "React Native",
-      "Mobile Innovation",
-      "National Contest"
-    ],
-    "description": "Certificate of participation & achievement in the national Proxo Coris 2026 Mobile Application Development competition.",
-    "image": "/certificates/_thumbnails/cert-proxo-mobile-app.webp",
-    "link": "/certificates/Mobile App Dev - Proxo/PARTICIPANT_MOBILE APP (Adriel).pdf"
-  },
-  {
     "id": "cert-proxo-appreciation",
-    "title": "Certificate of Appreciation — Proxo Coris",
-    "issuer": "Proxo Coris Committee",
+    "title": "Proxo Coris 2026 — Mobile App Development",
+    "issuer": "PROXO X Coris International Competition",
     "year": "2026",
     "date": "2026",
     "category": "Competition / Award",
@@ -544,42 +627,6 @@ export const CERTIFICATES_DATA: Certificate[] = [
     "description": "Certificate of appreciation awarded for dedicated participation and technical excellence.",
     "image": "/certificates/_thumbnails/cert-proxo-appreciation.webp",
     "link": "/certificates/Mobile App Dev - Proxo/Certificate of Appreciation_JAT.pdf"
-  },
-  {
-    "id": "cert-proxo-shortmovie",
-    "title": "Short Movie Production — Proxo Coris",
-    "issuer": "Proxo Coris Competition",
-    "year": "2026",
-    "date": "2026",
-    "category": "Creative & Media",
-    "pdf": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf",
-    "pdf_rel": "Short Movie - Proxo\\Sertifikat-ShortMovie.pdf",
-    "skills": [
-      "Creative Direction",
-      "Storytelling",
-      "Digital Media"
-    ],
-    "description": "Recognition for multimedia production and creative storytelling competition.",
-    "image": "/certificates/_thumbnails/cert-proxo-shortmovie.webp",
-    "link": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf"
-  },
-  {
-    "id": "cert-cfds-ugm",
-    "title": "Diffusion #127 — Digital Society & Labor Tech",
-    "issuer": "Center for Digital Society (CfDS) UGM & Oxford",
-    "year": "2025",
-    "date": "Sep 2025",
-    "category": "Technology & Society",
-    "pdf": "/certificates/Center for Digital Society/Sertifikat Difussion 127 (124).pdf",
-    "pdf_rel": "Center for Digital Society\\Sertifikat Difussion 127 (124).pdf",
-    "skills": [
-      "Digital Ethics",
-      "Data Governance",
-      "Worker Info Exchange"
-    ],
-    "description": "International seminar organized by CfDS UGM in collaboration with University of Oxford on digital society and data rights.",
-    "image": "/certificates/_thumbnails/cert-cfds-ugm.webp",
-    "link": "/certificates/Center for Digital Society/Sertifikat Difussion 127 (124).pdf"
   },
   {
     "id": "cert-iris-robotics",
@@ -600,22 +647,24 @@ export const CERTIFICATES_DATA: Certificate[] = [
     "link": "/certificates/IRIS/Sertifikat-IRIS.pdf"
   },
   {
-    "id": "cert-cpent-ai",
-    "title": "The Future of Penetration Testing with CPENT AI",
-    "issuer": "EC-Council / Cybersecurity Seminar",
-    "year": "2025",
-    "date": "2025",
-    "category": "Cybersecurity",
-    "pdf": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf",
-    "pdf_rel": "The Future of Penetration Testing with CPENT AI\\The Future of Penetration Testing with CPENT AI.pdf",
+    "id": "cert-proxo-shortmovie",
+    "title": "Short Movie Production — Proxo Coris",
+    "issuer": "PROXO X Coris International Competition",
+    "year": "2026",
+    "date": "2026",
+    "category": "Creative & Media",
+    "pdf": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf",
+    "pdf_rel": "Short Movie - Proxo\\Sertifikat-ShortMovie.pdf",
     "skills": [
-      "AI in Pentesting",
-      "CPENT",
-      "Threat Modeling"
+      "Creative Direction",
+      "Storytelling",
+      "Digital Media"
     ],
-    "description": "Specialized seminar exploring AI-driven penetration testing, automated vulnerability assessments, and modern exploit analysis.",
-    "image": "/certificates/_thumbnails/cert-cpent-ai.webp",
-    "link": "/certificates/The Future of Penetration Testing with CPENT AI/The Future of Penetration Testing with CPENT AI.pdf"
+    "description": "Recognition for multimedia production and creative storytelling competition.",
+    "image": "/certificates/_thumbnails/cert-proxo-shortmovie.webp",
+    "link": "/certificates/Short Movie - Proxo/Sertifikat-ShortMovie.pdf"
   }
 ]
+
+
 

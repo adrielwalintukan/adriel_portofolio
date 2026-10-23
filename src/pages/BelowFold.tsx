@@ -1,10 +1,10 @@
 import {
   AboutSection,
   ProjectsSection,
-  SkillsSection,
-  HowIWorkSection,
-  NumbersSection,
   ExperienceSection,
+  SkillsSection,
+  GitHubActivitySection,
+  NumbersSection,
   CertificatesSection,
   ContactSection,
 } from '@/components/sections'
@@ -15,10 +15,10 @@ export default function BelowFold() {
     <>
       <AboutSection />
       <ProjectsSection />
-      <SkillsSection />
-      <HowIWorkSection />
-      <NumbersSection />
       <ExperienceSection />
+      <SkillsSection />
+      <GitHubActivitySection />
+      <NumbersSection />
       <CertificatesSection />
       <ContactSection />
     </>

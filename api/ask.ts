@@ -10,7 +10,8 @@ import {
 } from '../src/lib/constants.js' // .js: Vercel runs this as plain Node ESM, which needs the extension
 
 // alias that follows Google's current Flash model, so a model retirement doesn't break the terminal
-const MODEL = process.env.GEMINI_MODEL || 'gemini-flash-latest'
+// Flash-Lite answers in ~2-5s; full Flash (incl. 3.8) kept returning 503 only after 30s+ of waiting
+const MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite'
 const FALLBACK_MODEL = 'gemini-flash-lite-latest'
 const MAX_QUESTION = 500
 const MAX_HISTORY = 6
@@ -34,7 +35,7 @@ Skills:
 ${SKILLS_DATA.map((g) => `- ${g.category}: ${g.skills.map((s) => s.name).join(', ')}`).join('\n')}
 
 Projects:
-${PROJECTS.map((p) => `- ${p.title} [${p.category}]: ${p.description}`).join('\n')}
+${PROJECTS.map((p) => `- ${p.title}${p.inDevelopment ? ' (in development, not released yet)' : ''} [${p.category}]: ${p.description}`).join('\n')}
 
 Certificates:
 ${CERTIFICATES_DATA.map((c) => `- ${c.title}, ${c.issuer} (${c.date ?? c.year})`).join('\n')}
@@ -98,17 +99,18 @@ export async function POST(request: Request): Promise<Response> {
     generationConfig: {
       temperature: 0.4,
       maxOutputTokens: 400,
-      // Flash: skip thinking for speed. Flash-Lite rejects thinkingBudget 0 (400) and thinks minimally anyway
-      ...(model === FALLBACK_MODEL ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
+      // full Flash: skip thinking for speed. Flash-Lite rejects thinkingBudget 0 (400) and thinks minimally anyway
+      ...(model.includes('lite') ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
     },
   })
-  // Flash is sometimes overloaded (503/429); the lighter model usually still has capacity
+  // a model can be overloaded (503/429) or just hang; give each 12s, then try the other one
   let res: Response | null = null
   for (const model of [MODEL, FALLBACK_MODEL]) {
     res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: payload(model),
+      signal: AbortSignal.timeout(12_000),
     }).catch(() => null)
     if (res && res.status !== 503 && res.status !== 429) break
   }
