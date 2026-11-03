@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Resume - Adriel Walintukan</title>
+<!-- source of public/Resume_Adriel_Walintukan.pdf: print with Chrome headless, --no-pdf-header-footer -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 9mm 12mm 8mm; }
+  :root { --ink: #111827; --muted: #4b5563; --soft: #6b7280; --accent: #0f2a4a; --teal: #0e7c7b; --rule: #d1d5db; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); font-size: 8.4pt; line-height: 1.33; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  a { color: inherit; text-decoration: none; }
+  b { font-weight: 600; }
+
+  header { display: flex; gap: 14px; align-items: center; padding-bottom: 8px; border-bottom: 2px solid var(--accent); }
+  header img { width: 66px; height: 66px; border-radius: 50%; object-fit: cover; flex: none; }
+  h1 { font-size: 19pt; font-weight: 800; letter-spacing: -0.02em; color: var(--accent); line-height: 1.1; }
+  .headline { font-size: 9.6pt; font-weight: 600; color: var(--teal); margin-top: 1px; }
+  .contact { margin-top: 4px; color: var(--muted); font-size: 8.2pt; display: flex; flex-wrap: wrap; row-gap: 0; }
+  .contact > :not(.break):not(:last-child):not(:has(+ .break))::after { content: "\00b7"; margin: 0 7px; color: var(--soft); }
+  .contact .break { flex-basis: 100%; height: 0; }
+
+  section { margin-top: 7px; }
+  h2 { font-size: 8.8pt; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); padding-bottom: 2px; border-bottom: 1px solid var(--rule); margin-bottom: 5px; }
+
+  .item { margin-bottom: 6px; break-inside: avoid; }
+  .item:last-child { margin-bottom: 0; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .title { font-weight: 700; font-size: 9pt; }
+  .org { font-weight: 600; color: var(--teal); }
+  .date { color: var(--soft); font-size: 8pt; white-space: nowrap; font-weight: 500; }
+  .sub { color: var(--muted); }
+  .stack { color: var(--soft); font-size: 7.9pt; }
+  .stack b { color: var(--muted); }
+  ul { margin-top: 2px; padding-left: 12px; }
+  li { margin-bottom: 0; padding-left: 1px; }
+  li::marker { color: var(--teal); }
+
+  .skills { display: grid; grid-template-columns: 104px 1fr; row-gap: 1px; column-gap: 8px; }
+  .skills dt { font-weight: 600; }
+
+  .award { border-left: 3px solid var(--teal); background: #f0f7f7; padding: 4px 9px; margin-bottom: 5px; }
+  .certs { display: grid; grid-template-columns: 1fr 1fr; column-gap: 18px; }
+  .certs div { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; border-bottom: 1px dotted var(--rule); }
+  .certs span { color: var(--soft); white-space: nowrap; }
+  .two { display: grid; grid-template-columns: 1.25fr 1fr; column-gap: 18px; }
+  .plain { list-style: none; padding-left: 0; margin-top: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="photo.jpg" alt="Adriel Walintukan">
+  <div>
+    <h1>Adriel Walintukan</h1>
+    <div class="headline">Information Systems Student &middot; AI Integration &middot; Full-Stack Web &amp; Mobile Developer</div>
+    <div class="contact">
+      <a href="mailto:adrielwalintukan27@gmail.com">adrielwalintukan27@gmail.com</a>
+      <a href="https://wa.me/628981548999">+62 898-1548-999</a>
+      <span>North Minahasa, North Sulawesi, Indonesia</span>
+      <span class="break"></span>
+      <a href="https://adrielwalintukan.my.id">adrielwalintukan.my.id</a>
+      <a href="https://www.linkedin.com/in/adriel-walintukan-383032332/">linkedin.com/in/adriel-walintukan-383032332</a>
+      <a href="https://github.com/adrielwalintukan">github.com/adrielwalintukan</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <h2>Profile</h2>
+  <p>
+    Information Systems student at Universitas Klabat (GPA 3.96/4.00) and full-stack developer intern at LLDIKTI Wilayah XVI, building the
+    agency's personnel (SIMPEG) and performance accountability (SAKIP) systems with Laravel, React and PostgreSQL while acting as the team's
+    code reviewer and merge gate. I also build AI-powered web and mobile apps with Google Gemini; my team won <b>Best Technical Excellence</b>
+    (Mobile Application) at the Proxocoris International Competition 2026.
+  </p>
+</section>
+
+<section>
+  <h2>Experience</h2>
+
+  <div class="item">
+    <div class="row">
+      <div class="title">Full-Stack Developer (Internship) <span class="org">&middot; LLDIKTI Wilayah XVI</span></div>
+      <div class="date">Jun 2026 &ndash; Present &middot; Gorontalo, Remote</div>
+    </div>
+    <ul>
+      <li>Designed and developed two institutional web applications for civil-service administration (SIMPEG) and performance accountability (SAKIP), moving from frontend developer and code reviewer to full-stack.</li>
+      <li>Served as SIMPEG's merge gate: <b>reviewed 80 pull requests and merged 81 of 180</b> (the most on the team), alongside 186 commits of my own.</li>
+      <li>SIMPEG: built the reusable Blade component library and the Head of Division dashboard, hardened the batch employee import and session security, and built a fail-closed WhatsApp Business notification dispatcher, each with tests.</li>
+      <li>SAKIP: delivered <b>12 pull requests (10 merged, about 31,000 lines)</b> across Laravel, React/TypeScript and tests: performance agreements, evidence fulfilment, activity planning, budgets (RAB) and period roll-over.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="row">
+      <div class="title">Web Developer <span class="org">&middot; UVICS (UNKLAB Virtue in Computer Science)</span></div>
+      <div class="date">Aug 2024 &ndash; Aug 2025 &middot; North Minahasa, Hybrid</div>
+    </div>
+    <ul>
+      <li>Member of the website development division: built and maintained the organisation's web platforms with React, Next.js and Tailwind CSS, working with Git and code review in a cross-functional team.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>Key Projects</h2>
+
+  <div class="item">
+    <div class="row">
+      <div class="title">SIMPEG &middot; Sistem Informasi Manajemen Kepegawaian</div>
+      <div class="stack"><b>Laravel, PostgreSQL, Keycloak SSO, queues &amp; notifications</b></div>
+    </div>
+    <ul>
+      <li>Early-warning alerts (email and in-app) for promotions, salary increments (KGB) and retirement; multi-tier leave approvals with automatic balances; append-only career history, full audit logs, ASN Professionalism Index (IP-ASN) calculator and a 20-hour annual training tracker.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="row">
+      <div class="title">SAKIP &middot; Sistem Akuntabilitas Kinerja Instansi Pemerintah</div>
+      <div class="stack"><b>Laravel, React 19 + TypeScript, Inertia.js, PostgreSQL, Keycloak OIDC</b></div>
+    </div>
+    <ul>
+      <li>Performance-accountability cycle following Permenpan RB: strategic plans and cascading KPIs (IKU), quarterly measurement, LAKIP reporting and internal evaluation; 4-stage verification (Draft &rarr; Submitted &rarr; Verified &rarr; Approved) with mandatory evidence, AKIP predicate scoring (AA to D) and PDDikti API sync.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="row">
+      <div class="title">Interview AI &middot; <a href="https://interview-ai-id.vercel.app">interview-ai-id.vercel.app</a></div>
+      <div class="stack"><b>Next.js, Gemini Live API, React Three Fiber, Supabase</b></div>
+    </div>
+    <ul>
+      <li>Students practise requirements interviews by voice with six real-time 3D AI clients who hide key facts until asked precisely; the AI grades each transcript against a rubric for teachers. Live in production.</li>
+    </ul>
+  </div>
+
+  <div class="item">
+    <div class="row">
+      <div class="title">DailyBoost AI &middot; AI money-management app</div>
+      <div class="stack"><b>React Native, Expo, Convex, Gemini API</b></div>
+    </div>
+    <ul>
+      <li>Logs spending by voice or receipt photo, tracks budgets and savings goals, and answers questions through an AI advisor that reads the user's own data, synced in real time across devices.</li>
+    </ul>
+  </div>
+  <div class="sub">More projects, including Carta AI, Klinik Sentosa and KostFinder UNKLAB, at <a href="https://adrielwalintukan.my.id"><b>adrielwalintukan.my.id</b></a></div>
+</section>
+
+<section>
+  <h2>Education</h2>
+  <div class="row">
+    <div class="title">Universitas Klabat (UNKLAB) <span class="org">&middot; Bachelor of Information Systems</span> <span class="sub" style="font-weight:500">&middot; GPA 3.96 / 4.00</span></div>
+    <div class="date">2023 &ndash; 2027 (expected)</div>
+  </div>
+</section>
+
+<section>
+  <h2>Technical Skills</h2>
+  <dl class="skills">
+    <dt>Languages</dt><dd>PHP, TypeScript, JavaScript, Python, SQL</dd>
+    <dt>Backend</dt><dd>Laravel, FastAPI, Node.js, REST APIs, queues &amp; background jobs, Keycloak SSO/OIDC</dd>
+    <dt>Frontend &amp; Mobile</dt><dd>React, Next.js, React Native (Expo), Inertia.js, Blade + Alpine.js, Tailwind CSS</dd>
+    <dt>Data, Cloud &amp; AI</dt><dd>PostgreSQL, Supabase, Convex, SQLite, AWS fundamentals, Google Gemini (incl. Live API)</dd>
+    <dt>Quality &amp; Tools</dt><dd>Software testing (PHPUnit/Pest, Vitest), PHPStan, Git &amp; GitHub code review, Podman/Docker, Figma</dd>
+  </dl>
+</section>
+
+<section>
+  <h2>Honors &amp; Certifications</h2>
+  <div class="award"><b>Best Technical Excellence, Mobile Application Category</b> &middot; Proxocoris International Competition 2026 (team JAT)</div>
+  <div class="certs">
+    <div><b>Cloud Computing &amp; Gen AI Basics on AWS</b><span>Dicoding, 2026</span></div>
+    <div><b>Code Generation with IBM Granite</b><span>IBM SkillsBuild, 2025</span></div>
+    <div><b>Spec-Driven Development with Kiro</b><span>Dicoding, 2026</span></div>
+    <div><b>Generative AI for Software Development</b><span>IBM SkillsBuild, 2025</span></div>
+    <div><b>AI Fluency: Framework &amp; Foundations</b><span>Anthropic, 2026</span></div>
+    <div><b>Introduction to Front End Development</b><span>Simplilearn, 2025</span></div>
+    <div><b>Introduction to Cybersecurity</b><span>Cisco, 2026</span></div>
+    <div><b>CISSP Security Assessment &amp; Testing</b><span>Simplilearn, 2025</span></div>
+  </div>
+</section>
+
+<div class="two">
+  <section>
+    <h2>Organizations</h2>
+    <ul class="plain">
+      <li><b>Sports Crew</b> &middot; BEM Universitas Klabat <span class="date">&middot; Jan &ndash; Jun 2026</span></li>
+      <li><b>VOCS Choir</b> &middot; Tenor, Voice of Computer Science</li>
+      <li><b>Tou Minahasa</b> &middot; Regional cultural student organization</li>
+    </ul>
+  </section>
+  <section>
+    <h2>Languages</h2>
+    <ul class="plain">
+      <li><b>Indonesian</b> &middot; Native</li>
+      <li><b>English</b> &middot; Basic, reading comprehension</li>
+    </ul>
+  </section>
+</div>
+
+</body>
+</html>
