@@ -14,12 +14,12 @@ export const ExperienceSection = memo(function ExperienceSection() {
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1])
 
   return (
-    <Section id="experience" className="bg-ink text-paper">
+    <Section id="experience" className="section-dark text-foreground">
       <div className="mb-12 text-center md:mb-16">
         <span className="inline-block rounded-full border border-border-hover bg-surface px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-accent">
           My journey
         </span>
-        <h2 className="mt-6 font-display text-[clamp(2.75rem,7vw,6.5rem)] font-black uppercase leading-[0.9] tracking-tight text-paper">
+        <h2 className="mt-6 font-display text-[clamp(2.75rem,7vw,6.5rem)] font-black uppercase leading-[0.9] tracking-tight text-foreground">
           Turning ideas into
           <br />
           <span className="text-foreground-subtle">working</span> software
@@ -62,10 +62,10 @@ export const ExperienceSection = memo(function ExperienceSection() {
                     />
                   )}
                   <div className="min-w-0">
-                    <h3 className="font-display text-2xl font-black uppercase leading-tight tracking-tight text-paper sm:text-3xl">
+                    <h3 className="font-display text-2xl font-black uppercase leading-tight tracking-tight text-foreground sm:text-3xl">
                       {item.title}
                     </h3>
-                    <p className="mt-1 text-sm font-medium text-paper">{item.role}</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">{item.role}</p>
                     <p className="mt-1 font-mono text-xs uppercase tracking-wider text-foreground-subtle">
                       {item.year}
                     </p>

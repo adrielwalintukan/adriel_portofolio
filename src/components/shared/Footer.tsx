@@ -18,7 +18,7 @@ const FOOTER_LINKS = [
  */
 export const Footer = memo(function Footer() {
   return (
-    <footer className="overflow-hidden bg-accent text-ink [--focus-ring:var(--color-ink)]">
+    <footer className="overflow-hidden bg-ink text-paper [--focus-ring:var(--color-paper)]">
       <div className="section-container pt-16 sm:pt-20">
         <div className="flex flex-col justify-between gap-10 sm:flex-row sm:items-start">
           <div className="aspect-square w-40 overflow-hidden rounded-xl bg-ink sm:w-52">
@@ -61,7 +61,7 @@ export const Footer = memo(function Footer() {
                     target={link.url.startsWith('mailto:') ? undefined : '_blank'}
                     rel="noreferrer"
                     aria-label={link.name}
-                    className="flex h-9 w-9 items-center justify-center rounded-md bg-ink text-paper transition-colors hover:bg-paper hover:text-ink"
+                    className="flex h-9 w-9 items-center justify-center rounded-md bg-paper text-ink transition-colors hover:bg-accent hover:text-paper"
                   >
                     {Icon && <Icon className="h-4 w-4" />}
                   </a>

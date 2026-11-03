@@ -32,16 +32,16 @@ export const Button = memo(
 
     const variants = {
       primary:
-        'bg-accent text-ink hover:bg-accent-hover',
+        'bg-accent text-paper hover:bg-accent-hover',
       // for use on accent-colored backgrounds
       ink:
-        'bg-ink text-paper hover:bg-surface',
+        'bg-ink text-paper hover:bg-accent',
       secondary:
         'border border-border-hover bg-transparent text-foreground hover:border-foreground',
       outline:
         'border border-border bg-transparent text-foreground hover:border-accent/50 hover:bg-accent/10',
       ghost:
-        'bg-transparent text-foreground-muted hover:text-foreground hover:bg-white/5',
+        'bg-transparent text-foreground-muted hover:text-foreground hover:bg-ink/5',
     }
 
     const sizes = {
@@ -59,7 +59,7 @@ export const Button = memo(
               className={cn(
                 'flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1 group-active:translate-x-0',
                 variant === 'primary' && 'h-7 w-7 rounded-md bg-ink text-accent',
-                variant === 'ink' && 'h-7 w-7 rounded-md bg-accent text-ink'
+                variant === 'ink' && 'h-7 w-7 rounded-md bg-accent text-paper'
               )}
             >
               {icon}

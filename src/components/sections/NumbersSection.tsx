@@ -44,7 +44,7 @@ const STATS = [
  */
 export const NumbersSection = memo(function NumbersSection() {
   return (
-    <Section id="numbers" className="bg-ink pt-0 sm:pt-0 md:pt-0 lg:pt-0">
+    <Section id="numbers" className="section-dark pt-0 sm:pt-0 md:pt-0 lg:pt-0">
       <div className="grid gap-6 lg:grid-cols-[200px_1fr] lg:gap-12">
         <p className="font-mono text-xs uppercase tracking-widest text-accent lg:pt-3">
           Why work with me

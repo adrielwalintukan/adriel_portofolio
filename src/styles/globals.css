@@ -1,55 +1,57 @@
 @import 'tailwindcss';
 
 /* ============================================================
-   DESIGN TOKENS — Editorial Signal-Red Theme (see docs/redesign/PRD.md §4.2)
+   DESIGN TOKENS — Clean Light Theme (navy + teal) (see docs/redesign/PRD.md §4.2)
    ============================================================ */
 @theme {
   /* ── Color Palette ── */
-  --color-ink: #07080a;
-  --color-paper: #f2efea;
-  /* text/lines on paper sections: dim = large secondary text (3.4:1), fg-muted = body text (6.8:1) */
-  --color-paper-dim: #85817b;
-  --color-paper-fg-muted: #55524d;
-  --color-paper-line: #d6d2cb;
+  /* ink = deep navy (text, dark buttons, footer); paper = near-white (cards, light-on-dark text) */
+  --color-ink: #0b1226;
+  --color-paper: #f8fafb;
+  /* text/lines on paper sections: dim = large secondary text, fg-muted = body text */
+  --color-paper-dim: #77828f;
+  --color-paper-fg-muted: #4a5565;
+  --color-paper-line: #b9c1c7;
 
-  --color-background: #07080a;
-  --color-background-secondary: #0d0e11;
-  --color-background-tertiary: #131418;
-  --color-surface: #17181c;
-  --color-surface-hover: #1e1f24;
+  /* cool grey, matched to how the translucent header reads over the page */
+  --color-background: #ccd2d6;
+  --color-background-secondary: #c4cacf;
+  --color-background-tertiary: #bcc3c8;
+  --color-surface: #ffffff;
+  --color-surface-hover: #f4f7f8;
 
-  --color-foreground: #f2efea;
-  --color-foreground-muted: #a3a3a3;
-  --color-foreground-subtle: #7a7a7a;
+  --color-foreground: #0b1226;
+  --color-foreground-muted: #4a5565;
+  --color-foreground-subtle: #56616e;
 
-  --color-border: #222328;
-  --color-border-hover: #34353b;
+  --color-border: #b9c1c7;
+  --color-border-hover: #a3acb3;
 
-  --color-accent: #ff3344;
-  --color-accent-hover: #ff5563;
-  /* small accent text on --color-paper; #ff3344 is too light there */
-  --color-accent-strong: #c8102e;
-  --color-accent-glow: rgba(255, 51, 68, 0.35);
+  --color-accent: #1b7a80;
+  --color-accent-hover: #15666b;
+  /* small accent text on light backgrounds */
+  --color-accent-strong: #15666b;
+  --color-accent-glow: rgba(27, 122, 128, 0.25);
 
-  /* Legacy decorative colors — collapsed to the single accent + neutral until sections are rebuilt */
-  --color-neon-cyan: #a3a3a3;
-  --color-neon-purple: #ff3344;
-  --color-neon-pink: #ff3344;
-  --color-neon-blue: #a3a3a3;
-  --color-neon-green: #a3a3a3;
+  /* Legacy decorative colors — collapsed to the single accent + neutral */
+  --color-neon-cyan: #66717f;
+  --color-neon-purple: #1b7a80;
+  --color-neon-pink: #1b7a80;
+  --color-neon-blue: #66717f;
+  --color-neon-green: #66717f;
 
-  --color-gradient-start: #ff3344;
-  --color-gradient-mid: #ff5563;
-  --color-gradient-end: #ff3344;
+  --color-gradient-start: #1b7a80;
+  --color-gradient-mid: #15666b;
+  --color-gradient-end: #1b7a80;
 
-  --color-card: rgba(23, 24, 28, 0.6);
-  --color-card-hover: rgba(30, 31, 36, 0.8);
+  --color-card: rgba(255, 255, 255, 0.7);
+  --color-card-hover: rgba(255, 255, 255, 0.9);
 
-  --color-ring: rgba(255, 51, 68, 0.5);
+  --color-ring: rgba(27, 122, 128, 0.45);
 
-  --color-destructive: #ef4444;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
+  --color-destructive: #dc2626;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
 
   /* ── Typography ── */
   --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
@@ -71,8 +73,8 @@
   /* ── Shadows ── */
   --shadow-glow: none;
   --shadow-glow-lg: none;
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.25);
-  --shadow-elevated: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 4px 20px rgba(11, 18, 38, 0.06);
+  --shadow-elevated: 0 12px 40px rgba(11, 18, 38, 0.12);
 
   /* ── Transitions ── */
   --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
@@ -103,6 +105,43 @@
   --animate-float: float 8s ease-in-out infinite;
   --animate-shimmer: shimmer 3s linear infinite;
   --animate-gradient: gradient-shift 10s ease infinite;
+}
+
+/* Dark navy band: re-points the theme tokens, so any section using bg-background / text-foreground /
+   border-border / bg-surface flips to dark without per-element changes. Alternates with the light sections. */
+.section-dark {
+  --color-background: #0b1226;
+  --color-background-secondary: #0f1730;
+  --color-background-tertiary: #131c38;
+  --color-surface: #121a33;
+  --color-surface-hover: #182241;
+  --color-foreground: #eef2f3;
+  --color-foreground-muted: #a7b0bd;
+  --color-foreground-subtle: #7f8a9a;
+  --color-border: #1f2946;
+  --color-border-hover: #2e3a5c;
+  /* brighter teal: the base accent is too dark to read on navy */
+  --color-accent: #3fb0b7;
+  --color-accent-hover: #5cc2c8;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Living backdrop for content sections: a faint dot grid plus a soft accent glow that follows the
+   cursor (--cx/--cy set on :root by RootLayout, desktop pointers only). The glow layer is
+   attached "fixed", so viewport coordinates line up without per-section maths. */
+.section-fx {
+  isolation: isolate;
+}
+.section-fx::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(480px circle at var(--cx, -1000px) var(--cy, -1000px), color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%) fixed,
+    radial-gradient(color-mix(in srgb, var(--color-foreground) 10%, transparent) 1px, transparent 1.5px) 0 0 / 24px 24px;
 }
 
 /* ============================================================
@@ -140,8 +179,8 @@
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 15px rgba(255, 51, 68, 0.1); }
-  50% { box-shadow: 0 0 25px rgba(255, 51, 68, 0.2); }
+  0%, 100% { box-shadow: 0 0 15px rgba(27, 122, 128, 0.1); }
+  50% { box-shadow: 0 0 25px rgba(27, 122, 128, 0.2); }
 }
 
 @keyframes float {
@@ -226,33 +265,16 @@
   }
 
   ::selection {
-    background-color: rgba(255, 51, 68, 0.3);
-    color: #fff;
+    background-color: rgba(27, 122, 128, 0.3);
+    color: var(--color-ink);
   }
 
+  /* no visible scrollbar: its track read as a stray line along the right edge of the hero */
+  html {
+    scrollbar-width: none;
+  }
   ::-webkit-scrollbar {
-    width: 5px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--color-background);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: var(--radius-full);
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-accent);
-  }
-
-  /* Hide scrollbar on mobile for cleaner look */
-  @media (max-width: 767px) {
-    ::-webkit-scrollbar {
-      width: 0;
-      display: none;
-    }
+    display: none;
   }
 }
 
@@ -272,23 +294,23 @@
 
 /* Glass — reduced blur for performance (16px → 10px) */
 @utility glass {
-  background: rgba(23, 24, 28, 0.55);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(11, 18, 38, 0.06);
 }
 
 /* Glass strong — reduced blur (24px → 14px), higher opacity to compensate */
 @utility glass-strong {
-  background: rgba(23, 24, 28, 0.8);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(11, 18, 38, 0.1);
 }
 
 @utility glow-border {
-  box-shadow: 0 0 0 1px rgba(255, 51, 68, 0.25),
-              0 0 15px rgba(255, 51, 68, 0.08);
+  box-shadow: 0 0 0 1px rgba(27, 122, 128, 0.25),
+              0 0 15px rgba(27, 122, 128, 0.08);
 }
 
 /* Responsive container with fluid padding */
@@ -361,7 +383,7 @@
   .glass-strong {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    background: rgba(23, 24, 28, 0.92);
+    background: rgba(255, 255, 255, 0.92);
   }
 
 }
@@ -387,3 +409,4 @@ a, button, [role="button"], input[type="submit"], input[type="button"] {
   outline: 3px solid var(--focus-ring, var(--color-accent));
   outline-offset: 3px;
 }
+

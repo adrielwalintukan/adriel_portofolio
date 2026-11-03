@@ -147,7 +147,7 @@ export default function AskAdrielTerminal({ onClose }: { onClose: () => void }) 
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 24, scale: 0.98 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed inset-x-3 bottom-3 top-20 z-[70] flex flex-col overflow-hidden rounded-2xl border border-border-hover bg-ink font-mono text-sm text-foreground shadow-2xl [--focus-ring:var(--color-accent)] sm:inset-x-auto sm:right-6 sm:top-auto sm:bottom-6 sm:h-[min(600px,80svh)] sm:w-[440px]"
+      className="fixed inset-x-3 bottom-3 top-20 z-[70] flex flex-col overflow-hidden rounded-2xl border border-border-hover bg-surface font-mono text-sm text-foreground shadow-2xl [--focus-ring:var(--color-accent)] sm:inset-x-auto sm:right-6 sm:top-auto sm:bottom-6 sm:h-[min(600px,80svh)] sm:w-[440px]"
     >
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-border px-4">
         <p className="text-xs uppercase tracking-widest text-foreground-subtle">

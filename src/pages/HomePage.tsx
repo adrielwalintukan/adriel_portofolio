@@ -12,7 +12,7 @@ const noop = () => () => {}
 function HomePage() {
   // false during prerender and hydration: renderToString can't wait for the lazy chunk (React error #419)
   const hydrated = useSyncExternalStore(noop, () => true, () => false)
-  const fallback = <div className="min-h-[100svh] bg-ink" />
+  const fallback = <div className="min-h-[100svh] bg-background" />
 
   return (
     <RootLayout>

@@ -54,7 +54,7 @@ export const CertificateModal = memo(function CertificateModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           onClick={onClose}
-          className="fixed inset-0 bg-black/85 backdrop-blur-md"
+          className="fixed inset-0 bg-ink/50 backdrop-blur-md"
         />
 
         {/* Modal Window */}
@@ -63,10 +63,10 @@ export const CertificateModal = memo(function CertificateModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="relative z-10 my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/10 bg-surface/95 shadow-2xl backdrop-blur-2xl"
+          className="relative z-10 my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-border bg-surface/95 shadow-2xl backdrop-blur-2xl"
         >
           {/* Header Bar */}
-          <div className="flex items-center justify-between border-b border-white/10 px-6 py-4">
+          <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent/10 text-accent">
                 <Award className="h-4 w-4" />
@@ -78,7 +78,7 @@ export const CertificateModal = memo(function CertificateModal({
 
             <button
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground-muted transition-colors hover:bg-white/10 hover:text-foreground"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-background text-foreground-muted transition-colors hover:bg-background hover:text-foreground"
               aria-label="Close modal"
             >
               <X className="h-4 w-4" />
@@ -91,7 +91,7 @@ export const CertificateModal = memo(function CertificateModal({
               
               {/* Left Column: Certificate Preview Image */}
               <div className="lg:col-span-7">
-                <div className="relative aspect-[16/11] w-full overflow-hidden rounded-2xl border border-white/10 bg-background/50 shadow-inner group">
+                <div className="relative aspect-[16/11] w-full overflow-hidden rounded-2xl border border-border bg-background/50 shadow-inner group">
                   <img
                     src={certificate.image}
                     alt={certificate.title}
@@ -150,7 +150,7 @@ export const CertificateModal = memo(function CertificateModal({
                         {certificate.skills.map((skill) => (
                           <span
                             key={skill}
-                            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-foreground-subtle"
+                            className="rounded-lg border border-border bg-background px-2.5 py-1 text-xs text-foreground-subtle"
                           >
                             {skill}
                           </span>
@@ -161,7 +161,7 @@ export const CertificateModal = memo(function CertificateModal({
                 </div>
 
                 {/* Direct Action Button */}
-                <div className="mt-8 pt-4 border-t border-white/10">
+                <div className="mt-8 pt-4 border-t border-border">
                   <a
                     href={pdfUrl}
                     target="_blank"
