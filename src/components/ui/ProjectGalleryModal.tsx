@@ -1,4 +1,5 @@
 import { memo, useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { FiX, FiChevronLeft, FiChevronRight, FiGithub } from 'react-icons/fi'
 import { type Project } from '@/lib/constants'
@@ -93,9 +94,10 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
     }),
   }
 
-  return (
+  // portalled to body: inside the projects section its z-index stays under the fixed navbar
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[999] flex items-center justify-center p-2 sm:p-4 md:p-6">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6">
         {/* Dark Cinematic Backdrop with Blur */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -237,6 +239,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 })
