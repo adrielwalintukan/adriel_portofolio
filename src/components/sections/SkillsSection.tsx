@@ -64,7 +64,9 @@ export const SkillsSection = memo(function SkillsSection() {
   const goTo = (i: number) => {
     if (!ref.current) return
     const segment = (window.innerHeight * SEGMENT_VH) / 100
-    window.scrollTo({ top: ref.current.offsetTop + segment * (i + 0.5), behavior: 'smooth' })
+    // page position, not offsetTop: that is relative to the section and is ~0
+    const top = ref.current.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top: top + segment * (i + 0.5), behavior: 'smooth' })
   }
 
   if (!pinned) {
