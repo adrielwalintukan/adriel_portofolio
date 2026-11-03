@@ -55,11 +55,11 @@ export function LoadingScreen({ onComplete }: { onComplete: () => void }) {
           initial={{ clipPath: 'inset(0 0 0% 0)' }}
           exit={{ clipPath: 'inset(0 0 100% 0)' }}
           transition={{ duration: EXIT_MS / 1000, ease: [0.87, 0, 0.13, 1] }}
-          className="fixed inset-0 z-[999] flex items-center justify-center bg-ink motion-reduce:hidden"
+          className="fixed inset-0 z-[999] flex items-center justify-center bg-background motion-reduce:hidden"
         >
           <span
             aria-label={INTRO}
-            className="flex overflow-hidden font-display text-6xl font-black uppercase leading-none text-paper sm:text-8xl"
+            className="flex overflow-hidden font-display text-6xl font-black uppercase leading-none text-ink sm:text-8xl"
           >
             {INTRO.split('').map((c, i) => (
               <span key={i} aria-hidden="true" className="intro-letter" style={{ animationDelay: `${i * 0.04}s` }}>

@@ -1,4 +1,4 @@
-import { type ReactNode, memo } from 'react'
+import { type ReactNode, memo, useEffect } from 'react'
 import { Navbar } from '@/components/shared/Navbar'
 import { Footer } from '@/components/shared/Footer'
 import { AskAdriel } from '@/components/ui'
@@ -13,6 +13,25 @@ interface RootLayoutProps {
  */
 export const RootLayout = memo(function RootLayout({ children }: RootLayoutProps) {
   useSmoothScroll()
+
+  // feeds the cursor glow behind sections (.section-fx); CSS vars so nothing re-renders
+  useEffect(() => {
+    if (!matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const root = document.documentElement
+    let frame = 0
+    const onMove = (e: PointerEvent) => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        root.style.setProperty('--cx', `${e.clientX}px`)
+        root.style.setProperty('--cy', `${e.clientY}px`)
+      })
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(frame)
+    }
+  }, [])
 
   return (
     <div className="relative flex min-h-screen w-full max-w-full flex-col overflow-x-clip">

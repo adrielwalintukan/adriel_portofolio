@@ -17,7 +17,7 @@ const FACTS = [
  */
 export const AboutSection = memo(function AboutSection() {
   return (
-    <Section id="about" className="bg-ink">
+    <Section id="about" className="section-dark">
       <div className="grid gap-6 lg:grid-cols-[200px_1fr] lg:gap-12">
         <p className="font-mono text-xs uppercase tracking-widest text-accent lg:pt-4">About me</p>
         <ScrollRevealText

@@ -33,7 +33,7 @@ export const CertificatesSection = memo(function CertificatesSection() {
   }
 
   return (
-    <Section id="certificates" className="bg-ink">
+    <Section id="certificates" className="bg-background">
       <div className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
         <div>
           <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">

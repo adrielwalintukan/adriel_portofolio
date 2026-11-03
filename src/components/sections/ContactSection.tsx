@@ -21,9 +21,9 @@ export const ContactSection = memo(function ContactSection() {
   const y = useTransform(scrollYProgress, [0, 1], [80, 0])
 
   return (
-    <section id="contact" className="bg-ink">
+    <section id="contact" className="section-fx relative bg-background">
       {/* Decorative band; the same words are the CTA heading below */}
-      <div aria-hidden="true" className="bg-accent py-4 text-ink sm:py-6">
+      <div aria-hidden="true" className="bg-ink py-4 text-paper sm:py-6">
         <InfiniteMarquee speed={60} pauseOnHover={false}>
           {MARQUEE_ITEMS.map((text, i) => (
             <span
@@ -46,10 +46,10 @@ export const ContactSection = memo(function ContactSection() {
           className="absolute inset-0 h-full w-full object-cover object-[50%_30%] opacity-25 grayscale"
         />
         <div className="relative mx-auto max-w-3xl">
-          <div className="absolute inset-0 translate-x-3 translate-y-3 -rotate-6 rounded-2xl bg-paper/15" aria-hidden="true" />
+          <div className="absolute inset-0 translate-x-3 translate-y-3 -rotate-6 rounded-2xl bg-accent/15" aria-hidden="true" />
           <motion.div
             style={reduceMotion ? { rotate: -2 } : { rotate, y }}
-            className="relative rounded-2xl bg-paper p-8 text-center text-ink sm:p-12"
+            className="relative rounded-2xl border border-border bg-surface p-8 shadow-elevated text-center text-ink sm:p-12"
           >
             <p className="flex items-center justify-center gap-2 font-mono text-xs uppercase tracking-widest text-paper-fg-muted">
               <span className="h-2.5 w-2.5 bg-accent" aria-hidden="true" />

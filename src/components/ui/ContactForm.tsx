@@ -162,7 +162,7 @@ export function ContactForm() {
         type="submit"
         disabled={isSubmitting}
         className={cn(
-          "group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent px-8 py-4 font-display text-lg font-extrabold uppercase tracking-wide text-ink transition-colors duration-300 cursor-pointer",
+          "group relative mt-2 flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-accent px-8 py-4 font-display text-lg font-extrabold uppercase tracking-wide text-paper transition-colors duration-300 cursor-pointer",
           isSubmitting ? "opacity-80 cursor-wait" : "hover:bg-accent-hover"
         )}
       >

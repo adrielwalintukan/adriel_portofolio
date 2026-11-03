@@ -75,7 +75,7 @@ export const GitHubActivitySection = memo(function GitHubActivitySection() {
   const profile = `https://github.com/${data?.user ?? 'adrielwalintukan'}`
 
   return (
-    <Section id="github" className="bg-ink">
+    <Section id="github" className="section-dark">
       <div ref={ref} className="mb-12 grid items-end gap-6 md:mb-16 md:grid-cols-2">
         <div>
           <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">GitHub activity</p>

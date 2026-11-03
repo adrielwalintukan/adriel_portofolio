@@ -1,7 +1,5 @@
 export { useSmoothScroll } from './useSmoothScroll'
-export { useWindowSize } from './useWindowSize'
 export { useInView } from './useInView'
-export { useMediaQuery } from './useMediaQuery'
 export { useDeviceDetect } from './useDeviceDetect'
 export { useLocalTime } from './useLocalTime'
 export { useAppReady } from './useAppReady'

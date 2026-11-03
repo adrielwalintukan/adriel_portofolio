@@ -122,7 +122,7 @@ const StackCard = memo(function StackCard({
       ref={articleRef}
       style={stacked ? { scale, top: `${96 + index * 20}px` } : undefined}
       className={cn(
-        'relative grid origin-top overflow-hidden rounded-2xl bg-ink text-paper lg:grid-cols-[1fr_1.35fr]',
+        'section-dark relative grid origin-top overflow-hidden rounded-2xl border border-border shadow-elevated lg:grid-cols-[1fr_1.35fr]',
         // single column on small screens: copy on top, screenshot takes whatever height is left
         stacked && 'grid-rows-[auto_minmax(0,1fr)] lg:grid-rows-1',
         // cards must be direct siblings in one container: sticky only pins within its parent
@@ -135,7 +135,7 @@ const StackCard = memo(function StackCard({
           <span className="text-accent">{pad(index + 1)}</span>
           <span className="text-foreground-subtle">{project.category}</span>
         </div>
-        <h3 className="mt-4 font-display text-[clamp(2.25rem,5vw,4.5rem)] sm:mt-6 font-black uppercase leading-[0.9] tracking-tight text-paper">
+        <h3 className="mt-4 font-display text-[clamp(2.25rem,5vw,4.5rem)] sm:mt-6 font-black uppercase leading-[0.9] tracking-tight text-foreground">
           {project.title}
         </h3>
         <p className={cn('mt-4 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base', stacked && 'line-clamp-3 lg:line-clamp-none')}>
@@ -160,10 +160,10 @@ const StackCard = memo(function StackCard({
           ) : (
           <button
             onClick={open}
-            className="group inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover"
+            className="group inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-paper transition-colors hover:bg-accent-hover"
           >
             View project
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-ink text-accent transition-transform group-hover:translate-x-1">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-paper text-accent transition-transform group-hover:translate-x-1">
               <ArrowUpRight className="h-4 w-4" />
             </span>
           </button>
@@ -174,7 +174,7 @@ const StackCard = memo(function StackCard({
               target="_blank"
               rel="noreferrer"
               aria-label={`${project.title} source code on GitHub`}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-border-hover px-4 font-display text-base font-extrabold uppercase tracking-wide text-paper transition-colors hover:border-paper"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-border-hover px-4 font-display text-base font-extrabold uppercase tracking-wide text-foreground transition-colors hover:border-foreground"
             >
               <FiGithub className="h-4 w-4" />
               Code
@@ -241,7 +241,7 @@ const StackCard = memo(function StackCard({
       {stacked && (
         <motion.div
           style={{ opacity: shade }}
-          className="pointer-events-none absolute inset-0 bg-ink"
+          className="pointer-events-none absolute inset-0 bg-background"
         />
       )}
     </motion.article>
@@ -261,7 +261,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
   const { scrollYProgress } = useScroll({ target: listRef, offset: ['start start', 'end end'] })
 
   return (
-    <section id="projects" className="relative bg-paper py-16 text-ink sm:py-20 md:py-28">
+    <section id="projects" className="section-fx relative bg-background py-16 text-ink sm:py-20 md:py-28">
       <div className="section-container">
         <div className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
           <div>

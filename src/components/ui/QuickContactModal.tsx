@@ -101,7 +101,7 @@ export const QuickContactModal = memo(function QuickContactModal({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-ink/50 backdrop-blur-md"
           />
 
           {/* Modal Container */}
@@ -110,7 +110,7 @@ export const QuickContactModal = memo(function QuickContactModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-surface/95 p-5 shadow-2xl backdrop-blur-2xl sm:p-6 select-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-border bg-surface/95 p-5 shadow-2xl backdrop-blur-2xl sm:p-6 select-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* Ambient Background Glow */}
             <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-accent/20 blur-3xl" />
@@ -136,7 +136,7 @@ export const QuickContactModal = memo(function QuickContactModal({
 
               <button
                 onClick={onClose}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-foreground-muted transition-colors hover:border-white/20 hover:bg-white/10 hover:text-foreground"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground-muted transition-colors hover:border-border-hover hover:bg-background hover:text-foreground"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
@@ -157,7 +157,7 @@ export const QuickContactModal = memo(function QuickContactModal({
                     className={`group relative flex items-center justify-between gap-3 rounded-2xl border p-3 sm:p-3.5 transition-all duration-300 ${item.bgColor}`}
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-background/50 ${item.accentColor}`}>
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-background/50 ${item.accentColor}`}>
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
@@ -175,7 +175,7 @@ export const QuickContactModal = memo(function QuickContactModal({
                       </div>
                     </div>
 
-                    <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-foreground transition-transform duration-300 group-hover:scale-105 group-hover:border-accent/40 group-hover:bg-accent group-hover:text-background">
+                    <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-transform duration-300 group-hover:scale-105 group-hover:border-accent/40 group-hover:bg-accent group-hover:text-background">
                       <span>{item.buttonText}</span>
                       <ExternalLink className="h-3.5 w-3.5" />
                     </div>
@@ -185,7 +185,7 @@ export const QuickContactModal = memo(function QuickContactModal({
             </div>
 
             {/* Bottom Form Redirection */}
-            <div className="relative mt-4 border-t border-white/10 pt-3 text-center">
+            <div className="relative mt-4 border-t border-border pt-3 text-center">
               <a
                 href="#contact"
                 onClick={onClose}
