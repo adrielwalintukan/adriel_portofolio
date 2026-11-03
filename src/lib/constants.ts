@@ -194,6 +194,30 @@ export const PROJECTS: Project[] = [
     featured: false,
   },
   {
+    id: 'dentavision_AI',
+    title: 'DentaVision AI',
+    description: 'Upload a panoramic dental X-ray and see what the AI flags: 31 kinds of findings with boxes and heatmaps, plain-language explanations, and a chat to ask about them.',
+    longDescription: 'A YOLOv8m model with a ResNet50 backbone, trained on 31 classes of panoramic X-ray findings, marks each finding with a box and a per-class Grad-CAM heatmap. Gemini first checks that the upload really is a dental panoramic, then writes a streaming summary in everyday language and answers follow-up questions in a chat tied to the scan. Users can sign in with Google or email to keep their scan and chat history, or choose not to save anything. The FastAPI inference service runs on Hugging Face Spaces, and the browser never calls it or Gemini directly. Results are not a medical diagnosis.',
+    image: '/projects/dentavision_AI/DentaVision AI - Poster.webp',
+    video: '/projects/dentavision_AI/dentavision-promo.mp4',
+    images: [
+      '/projects/dentavision_AI/DentaVision AI - Landing.webp',
+      '/projects/dentavision_AI/DentaVision AI - Upload X-ray.webp',
+      '/projects/dentavision_AI/DentaVision AI - Hasil Deteksi.webp',
+      '/projects/dentavision_AI/DentaVision AI - Heatmap.webp',
+      '/projects/dentavision_AI/DentaVision AI - Ringkasan & Chat.webp',
+      '/projects/dentavision_AI/DentaVision AI - Tentang Model.webp',
+      '/projects/dentavision_AI/DentaVision AI - Privasi.webp',
+      '/projects/dentavision_AI/DentaVision AI - Mode Gelap.webp',
+      '/projects/dentavision_AI/DentaVision AI - Mobile Landing.webp',
+      '/projects/dentavision_AI/DentaVision AI - Mobile Hasil.webp'
+    ],
+    repoUrl: 'https://github.com/prettyara12/DentaVision-AI',
+    technologies: ['Next.js', 'FastAPI', 'YOLOv8', 'PyTorch', 'Gemini API', 'Supabase'],
+    category: 'AI Project / Fullstack',
+    featured: false,
+  },
+  {
     id: 'system_management_klinik_sentosa',
     title: 'Klinik Sentosa Management System',
     description: 'Web-based clinic system that runs one patient flow across four roles: registration, live queue, doctor exam and prescription, pharmacy and billing.',
@@ -276,6 +300,7 @@ export const SELECTED_PROJECT_IDS = [
   'AI_interview',
   'rinegetan_connect',
   'carta_AI',
+  'dentavision_AI',
   'system_management_klinik_sentosa',
 ]
 
