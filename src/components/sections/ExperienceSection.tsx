@@ -43,7 +43,7 @@ export const ExperienceSection = memo(function ExperienceSection() {
             {EXPERIENCE_TIMELINE.map((item, i) => (
               <li
                 key={item.id}
-                className="relative grid gap-3 pb-10 pl-8 last:pb-0 md:grid-cols-2 md:gap-16 md:pl-0"
+                className="relative grid gap-3 pb-10 pl-8 last:pb-0 md:grid-cols-2 md:gap-x-16 md:pl-0"
               >
                 <span
                   className="absolute left-0 top-1.5 h-[15px] w-[15px] rounded-full border-[3px] border-surface bg-accent md:left-1/2 md:-translate-x-1/2"
@@ -91,6 +91,46 @@ export const ExperienceSection = memo(function ExperienceSection() {
                     </ul>
                   )}
                 </Reveal>
+                {/* sub-entries: indented under the track, aligned with the parent's prose column */}
+                {item.children && (
+                  <ol className="mt-3 space-y-4 pl-6 md:col-start-2 md:mt-1">
+                    {item.children.map((child) => (
+                      <li key={child.id} className="relative">
+                        <span
+                          className="absolute left-[-29px] top-2 h-2.5 w-2.5 rounded-full border-2 border-border-hover bg-surface"
+                          aria-hidden="true"
+                        />
+                        <div className="flex items-start gap-3">
+                          {child.logo && (
+                            <img
+                              src={child.logo}
+                              alt={`${child.role} logo`}
+                              width={28}
+                              height={28}
+                              loading="lazy"
+                              className="h-7 w-7 shrink-0 rounded-lg object-cover"
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <span className="inline-block rounded-full border border-border-hover px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-foreground-muted">
+                              {child.category}
+                            </span>
+                            <p className="mt-1.5 text-sm font-semibold text-foreground-muted">
+                              {child.title}
+                            </p>
+                            <p className="text-xs text-foreground-subtle">
+                              {child.role} ·{' '}
+                              <span className="font-mono uppercase tracking-wider">{child.year}</span>
+                            </p>
+                            <p className="mt-1 text-xs leading-relaxed text-foreground-muted">
+                              {child.description}
+                            </p>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                )}
               </li>
             ))}
           </ol>

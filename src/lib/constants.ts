@@ -326,6 +326,8 @@ export interface TimelineItem {
   technologies?: string[]
   /** organisation logo shown beside the title */
   logo?: string
+  /** sub-entries (e.g. campus organisations under the university they run at) */
+  children?: TimelineItem[]
 }
 
 export const EXPERIENCE_TIMELINE: TimelineItem[] = [
@@ -338,6 +340,24 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     description: 'Developing and engineering enterprise information systems utilizing Laravel, Blade, Vite, and PostgreSQL architectures.',
     category: 'Experience',
     technologies: ['Laravel', 'Blade', 'Vite', 'PostgreSQL'],
+  },
+  {
+    id: 'exp-new-2',
+    year: 'Jan 2025 — Present',
+    title: 'Freelance Mobile & Web Developer',
+    role: 'Self-employed (Remote)',
+    logo: '/logo-experience/freelance.svg',
+    description: 'Delivering end-to-end web development solutions for clients, focusing on responsive design, performance, and clean code. Responsible for gathering requirements, translating mockups into functional web applications, and ensuring smooth deployment.',
+    category: 'Experience',
+    technologies: [
+      'React Native',
+      'Mobile Applications',
+      'Full-Stack Development',
+      'Software Engineering',
+      'Next.js',
+      'Artificial Intelligence (AI)',
+      'React.js',
+    ],
   },
   {
     id: 'exp-1',
@@ -357,24 +377,27 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     logo: '/logo-experience/unklab.webp',
     description: 'Pursuing a degree in Information Systems, building a strong foundation in software engineering, algorithms, and systems architecture.',
     category: 'Education',
-  },
-  {
-    id: 'exp-3',
-    year: '2026',
-    title: 'Division Sports',
-    role: 'BEM Unklab 2026',
-    logo: '/logo-experience/bem-unklab.webp',
-    description: 'Active committee member in the Student Executive Board, organizing and managing faculty sports programs and events.',
-    category: 'Organization',
-  },
-  {
-    id: 'exp-4',
-    year: 'Present',
-    title: 'Division Tenor',
-    role: 'Voice of Computer Science (Choir)',
-    logo: '/logo-experience/vocs.webp',
-    description: 'Sings tenor in the Voice of Computer Science choir, serving through choral hymns and songs of praise at worship services and campus events.',
-    category: 'Organization',
+    // campus organisations both run at Klabat University
+    children: [
+      {
+        id: 'exp-3',
+        year: '2026',
+        title: 'Division Sports',
+        role: 'BEM Unklab',
+        logo: '/logo-experience/bem-unklab.webp',
+        description: 'Active committee member in the Student Executive Board, organizing and managing faculty sports programs and events.',
+        category: 'Organization',
+      },
+      {
+        id: 'exp-4',
+        year: 'Present',
+        title: 'Division Tenor',
+        role: 'Voice of Computer Science (Choir)',
+        logo: '/logo-experience/vocs.webp',
+        description: 'Sings tenor in the Voice of Computer Science choir, serving through choral hymns and songs of praise at worship services and campus events.',
+        category: 'Organization',
+      },
+    ],
   },
 ]
 
@@ -388,10 +411,71 @@ export const CONTACT_INFO = {
   availability: 'Available for collaboration & opportunities',
 }
 
-export const SOCIAL_LINKS = [
-  { name: 'GitHub', url: 'https://github.com/AdrielWalintukan', icon: 'FiGithub' },
-  { name: 'LinkedIn', url: 'https://www.linkedin.com/in/adriel-walintukan-383032332/', icon: 'FiLinkedin' },
-  { name: 'Instagram', url: 'https://www.instagram.com/walintukann.adriel/', icon: 'FiInstagram' },
+/** Public facts shown in the hover preview; update the numbers when they drift. */
+export interface SocialProfile {
+  name: string
+  handle: string
+  headline: string
+  location: string
+  avatar: string
+  stats?: { label: string; value: number }[]
+  achievements?: { name: string; image: string; count?: number }[]
+}
+
+export const SOCIAL_LINKS: { name: string; url: string; icon: string; profile?: SocialProfile }[] = [
+  {
+    name: 'GitHub',
+    url: 'https://github.com/AdrielWalintukan',
+    icon: 'FiGithub',
+    // snapshot of api.github.com/users/AdrielWalintukan
+    profile: {
+      name: 'Adriel Walintukan',
+      handle: 'adrielwalintukan',
+      headline: 'Full-Stack Developer · AI Integration',
+      location: 'Manado, Indonesia',
+      avatar: '/images/adriel.webp',
+      stats: [
+        { label: 'Repositories', value: 20 },
+        { label: 'Followers', value: 5 },
+        { label: 'Following', value: 10 },
+      ],
+      achievements: [
+        { name: 'Pair Extraordinaire', image: '/achievements/pair-extraordinaire.png', count: 2 },
+        { name: 'Pull Shark', image: '/achievements/pull-shark.png', count: 3 },
+        { name: 'Quickdraw', image: '/achievements/quickdraw.png' },
+        { name: 'YOLO', image: '/achievements/yolo.png' },
+      ],
+    },
+  },
+  {
+    name: 'LinkedIn',
+    url: 'https://www.linkedin.com/in/adriel-walintukan-383032332/',
+    icon: 'FiLinkedin',
+    profile: {
+      name: 'Adriel Walintukan',
+      handle: 'in/adriel-walintukan-383032332',
+      headline: 'Full-Stack Developer · AI Integration',
+      location: 'Manado, Indonesia',
+      avatar: '/images/adriel.webp',
+      stats: [{ label: 'Connections', value: 41 }],
+    },
+  },
+  {
+    name: 'Instagram',
+    url: 'https://www.instagram.com/walintukann.adriel/',
+    icon: 'FiInstagram',
+    profile: {
+      name: 'Adriel Walintukan',
+      handle: '@walintukann.adriel',
+      headline: 'Full-Stack Developer · AI Integration',
+      location: 'Manado, Indonesia',
+      avatar: '/images/adriel.webp',
+      stats: [
+        { label: 'Followers', value: 2753 },
+        { label: 'Following', value: 925 },
+      ],
+    },
+  },
   { name: 'Email', url: 'mailto:adrielwalintukan27@gmail.com', icon: 'FiMail' },
 ]
 

@@ -72,6 +72,7 @@ export const SkillsSection = memo(function SkillsSection() {
   if (!pinned) {
     return (
       <section id="skills" className="section-fx relative bg-background py-16 sm:py-20">
+        <span aria-hidden="true" className="section-glow" />
         <div className="section-container">
           <Heading />
           <div className="mt-12 flex flex-col gap-6">
@@ -86,6 +87,7 @@ export const SkillsSection = memo(function SkillsSection() {
 
   return (
     <section id="skills" className="section-fx relative bg-background">
+      <span aria-hidden="true" className="section-glow" />
       <div ref={ref} style={{ height: `${100 + COUNT * SEGMENT_VH}vh` }}>
         {/* mobile: compact heading + counter on top, card below (pt clears the fixed header) */}
         <div className="sticky top-0 flex h-[100svh] items-start pt-20 lg:items-center lg:pt-0">

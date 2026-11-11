@@ -14,21 +14,50 @@ interface RootLayoutProps {
 export const RootLayout = memo(function RootLayout({ children }: RootLayoutProps) {
   useSmoothScroll()
 
-  // feeds the cursor glow behind sections (.section-fx); CSS vars so nothing re-renders
+  // cursor trail: ovals breadcrumbed along the pointer path, spaced by distance so a fast move
+  // leaves a chain of ghosts (RootLayout owns the count, CSS owns the look). Section-local
+  // coordinates + inline transforms: no repaint, and the ovals stay behind the section's content.
   useEffect(() => {
     if (!matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const root = document.documentElement
+    const TRAIL = 6
+    const STEP = 40 // px between breadcrumbs (~half the circle, so the ghosts stay distinct)
+    const crumbs: { x: number; y: number }[] = []
+    let pointerX = 0
+    let pointerY = 0
     let frame = 0
+    const draw = () => {
+      frame = 0
+      for (const root of document.querySelectorAll<HTMLElement>('.section-glow')) {
+        while (root.childElementCount < TRAIL) root.appendChild(document.createElement('i'))
+        const box = root.getBoundingClientRect()
+        for (let i = 0; i < TRAIL; i++) {
+          const at = i === 0 ? { x: pointerX, y: pointerY } : crumbs[i - 1]
+          // the trail is only as long as the path walked so far
+          const ghost = root.children[i] as HTMLElement
+          ghost.style.transform = at
+            ? `translate3d(${at.x - box.left}px, ${at.y - box.top}px, 0) translate(-50%, -50%)`
+            : 'translate3d(-9999px, -9999px, 0)'
+        }
+      }
+    }
+    const wake = () => {
+      if (!frame) frame = requestAnimationFrame(draw)
+    }
     const onMove = (e: PointerEvent) => {
-      cancelAnimationFrame(frame)
-      frame = requestAnimationFrame(() => {
-        root.style.setProperty('--cx', `${e.clientX}px`)
-        root.style.setProperty('--cy', `${e.clientY}px`)
-      })
+      pointerX = e.clientX
+      pointerY = e.clientY
+      const last = crumbs[0]
+      if (!last || Math.hypot(e.clientX - last.x, e.clientY - last.y) >= STEP) {
+        crumbs.unshift({ x: e.clientX, y: e.clientY })
+        crumbs.length = Math.min(crumbs.length, TRAIL - 1)
+      }
+      wake()
     }
     window.addEventListener('pointermove', onMove, { passive: true })
+    window.addEventListener('scroll', wake, { passive: true })
     return () => {
       window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('scroll', wake)
       cancelAnimationFrame(frame)
     }
   }, [])

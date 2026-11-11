@@ -1,16 +1,13 @@
 import { memo, useRef } from 'react'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
-import { InfiniteMarquee } from '@/components/animations'
 import { Button, ContactForm } from '@/components/ui'
 import { CONTACT_INFO, SOCIAL_LINKS } from '@/lib/constants'
 import { useLocalTime } from '@/hooks'
 
-const MARQUEE_ITEMS = ["Let's build something", "Let's build something"]
-
 /**
- * Closing block (PRD §6.9–6.10): accent marquee band, a tilted CTA card over the portrait,
- * then the contact details and form.
+ * Closing block (PRD §6.9–6.10): a tilted CTA card over the portrait, then the contact details
+ * and form.
  */
 export const ContactSection = memo(function ContactSection() {
   const ctaRef = useRef<HTMLDivElement>(null)
@@ -22,21 +19,7 @@ export const ContactSection = memo(function ContactSection() {
 
   return (
     <section id="contact" className="section-fx relative bg-background">
-      {/* Decorative band; the same words are the CTA heading below */}
-      <div aria-hidden="true" className="bg-ink py-4 text-paper sm:py-6">
-        <InfiniteMarquee speed={60} pauseOnHover={false}>
-          {MARQUEE_ITEMS.map((text, i) => (
-            <span
-              key={i}
-              className="flex items-center gap-6 whitespace-nowrap font-display text-6xl font-black uppercase leading-none sm:gap-8 sm:text-8xl"
-            >
-              {text}
-              <span className="text-4xl sm:text-6xl">✦</span>
-            </span>
-          ))}
-        </InfiniteMarquee>
-      </div>
-
+      <span aria-hidden="true" className="section-glow" />
       {/* CTA card over a dimmed portrait */}
       <div ref={ctaRef} className="relative overflow-hidden px-[var(--spacing-container)] py-24 sm:py-32">
         <img
