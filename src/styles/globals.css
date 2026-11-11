@@ -127,9 +127,9 @@
   color: var(--color-foreground);
 }
 
-/* Living backdrop for content sections: a faint dot grid plus a soft accent glow that follows the
-   cursor (--cx/--cy set on :root by RootLayout, desktop pointers only). The glow layer is
-   attached "fixed", so viewport coordinates line up without per-section maths. */
+/* Living backdrop for content sections: a faint dot grid plus a soft cursor comet behind the
+   content. The comet is clipped to its own section so it can never sit over another section's
+   content, and it is moved with transforms only, so pointer movement never repaints. */
 .section-fx {
   isolation: isolate;
 }
@@ -139,9 +139,44 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(480px circle at var(--cx, -1000px) var(--cy, -1000px), color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 70%) fixed,
-    radial-gradient(color-mix(in srgb, var(--color-foreground) 10%, transparent) 1px, transparent 1.5px) 0 0 / 24px 24px;
+  background: radial-gradient(color-mix(in srgb, var(--color-foreground) 10%, transparent) 1px, transparent 1.5px) 0 0 / 24px 24px;
+}
+.section-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+/* the trail: same-size soft ovals breadcrumbed along the pointer path (RootLayout appends them),
+   each fainter than the one before, so the overlaps darken like a chain of ghosts.
+   Solid colour + blur instead of a radial gradient, which banded into visible rings. */
+.section-glow > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  filter: blur(8px);
+  opacity: 0.1;
+  transform: translate3d(-9999px, -9999px, 0);
+}
+.section-glow > i:nth-child(2) {
+  opacity: 0.095;
+}
+.section-glow > i:nth-child(3) {
+  opacity: 0.085;
+}
+.section-glow > i:nth-child(4) {
+  opacity: 0.07;
+}
+.section-glow > i:nth-child(5) {
+  opacity: 0.055;
+}
+.section-glow > i:nth-child(6) {
+  opacity: 0.04;
 }
 
 /* ============================================================

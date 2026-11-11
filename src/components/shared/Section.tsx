@@ -24,6 +24,7 @@ export const Section = memo(function Section({
       id={id}
       className={cn('section-fx relative w-full max-w-full py-16 sm:py-20 md:py-28 lg:py-36', className)}
     >
+      <span aria-hidden="true" className="section-glow" />
       {fullWidth ? (
         children
       ) : (

@@ -262,6 +262,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
 
   return (
     <section id="projects" className="section-fx relative bg-background py-16 text-ink sm:py-20 md:py-28">
+      <span aria-hidden="true" className="section-glow" />
       <div className="section-container">
         <div className="mb-12 flex flex-wrap items-end justify-between gap-6 md:mb-16">
           <div>

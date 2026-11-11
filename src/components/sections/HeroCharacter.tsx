@@ -122,23 +122,39 @@ export const HeroCharacter = memo(function HeroCharacter() {
       const b = animate(ty, [0, 0.3, -0.4, -0.4, 0.4, 0], { duration: 10, repeat: Infinity, ease: 'easeInOut' })
       return () => { a.stop(); b.stop() }
     }
-    const onMove = (e: PointerEvent) => {
+    // One update per frame: high-rate mice fire several pointermoves per frame, and each one used to
+    // force layout reads and repaint the masked layers.
+    let frame = 0
+    let last: PointerEvent | null = null
+    let lensShown = false
+    const update = () => {
+      frame = 0
+      const e = last
+      const s = stage.current
       const r = ref.current?.getBoundingClientRect()
-      if (!r) return
+      const b = s?.getBoundingClientRect()
+      if (!e || !s || !r || !b) return
       const clamp = (v: number) => Math.max(-1, Math.min(1, v))
       tx.set(clamp((e.clientX - (r.left + r.width / 2)) / (innerWidth / 2)))
       ty.set(clamp((e.clientY - (r.top + r.height * 0.3)) / (innerHeight / 2)))
-      // suit lens: CSS variables on the stage, so the mask follows the pointer without re-rendering
-      const s = stage.current
-      if (!s) return
-      const b = s.getBoundingClientRect()
+      // suit lens: CSS variables on the stage, so the mask follows the pointer without re-rendering.
+      // While the lens is hidden, its position does not matter, so skip the repaint it would cause.
       const inside = e.clientX > b.left && e.clientX < b.right && e.clientY > b.top && e.clientY < b.bottom
+      if (!inside && !lensShown) return
+      lensShown = inside
       s.style.setProperty('--lx', `${e.clientX - b.left}px`)
       s.style.setProperty('--ly', `${e.clientY - b.top}px`)
       s.style.setProperty('--lr', inside ? `${b.width * 0.2}px` : '0px')
     }
+    const onMove = (e: PointerEvent) => {
+      last = e
+      if (!frame) frame = requestAnimationFrame(update)
+    }
     window.addEventListener('pointermove', onMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onMove)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(frame)
+    }
   }, [reduceMotion, loadAll, tx, ty])
 
   return (

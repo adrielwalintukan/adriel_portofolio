@@ -3,7 +3,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion
 import { ArrowUpRight, ArrowDown } from 'lucide-react'
 import { FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi'
 import { TextReveal } from '@/components/animations'
-import { Button } from '@/components/ui'
+import { Button, ProfilePreview } from '@/components/ui'
 import { CORE_STRENGTHS, SOCIAL_LINKS } from '@/lib/constants'
 import { useAppReady } from '@/hooks'
 import { HeroCharacter } from './HeroCharacter'
@@ -39,6 +39,7 @@ export const HeroSection = memo(function HeroSection() {
       ref={ref}
       className="section-fx relative min-h-[100svh] w-full overflow-hidden bg-background text-foreground [--focus-ring:var(--color-ink)]"
     >
+      <span aria-hidden="true" className="section-glow" />
       {/* character: fills the top of the screen on phones (copy overlaps its jacket), and stands
           large between the copy columns on desktop, cropped at the waist by the section edge */}
       <motion.div
@@ -86,20 +87,22 @@ export const HeroSection = memo(function HeroSection() {
             <p className="max-w-sm text-base font-medium leading-snug sm:text-lg">
               Information Systems student building AI-powered web &amp; mobile products with clean architecture.
             </p>
-            <div className="mt-5 flex items-center gap-3">
+            <div className="relative mt-5 flex items-center gap-3">
               {HERO_SOCIALS.map((s) => {
                 const Icon = SOCIAL_ICONS[s.icon as keyof typeof SOCIAL_ICONS]
                 return (
-                  <a
-                    key={s.name}
-                    href={s.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={s.name}
-                    className="flex h-10 w-10 items-center justify-center rounded-md bg-ink text-paper transition-colors hover:bg-accent"
-                  >
-                    <Icon className="h-4 w-4" />
-                  </a>
+                  <div key={s.name} className="group pointer-events-auto sm:relative">
+                    <a
+                      href={s.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={s.name}
+                      className="flex h-10 w-10 items-center justify-center rounded-md bg-ink text-paper transition-colors hover:bg-accent"
+                    >
+                      <Icon className="h-4 w-4" />
+                    </a>
+                    {s.profile && <ProfilePreview profile={s.profile} />}
+                  </div>
                 )
               })}
             </div>
