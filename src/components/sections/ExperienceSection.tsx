@@ -1,8 +1,10 @@
 import { memo, useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
-import { EXPERIENCE_TIMELINE } from '@/lib/constants'
+import { ArrowUpRight, ChevronDown } from 'lucide-react'
+import { EXPERIENCE_TIMELINE, type TimelineItem } from '@/lib/constants'
 import { Section } from '@/components/shared'
 import { Reveal } from '@/components/animations'
+import { scrollToProject } from '@/lib/scrollToProject'
 
 /**
  * Experience — dark section right after Selected Work (which stays the one light section),
@@ -90,6 +92,7 @@ export const ExperienceSection = memo(function ExperienceSection() {
                       ))}
                     </ul>
                   )}
+                  {item.projects && <SeeProjectMenu projects={item.projects} />}
                 </Reveal>
                 {/* sub-entries: indented under the track, aligned with the parent's prose column */}
                 {item.children && (
@@ -137,5 +140,53 @@ export const ExperienceSection = memo(function ExperienceSection() {
         </div>
       </div>
     </Section>
+  )
+})
+
+/**
+ * A native <details> "See project" list: entries with a projectId jump to that project card,
+ * entries without one are listed but inert (the project isn't on the page yet).
+ */
+const SeeProjectMenu = memo(function SeeProjectMenu({
+  projects,
+}: {
+  projects: NonNullable<TimelineItem['projects']>
+}) {
+  return (
+    <details className="group/menu mt-4">
+      <summary className="group/trigger inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-accent/50 bg-accent/10 px-3.5 py-1.5 font-mono text-[11px] uppercase tracking-wider text-accent transition-colors hover:border-accent hover:bg-accent hover:text-paper group-open/menu:border-accent group-open/menu:bg-accent group-open/menu:text-paper [&::-webkit-details-marker]:hidden">
+        <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden="true" />
+        See project
+        <ChevronDown
+          className="h-3.5 w-3.5 transition-transform duration-200 group-open/menu:rotate-180"
+          aria-hidden="true"
+        />
+      </summary>
+      <ul className="mt-2 w-full max-w-sm overflow-hidden rounded-xl border border-border-hover bg-background shadow-elevated">
+        {projects.map((project) => (
+          <li key={project.label} className="border-b border-border last:border-b-0">
+            {project.projectId ? (
+              <button
+                type="button"
+                onClick={(e) => {
+                  // close before scrolling: collapsing changes the page height and would drag the target along
+                  e.currentTarget.closest('details')?.removeAttribute('open')
+                  scrollToProject(project.projectId!)
+                }}
+                className="group/item flex w-full items-center justify-between gap-3 px-4 py-2.5 text-left text-sm text-foreground-muted transition-colors hover:bg-surface-hover hover:text-accent"
+              >
+                {project.label}
+                <ArrowUpRight
+                  className="h-3.5 w-3.5 shrink-0 opacity-0 transition-opacity group-hover/item:opacity-100"
+                  aria-hidden="true"
+                />
+              </button>
+            ) : (
+              <span className="flex px-4 py-2.5 text-sm text-foreground-subtle">{project.label}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </details>
   )
 })

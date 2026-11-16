@@ -13,6 +13,7 @@ import { PROJECTS, SELECTED_PROJECT_IDS, type Project } from '@/lib/constants'
 import { ProjectGalleryModal, ProjectLink } from '@/components/ui'
 import { useInView } from '@/hooks'
 import { cn } from '@/lib/utils'
+import { PROJECTS_EXPAND_EVENT } from '@/lib/scrollToProject'
 
 const SELECTED = SELECTED_PROJECT_IDS.map((id) => PROJECTS.find((p) => p.id === id)).filter(
   (p): p is Project => !!p
@@ -120,9 +121,10 @@ const StackCard = memo(function StackCard({
   return (
     <motion.article
       ref={articleRef}
+      id={`project-${project.id}`}
       style={stacked ? { scale, top: `${96 + index * 20}px` } : undefined}
       className={cn(
-        'section-dark relative grid origin-top overflow-hidden rounded-2xl border border-border shadow-elevated lg:grid-cols-[1fr_1.35fr]',
+        'section-dark relative grid scroll-mt-24 origin-top overflow-hidden rounded-2xl border border-border shadow-elevated lg:grid-cols-[1fr_1.35fr]',
         // single column on small screens: copy on top, screenshot takes whatever height is left
         stacked && 'grid-rows-[auto_minmax(0,1fr)] lg:grid-rows-1',
         // cards must be direct siblings in one container: sticky only pins within its parent
@@ -220,7 +222,11 @@ const StackCard = memo(function StackCard({
           // phone screenshots are portrait: show them whole instead of cropping
           className={cn(
             'absolute inset-0 h-full w-full transition-transform duration-700 group-hover:scale-[1.03]',
-            portrait ? 'object-contain p-6' : 'object-cover object-top'
+            portrait
+              ? 'object-contain p-6'
+              : project.imageFit === 'contain'
+                ? 'object-contain'
+                : 'object-cover object-top'
           )}
         />
         )}
@@ -260,6 +266,13 @@ export const ProjectsSection = memo(function ProjectsSection() {
   const stacked = !reduceMotion
   const listRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: listRef, offset: ['start start', 'end end'] })
+
+  // "See project" in Experience can point at a row inside the collapsed list: open it before scrolling
+  useEffect(() => {
+    const open = () => setShowAll(true)
+    window.addEventListener(PROJECTS_EXPAND_EVENT, open)
+    return () => window.removeEventListener(PROJECTS_EXPAND_EVENT, open)
+  }, [])
 
   return (
     <section id="projects" className="section-fx relative bg-background py-16 text-ink sm:py-20 md:py-28">
@@ -334,7 +347,7 @@ export const ProjectsSection = memo(function ProjectsSection() {
                       </div>
                     </li>
                   ) : (
-                  <li key={project.id} className="border-b border-paper-line">
+                  <li key={project.id} id={`project-${project.id}`} className="scroll-mt-24 border-b border-paper-line">
                     <button
                       onClick={() => setSelectedProject(project)}
                       className="group grid w-full grid-cols-[3rem_1fr_auto] items-center gap-4 py-5 text-left sm:grid-cols-[4rem_1fr_14rem_auto]"

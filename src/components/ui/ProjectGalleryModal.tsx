@@ -4,6 +4,7 @@ import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { FiX, FiChevronLeft, FiChevronRight, FiGithub } from 'react-icons/fi'
 import { type Project } from '@/lib/constants'
 import { TechBadge } from './TechBadge'
+import { ProjectLink } from './ProjectLink'
 
 interface ProjectGalleryModalProps {
   project: Project | null
@@ -29,10 +30,16 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
     }
   }, [project])
 
-  // the promo video, when there is one, is the first slide
-  const images = project ? [...(project.video ? [project.video] : []), ...project.images] : []
-  const totalImages = images.length
-  const isVideo = !!project?.video && currentIndex === 0
+  // the promo video, when there is one, is the first slide; a YouTube-only project shows its embed
+  const slides = project
+    ? [
+        ...(project.video ? [{ kind: 'video' as const, src: project.video }] : []),
+        ...(project.youtubeId ? [{ kind: 'youtube' as const, src: project.youtubeId }] : []),
+        ...project.images.map((src) => ({ kind: 'image' as const, src })),
+      ]
+    : []
+  const totalImages = slides.length
+  const slide = slides[currentIndex]
 
   const handleNext = useCallback(() => {
     if (totalImages <= 1) return
@@ -155,9 +162,18 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
                   exit="exit"
                   className="relative flex h-full w-full items-center justify-center"
                 >
-                  {isVideo ? (
+                  {slide.kind === 'youtube' ? (
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${slide.src}?autoplay=1&rel=0`}
+                      title={project.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                      className="aspect-video h-full max-h-full w-full rounded-lg bg-black"
+                    />
+                  ) : slide.kind === 'video' ? (
                     <video
-                      src={images[0]}
+                      src={slide.src}
                       poster={project.image}
                       controls
                       playsInline
@@ -173,7 +189,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
                     />
                   ) : (
                   <img
-                    src={images[currentIndex]}
+                    src={slide.src}
                     alt={`${project.title} screenshot ${currentIndex + 1}`}
                     loading="lazy"
                     className="max-h-full max-w-full object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.5)] select-none rounded-lg"
@@ -223,16 +239,21 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
               {project.technologies.map((tech) => (
                 <TechBadge key={tech} name={tech} />
               ))}
-              {project.repoUrl && (
-                <a
-                  href={project.repoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="ml-auto inline-flex items-center gap-2 rounded-lg border border-border-hover px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent sm:text-sm"
-                >
-                  <FiGithub className="h-4 w-4" />
-                  View code
-                </a>
+              {(project.liveUrl || project.downloadUrl || project.repoUrl) && (
+                <div className="ml-auto flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <ProjectLink project={project} compact />
+                  {project.repoUrl && (
+                    <a
+                      href={project.repoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-lg border border-border-hover px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-accent hover:text-accent sm:text-sm"
+                    >
+                      <FiGithub className="h-4 w-4" />
+                      View code
+                    </a>
+                  )}
+                </div>
               )}
             </div>
 

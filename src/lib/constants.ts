@@ -29,6 +29,10 @@ export interface Project {
   featured?: boolean
   /** muted looping clip shown in the featured card instead of the cover image */
   video?: string
+  /** YouTube id for a demo we host on YouTube instead of as a local file; shows in the gallery */
+  youtubeId?: string
+  /** 'contain' for a title slide that must not be cropped; screenshots default to a cover crop */
+  imageFit?: 'cover' | 'contain'
   repoUrl?: string
   /** live site, for a web app */
   liveUrl?: string
@@ -143,6 +147,22 @@ export const PROJECTS: Project[] = [
     liveUrl: 'https://rumahmakansipil.web.id',
     technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'shadcn/ui', 'Supabase'],
     category: 'Web App',
+    featured: false,
+  },
+  {
+    id: 'sakip_lldikti16',
+    title: 'SAKIP LLDIKTI XVI',
+    description:
+      'Internal accountability system for LLDIKTI Wilayah XVI: annual action plans, activity records and indicator measurements, each moving from draft through verification to sign-off.',
+    longDescription:
+      'Replaces the spreadsheets the regional education office used to plan and report performance. Indicators from Kepmendiktisaintek 358/M/KEP/2025 are carried down the chain — Renstra, sasaran, indicator, annual target from the Perjanjian Kinerja — into yearly action plans whose targets are split per period and whose activities carry their own budget and cost breakdown. Ratio and sum indicators are computed from their components instead of being keyed in as one finished number. Plans and measurements follow a draft, submitted, verified, signed-off flow with completeness gates and a returned path for revisions, so nothing is signed before every component is filled and its evidence attached. Each reporting period is frozen into a snapshot, so later changes to master data never rewrite past results, and every change — including attempts the gates rejected — is recorded in the audit trail. Signed periods produce the official annual action plan and quarterly performance report, archived as PDF.',
+    image: '/projects/sakip/cover-sakip.jpeg',
+    imageFit: 'contain',
+    images: [],
+    // the demo is the team's video on YouTube, so it is embedded rather than re-hosted
+    youtubeId: 'vi-OXsSWJkk',
+    technologies: ['Laravel', 'React', 'TypeScript', 'Inertia.js', 'PostgreSQL', 'Tailwind CSS'],
+    category: 'Fullstack / Web App',
     featured: false,
   },
   {
@@ -312,9 +332,9 @@ export const SELECTED_PROJECT_IDS = [
   'dailyboost_AI',
   'AI_interview',
   'rinegetan_connect',
+  'sakip_lldikti16',
   'carta_AI',
   'dentavision_AI',
-  'system_management_klinik_sentosa',
 ]
 
 // Other headline numbers (projects, technologies, certificates) are counted from the data below
@@ -341,6 +361,8 @@ export interface TimelineItem {
   logo?: string
   /** sub-entries (e.g. campus organisations under the university they run at) */
   children?: TimelineItem[]
+  /** shown behind a "See project" dropdown; an entry without a projectId is listed but not clickable */
+  projects?: { label: string; projectId?: string }[]
 }
 
 export const EXPERIENCE_TIMELINE: TimelineItem[] = [
@@ -353,6 +375,7 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     description: 'Developing and engineering enterprise information systems utilizing Laravel, Blade, Vite, and PostgreSQL architectures.',
     category: 'Experience',
     technologies: ['Laravel', 'Blade', 'Vite', 'PostgreSQL'],
+    projects: [{ label: 'SIMPEG' }, { label: 'SAKIP', projectId: 'sakip_lldikti16' }],
   },
   {
     id: 'exp-new-2',
@@ -370,6 +393,13 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
       'Next.js',
       'Artificial Intelligence (AI)',
       'React.js',
+    ],
+    projects: [
+      { label: 'DailyBoost AI', projectId: 'dailyboost_AI' },
+      { label: 'Rinegetan Connect', projectId: 'rinegetan_connect' },
+      { label: 'Rumah Makan Sipil', projectId: 'rumah_makan_sipil' },
+      { label: 'KostFinder UNKLAB', projectId: 'kostfinder_unklab' },
+      { label: 'Modern Car Rental', projectId: 'car_rental_website' },
     ],
   },
   {
@@ -390,6 +420,13 @@ export const EXPERIENCE_TIMELINE: TimelineItem[] = [
     logo: '/logo-experience/unklab.webp',
     description: 'Pursuing a degree in Information Systems, building a strong foundation in software engineering, algorithms, and systems architecture.',
     category: 'Education',
+    projects: [
+      { label: 'Carta AI', projectId: 'carta_AI' },
+      { label: 'DentaVision AI', projectId: 'dentavision_AI' },
+      { label: 'Interview AI', projectId: 'AI_interview' },
+      { label: 'Klinik Sentosa Management System', projectId: 'system_management_klinik_sentosa' },
+      { label: 'System Library', projectId: 'system_library_mobile_app' },
+    ],
     // campus organisations both run at Klabat University
     children: [
       {

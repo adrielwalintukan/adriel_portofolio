@@ -51,6 +51,9 @@ export const Navbar = memo(function Navbar() {
   }, [])
 
   const closeMenu = useCallback(() => setIsOpen(false), [])
+  // stable: QuickContactModal's scroll-lock effect depends on it and would otherwise re-run on every clock tick,
+  // clearing the page's overflow while the site menu is open
+  const closeContact = useCallback(() => setIsContactOpen(false), [])
 
   // Scroll lock, ESC to close, focus trap, focus restore
   useEffect(() => {
@@ -85,6 +88,7 @@ export const Navbar = memo(function Navbar() {
   }, [isOpen])
 
   return (
+    <>
     <header
       className={cn(
         'fixed top-0 left-0 right-0 z-50 transition-colors duration-500',
@@ -129,6 +133,7 @@ export const Navbar = memo(function Navbar() {
           </button>
         </Magnetic>
       </nav>
+    </header>
 
       <AnimatePresence>
         {isOpen && (
@@ -142,7 +147,7 @@ export const Navbar = memo(function Navbar() {
             animate={{ clipPath: 'inset(0 0 0% 0)' }}
             exit={{ clipPath: 'inset(0 0 100% 0)' }}
             transition={{ duration: 0.6, ease: [0.87, 0, 0.13, 1] }}
-            className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-background text-foreground [--focus-ring:var(--color-accent)]"
+            className="fixed inset-0 z-[80] flex flex-col overflow-y-auto bg-background text-foreground [--focus-ring:var(--color-accent)]"
           >
             <div className="section-container flex h-16 shrink-0 items-center justify-between border-b border-border sm:h-20">
               <span className="font-display text-2xl font-black uppercase tracking-tight text-accent sm:text-3xl">
@@ -241,7 +246,7 @@ export const Navbar = memo(function Navbar() {
         )}
       </AnimatePresence>
 
-      <QuickContactModal isOpen={isContactOpen} onClose={() => setIsContactOpen(false)} />
-    </header>
+      <QuickContactModal isOpen={isContactOpen} onClose={closeContact} />
+    </>
   )
 })
