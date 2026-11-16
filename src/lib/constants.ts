@@ -30,6 +30,12 @@ export interface Project {
   /** muted looping clip shown in the featured card instead of the cover image */
   video?: string
   repoUrl?: string
+  /** live site, for a web app */
+  liveUrl?: string
+  /** APK, for a mobile app: the card opens a download panel, so pair it with the size and QR below */
+  downloadUrl?: string
+  downloadSize?: string
+  downloadQr?: string
   /** listed with a "coming soon" placeholder: no media, not clickable, not counted */
   inDevelopment?: boolean
 }
@@ -62,6 +68,10 @@ export const PROJECTS: Project[] = [
       '/projects/dailyboost_AI/DailyBoost_AI - SignUp Page.webp'
     ],
     repoUrl: 'https://github.com/adrielwalintukan/DailyBoostAI_MAD',
+    downloadUrl:
+      'https://github.com/adrielwalintukan/DailyBoostAI_MAD/releases/download/v1.0.0/DailyBoost-AI.apk',
+    downloadSize: '90 MB',
+    downloadQr: '/projects/dailyboost_AI/apk-qr.png',
     technologies: ['React Native', 'Expo', 'TypeScript', 'Convex', 'Gemini API', 'Google OAuth'],
     category: 'AI Project / Mobile App',
     featured: true,
@@ -82,6 +92,7 @@ export const PROJECTS: Project[] = [
     ],
     video: '/projects/interview_ai/interview-ai-promo.mp4',
     repoUrl: 'https://github.com/adrielwalintukan/interviewAI',
+    liveUrl: 'https://interview-ai-id.vercel.app',
     technologies: ['Next.js', 'TypeScript', 'Gemini Live API', 'React Three Fiber', 'Supabase', 'Tailwind CSS'],
     category: 'AI Project / Fullstack',
     featured: false,
@@ -105,6 +116,7 @@ export const PROJECTS: Project[] = [
       '/projects/rinegetan_connect/Rinegetan Connect - Login Staf.webp'
     ],
     repoUrl: 'https://github.com/adrielwalintukan/Rinegetan-Connect',
+    liveUrl: 'https://gmahkrinegetan.web.id',
     technologies: ['Next.js', 'TypeScript', 'Supabase', 'Tailwind CSS', 'Framer Motion'],
     category: 'Web App',
   },
@@ -128,6 +140,7 @@ export const PROJECTS: Project[] = [
       '/projects/rumah_makan_sipil/Rumah Makan Sipil - Beranda Desktop.webp'
     ],
     repoUrl: 'https://github.com/adrielwalintukan/Rumah-Makan-Sipil',
+    liveUrl: 'https://rumahmakansipil.web.id',
     technologies: ['Next.js', 'TypeScript', 'Tailwind CSS', 'shadcn/ui', 'Supabase'],
     category: 'Web App',
     featured: false,

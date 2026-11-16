@@ -10,7 +10,7 @@ import {
 import { ArrowUpRight, Plus, Minus, Volume2, VolumeX } from 'lucide-react'
 import { FiGithub } from 'react-icons/fi'
 import { PROJECTS, SELECTED_PROJECT_IDS, type Project } from '@/lib/constants'
-import { ProjectGalleryModal } from '@/components/ui'
+import { ProjectGalleryModal, ProjectLink } from '@/components/ui'
 import { useInView } from '@/hooks'
 import { cn } from '@/lib/utils'
 
@@ -168,6 +168,7 @@ const StackCard = memo(function StackCard({
             </span>
           </button>
           )}
+          <ProjectLink project={project} />
           {project.repoUrl && (
             <a
               href={project.repoUrl}

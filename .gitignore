@@ -28,3 +28,6 @@ dist-ssr
 .codex/
 agent.md
 skills-lock.json
+
+# 90 MB APK: served from the GitHub release, never from the site build
+public/projects/dailyboost_AI/aplikasi/
