@@ -562,6 +562,9 @@ export const SKILLS_DATA: SkillCategory[] = [
       { name: 'Node.js', level: 85, icon: 'nodejs' },
       { name: 'PostgreSQL', level: 85, icon: 'postgresql' },
       { name: 'Laravel', level: 85, icon: 'laravel' },
+      { name: 'PHP', level: 85, icon: 'php' },
+      { name: 'Claude Code', level: 90, icon: 'claude' },
+      { name: 'Codex', level: 85, icon: 'codex' },
       { name: 'Supabase', level: 80, icon: 'supabase' },
       { name: 'Convex', level: 80, icon: 'convex' },
       { name: 'SQL', level: 85, icon: 'database' },
@@ -572,6 +575,7 @@ export const SKILLS_DATA: SkillCategory[] = [
     description: 'Fast, responsive interfaces for the web and cross-platform mobile apps.',
     skills: [
       { name: 'React Native', level: 90, icon: 'react' },
+      { name: 'React.js', level: 90, icon: 'react' },
       { name: 'Expo', level: 85, icon: 'expo' },
       { name: 'Next.js', level: 85, icon: 'nextjs' },
       { name: 'TypeScript', level: 85, icon: 'typescript' },

@@ -17,7 +17,10 @@ import {
   SiExpo,
   SiFigma,
   SiTestinglibrary,
-  SiPostman
+  SiPostman,
+  SiPhp,
+  SiClaude,
+  SiOpenai
 } from 'react-icons/si'
 
 /** Brand icon for a skill, matched on its icon code and name. */
@@ -31,6 +34,10 @@ export const getSkillIcon = (iconName?: string, skillName?: string) => {
   if (key.includes('figma')) return <SiFigma className="text-[#F24E1E]" />
   if (key.includes('testing') || key.includes('qa')) return <SiTestinglibrary className="text-[#E33332]" />
   if (key.includes('blade')) return <SiLaravel className="text-[#FF2D20]" />
+  if (key.includes('php')) return <SiPhp className="text-[#777BB4]" />
+  if (key.includes('claude')) return <SiClaude className="text-[#D97757]" />
+  // no Codex glyph yet: the OpenAI mark stands in for it
+  if (key.includes('codex')) return <SiOpenai className="text-foreground" />
   if (key.includes('python')) return <SiPython className="text-[#3776AB]" />
   if (key.includes('node')) return <SiNodedotjs className="text-[#339933]" />
   if (key.includes('supabase')) return <SiSupabase className="text-[#3ECF8E]" />
