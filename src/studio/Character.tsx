@@ -31,7 +31,8 @@ const ROUTINE: Spot[] = [
 ]
 
 const HIP_Y = 0.95
-const SEAT_DROP = 0.3
+// shallow enough that he sits tall on the seat instead of sinking into the chair
+const SEAT_DROP = 0.24
 
 const damp = (current: number, target: number, rate: number, dt: number) =>
   current + (target - current) * (1 - Math.exp(-rate * Math.min(dt, 0.12)))
@@ -216,8 +217,9 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     // --- head ---------------------------------------------------------------
     if (head.current) {
       const seated = sit > 0.5
-      const lookY = seated ? -0.16 : pointer.x * 0.38 + (a.act === 'shelf' ? 0.3 : 0)
-      const lookX = seated ? -0.28 : -pointer.y * 0.16
+      // at the desk he reads the screens: a small tilt, not a hunched neck
+      const lookY = seated ? -0.12 : pointer.x * 0.38 + (a.act === 'shelf' ? 0.3 : 0)
+      const lookX = seated ? -0.1 : -pointer.y * 0.16
       head.current.rotation.y = damp(head.current.rotation.y, lookY, 7, dt)
       head.current.rotation.x = damp(head.current.rotation.x, lookX, 7, dt)
     }
@@ -388,7 +390,8 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
           <sphereGeometry args={[0.03, 12, 10]} />
           <meshStandardMaterial color={SKIN} roughness={0.72} />
         </mesh>
-        <mesh position={[0, -0.148, 0.214]} rotation={[0, 0, -2.513]}>
+        {/* mouth sits on the face, not in front of it: the arc is pressed into the skin */}
+        <mesh position={[0, -0.148, 0.196]} rotation={[0.12, 0, -2.513]}>
           <torusGeometry args={[0.048, 0.0055, 6, 20, Math.PI * 0.6]} />
           <meshStandardMaterial color="#7d4239" roughness={0.7} />
         </mesh>

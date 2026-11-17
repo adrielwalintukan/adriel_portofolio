@@ -1,6 +1,6 @@
 import { Suspense, memo } from 'react'
 import { Canvas } from '@react-three/fiber'
-import type { StationId, ViewId } from './data'
+import type { StationId, TvMode, ViewId } from './data'
 import { CameraRig } from './CameraRig'
 import { Character } from './Character'
 import { Room } from './Room'
@@ -17,6 +17,7 @@ interface SceneProps {
   onGreet: () => void
   onPoster: () => void
   onTv: () => void
+  tvMode: TvMode
 }
 
 /**
@@ -35,6 +36,7 @@ export const StudioScene = memo(function StudioScene({
   onGreet,
   onPoster,
   onTv,
+  tvMode,
 }: SceneProps) {
   return (
     <Canvas
@@ -74,7 +76,7 @@ export const StudioScene = memo(function StudioScene({
       <pointLight position={[4.05, 1.2, 1.1]} intensity={3} distance={4.5} decay={2} color="#5fb2c8" />
 
       <Suspense fallback={null}>
-        <Room onPick={onPick} onHover={onHover} onPoster={onPoster} onTv={onTv} tvActive={view === 'tv'} />
+        <Room onPick={onPick} onHover={onHover} onPoster={onPoster} onTv={onTv} tvActive={view === 'tv'} tvMode={tvMode} />
       </Suspense>
       <Character
         greetKey={greetKey}

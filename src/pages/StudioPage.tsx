@@ -4,9 +4,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, RotateCcw } from 'lucide-react'
 import { CertificateModal, ProjectGalleryModal } from '@/components/ui'
 import type { Certificate, Project } from '@/lib/constants'
-import { STATIONS, type StationId, type ViewId } from '@/studio/data'
+import { STATIONS, type StationId, type TvMode, type ViewId } from '@/studio/data'
 import { StudioScene } from '@/studio/Scene'
 import { StudioPanel } from '@/studio/StudioPanel'
+import { TvPanel } from '@/studio/TvPanel'
 
 const isStation = (value: string): value is StationId => STATIONS.some((s) => s.id === value)
 
@@ -38,6 +39,7 @@ function StudioPage() {
   const [hello, setHello] = useState(true)
   const [project, setProject] = useState<Project | null>(null)
   const [certificate, setCertificate] = useState<Certificate | null>(null)
+  const [tvMode, setTvMode] = useState<TvMode>('menu')
 
   const coarse = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
@@ -98,6 +100,12 @@ function StudioPage() {
   const closeProject = useCallback(() => setProject(null), [])
   const closeCertificate = useCallback(() => setCertificate(null), [])
 
+  // leaving the TV puts it back on its menu, so it never sits on a stale "now playing" frame
+  const closeTv = useCallback(() => {
+    setTvMode('menu')
+    setView('room')
+  }, [])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
@@ -106,6 +114,7 @@ function StudioPage() {
         return
       }
       if (view !== 'room') {
+        if (view === 'tv') setTvMode('menu')
         setView('room')
         return
       }
@@ -125,6 +134,7 @@ function StudioPage() {
   }, [])
 
   const station = inRoom ? null : STATIONS.find((s) => s.id === view)
+  const panelOpen = Boolean(station) || view === 'tv'
 
   if (!webgl) {
     return (
@@ -159,7 +169,11 @@ function StudioPage() {
           onHover={onHover}
           onGreet={onGreet}
           onPoster={() => setView('poster')}
-          onTv={() => setView('tv')}
+          onTv={() => {
+            setTvMode('menu')
+            setView('tv')
+          }}
+          tvMode={tvMode}
         />
       </div>
 
@@ -249,8 +263,19 @@ function StudioPage() {
         <div className="relative flex-1">
           {/* desktop panel */}
           <div className="pointer-events-none absolute bottom-4 right-4 top-2 hidden w-[380px] md:block">
-            <AnimatePresence>
-              {station && (
+            <AnimatePresence mode="wait">
+              {view === 'tv' ? (
+                <motion.div
+                  key="tv"
+                  initial={{ opacity: 0, x: 24 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 24 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="h-full"
+                >
+                  <TvPanel mode={tvMode} onMode={setTvMode} onClose={closeTv} />
+                </motion.div>
+              ) : station ? (
                 <motion.div
                   key={station.id}
                   initial={{ opacity: 0, x: 24 }}
@@ -266,14 +291,14 @@ function StudioPage() {
                     onOpenCertificate={setCertificate}
                   />
                 </motion.div>
-              )}
+              ) : null}
             </AnimatePresence>
           </div>
 
           {/* hint */}
           <div
             className={`pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4 md:justify-start md:pl-4 ${
-              station ? 'hidden md:flex' : 'flex'
+              panelOpen ? 'hidden md:flex' : 'flex'
             }`}
           >
             <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
@@ -297,8 +322,19 @@ function StudioPage() {
       </div>
 
       {/* mobile sheet */}
-      <AnimatePresence>
-        {station && (
+      <AnimatePresence mode="wait">
+        {view === 'tv' ? (
+          <motion.div
+            key="tv"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-x-2 bottom-2 z-30 h-[52svh] md:hidden"
+          >
+            <TvPanel mode={tvMode} onMode={setTvMode} onClose={closeTv} />
+          </motion.div>
+        ) : station ? (
           <motion.div
             key={station.id}
             initial={{ y: '100%' }}
@@ -314,11 +350,11 @@ function StudioPage() {
               onOpenCertificate={setCertificate}
             />
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
 
       {/* hotspot tooltip */}
-      {hover && !coarse && !station && (
+      {hover && !coarse && !panelOpen && (
         <div
           className="pointer-events-none fixed z-[70] -translate-x-1/2 -translate-y-[calc(100%+14px)] whitespace-nowrap rounded-md border border-white/15 bg-[#0b1226]/95 px-2.5 py-1.5 font-mono text-[11px] text-[#dbe5ea] shadow-lg"
           style={{ left: hover.x, top: hover.y }}
@@ -329,7 +365,7 @@ function StudioPage() {
       )}
 
       <p className="sr-only" aria-live="polite">
-        {station ? `${station.label} panel opened` : 'Back to the room'}
+        {view === 'tv' ? 'TV panel opened' : station ? `${station.label} panel opened` : 'Back to the room'}
       </p>
 
       {!ready && (

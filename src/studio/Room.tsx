@@ -1,13 +1,12 @@
 import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
-import { pointerDrag, type StationId } from './data'
+import { pointerDrag, type StationId, type TvMode } from './data'
 import {
   boardTexture,
   certificateTexture,
   floorTexture,
   projectsTexture,
-  terminalTexture,
   windowTexture,
 } from './textures'
 
@@ -127,14 +126,67 @@ const RoomShell = memo(function RoomShell() {
       <Box position={[-5.92, 0.06, 0]} size={[0.08, 0.12, 12.2]} color={C.trim} />
 
       {/* rug */}
-      <Box position={[-0.1, 0.02, 1.4]} size={[5.4, 0.04, 3.8]} color={C.rug} />
-      <Box position={[-0.1, 0.045, 1.4]} size={[4.9, 0.01, 3.3]} color={C.rugTrim} />
-      <Box position={[-0.1, 0.052, 1.4]} size={[4.5, 0.01, 2.9]} color={C.rug} />
+      {/* rug: pulled up toward the desk and the shelf, clear of the lounge */}
+      <Box position={[-0.1, 0.02, 0.4]} size={[5.4, 0.04, 3.8]} color={C.rug} />
+      <Box position={[-0.1, 0.045, 0.4]} size={[4.9, 0.01, 3.3]} color={C.rugTrim} />
+      <Box position={[-0.1, 0.052, 0.4]} size={[4.5, 0.01, 2.9]} color={C.rug} />
     </group>
   )
 })
 
-/** Desk, two monitors, keyboard, mug and chair — the projects station. */
+/** The live terminal: a fixed script that types itself out, so the screen is never a still image. */
+const TERM = { w: 640, h: 400 }
+
+const TERM_LINES: [string, string][] = [
+  ['adriel@studio:~$ npm run dev', '#3fb0b7'],
+  ['  vite v8  ready in 214 ms', '#9fb2bb'],
+  ['adriel@studio:~$ git log --oneline -3', '#3fb0b7'],
+  ['  a0f0f19 studio: open the portrait', '#cdd9dd'],
+  ['  d54d84f studio: animate the host', '#cdd9dd'],
+  ['  85a9848 studio: lounge and tv', '#cdd9dd'],
+  ['adriel@studio:~$ npm test', '#3fb0b7'],
+  ['  pass 2  fail 0', '#7fd6b8'],
+  ['adriel@studio:~$ npm run build', '#3fb0b7'],
+  ['  built in 1.56s', '#7fd6b8'],
+  ['adriel@studio:~$ ls projects', '#3fb0b7'],
+  ['  dailyboost   sakip   carta', '#cdd9dd'],
+  ['adriel@studio:~$ _', '#3fb0b7'],
+]
+
+const paintTerminal = (ctx: CanvasRenderingContext2D, time: number) => {
+  const w = TERM.w
+  ctx.fillStyle = '#0b111c'
+  ctx.fillRect(0, 0, w, TERM.h)
+  ctx.font = '600 17px ui-monospace, monospace'
+  // one line every 0.55s, then a beat on the last line before starting over
+  const shown = Math.floor((time * 1.8) % (TERM_LINES.length + 3))
+  TERM_LINES.slice(0, shown).forEach(([text, color], i) => {
+    ctx.fillStyle = color
+    ctx.fillText(text, 26, 48 + i * 26)
+  })
+  const caret = Math.floor(time * 2) % 2 === 0
+  if (caret) {
+    const y = 48 + Math.min(shown, TERM_LINES.length) * 26
+    ctx.fillStyle = '#3fb0b7'
+    ctx.fillRect(26, y - 15, 10, 19)
+  }
+}
+
+let terminalCanvas: { ctx: CanvasRenderingContext2D; texture: THREE.CanvasTexture } | null = null
+const terminalScreen = () => {
+  if (!terminalCanvas) {
+    const canvas = document.createElement('canvas')
+    canvas.width = TERM.w
+    canvas.height = TERM.h
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.anisotropy = 4
+    terminalCanvas = { ctx: canvas.getContext('2d')!, texture }
+  }
+  return terminalCanvas
+}
+
+/** Gaming desk: two screens on low arms, an RGB tower, a headset — the projects station. */
 const Desk = memo(function Desk({
   onPick,
   onHover,
@@ -142,84 +194,139 @@ const Desk = memo(function Desk({
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
 }) {
-  const terminal = useMemo(() => terminalTexture(), [])
   const projects = useMemo(() => projectsTexture(), [])
   const steam = useRef<THREE.Group>(null)
+  const tower = useRef<THREE.Mesh[]>([])
+  const live = terminalScreen()
+  const termPaint = useRef(0)
 
-  useFrame(({ clock }) => {
-    if (!steam.current) return
+  useFrame(({ clock }, delta) => {
     const t = clock.elapsedTime
-    steam.current.children.forEach((child, i) => {
-      const p = (t * 0.35 + i / 3) % 1
-      child.position.y = 1.22 + p * 0.45
-      child.position.x = 3.05 + Math.sin(p * 6 + i) * 0.05
-      child.scale.setScalar(0.05 + p * 0.06)
-      const puff = child as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>
-      puff.material.opacity = 0.32 * (1 - p)
+    if (steam.current) {
+      steam.current.children.forEach((child, i) => {
+        const p = (t * 0.35 + i / 3) % 1
+        child.position.y = 1.22 + p * 0.45
+        child.position.x = 2.75 + Math.sin(p * 6 + i) * 0.05
+        child.scale.setScalar(0.05 + p * 0.06)
+        const puff = child as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>
+        puff.material.opacity = 0.32 * (1 - p)
+      })
+    }
+    // the terminal keeps logging, so the second screen is never a frozen picture
+    termPaint.current += Math.min(delta, 0.05)
+    if (termPaint.current > 0.12) {
+      termPaint.current = 0
+      paintTerminal(terminalScreen().ctx, t)
+      terminalScreen().texture.needsUpdate = true
+    }
+    tower.current.forEach((fan, i) => {
+      if (fan) (fan.material as THREE.MeshStandardMaterial).emissiveIntensity = 1.4 + Math.sin(t * 2 + i * 1.7) * 0.7
     })
   })
 
   return (
     <Hotspot station="projects" label="Projects — the screens" onPick={onPick} onHover={onHover}>
       <group>
-        {/* desk */}
-        <Box position={[1.4, 1.02, -4.6]} size={[4.6, 0.1, 1.4]} color={C.wood} />
-        <Box position={[-0.68, 0.5, -4.6]} size={[0.12, 1, 1.3]} color={C.woodDark} />
-        <Box position={[3.48, 0.5, -4.6]} size={[0.12, 1, 1.3]} color={C.woodDark} />
-        <Box position={[1.4, 0.62, -5.22]} size={[4.3, 0.76, 0.08]} color={C.woodDark} />
+        {/* desk: narrower than the old workbench, angled like a gaming setup */}
+        <Box position={[1.4, 1.0, -4.62]} size={[3.3, 0.08, 1.12]} color={C.wood} />
+        <Box position={[1.4, 0.98, -4.62]} size={[3.24, 0.02, 1.06]} color="#1d2733" />
+        <Box position={[-0.14, 0.48, -4.62]} size={[0.1, 0.96, 1.02]} color={C.woodDark} />
+        <Box position={[2.94, 0.48, -4.62]} size={[0.1, 0.96, 1.02]} color={C.woodDark} />
+        <Box position={[1.4, 0.6, -5.1]} size={[3.06, 0.72, 0.06]} color={C.woodDark} />
 
-        {/* main monitor, standing on the desk: base plate, neck, panel */}
-        <Box position={[2.25, 1.1, -5.1]} size={[0.52, 0.06, 0.36]} color={C.metal} />
-        <Box position={[2.25, 1.37, -5.16]} size={[0.09, 0.52, 0.09]} color={C.metal} />
-        <Box position={[2.25, 2.12, -5.12]} size={[1.62, 0.98, 0.07]} color={C.dark} />
-        <mesh position={[2.25, 2.12, -5.075]} rotation={[0, 0, 0]}>
-          <planeGeometry args={[1.5, 0.87]} />
+        {/* main monitor: short arm, so the panel sits just above the desk */}
+        <Box position={[1.95, 1.06, -4.92]} size={[0.42, 0.04, 0.28]} color={C.metal} />
+        <Box position={[1.95, 1.2, -4.96]} size={[0.07, 0.24, 0.07]} color={C.metal} />
+        <Box position={[1.95, 1.68, -4.94]} size={[1.5, 0.86, 0.06]} color={C.dark} />
+        <mesh position={[1.95, 1.68, -4.905]}>
+          <planeGeometry args={[1.39, 0.77]} />
           <meshStandardMaterial map={projects} emissive="#ffffff" emissiveMap={projects} emissiveIntensity={0.55} toneMapped={false} />
         </mesh>
 
-        {/* terminal monitor, slightly turned */}
-        <group position={[0.55, 0, -5.1]} rotation={[0, 0.22, 0]}>
-          <Box position={[0, 1.1, 0]} size={[0.44, 0.05, 0.32]} color={C.metal} />
-          <Box position={[0, 1.36, -0.03]} size={[0.08, 0.48, 0.08]} color={C.metal} />
-          <Box position={[0, 1.92, 0]} size={[1.3, 0.8, 0.06]} color={C.dark} />
-          <mesh position={[0, 1.92, 0.035]}>
-            <planeGeometry args={[1.2, 0.71]} />
-            <meshStandardMaterial map={terminal} emissive="#ffffff" emissiveMap={terminal} emissiveIntensity={0.6} toneMapped={false} />
+        {/* second screen: the live terminal, turned toward him */}
+        <group position={[0.42, 0, -4.9]} rotation={[0, 0.24, 0]}>
+          <Box position={[0, 1.05, 0]} size={[0.34, 0.035, 0.24]} color={C.metal} />
+          <Box position={[0, 1.16, -0.02]} size={[0.06, 0.19, 0.06]} color={C.metal} />
+          <Box position={[0, 1.55, 0]} size={[1.12, 0.68, 0.05]} color={C.dark} />
+          <mesh position={[0, 1.55, 0.03]}>
+            <planeGeometry args={[1.03, 0.6]} />
+            <meshStandardMaterial map={live.texture} emissive="#ffffff" emissiveMap={live.texture} emissiveIntensity={0.7} toneMapped={false} />
           </mesh>
         </group>
 
         {/* keyboard, mouse, notebook */}
-        <Box position={[1.25, 1.08, -4.28]} size={[1.1, 0.04, 0.34]} color={C.metal} />
-        <Box position={[2.05, 1.08, -4.24]} size={[0.16, 0.03, 0.22]} color={C.metal} />
-        <Box position={[0.15, 1.08, -4.3]} size={[0.55, 0.04, 0.4]} color={C.cream} rotation={[0, -0.18, 0]} />
+        <Box position={[1.15, 1.06, -4.32]} size={[0.94, 0.035, 0.3]} color={C.metal} />
+        <Box position={[1.88, 1.06, -4.3]} size={[0.14, 0.03, 0.2]} color={C.metal} />
+        <Box position={[0.08, 1.05, -4.36]} size={[0.42, 0.03, 0.32]} color={C.cream} rotation={[0, -0.2, 0]} />
 
         {/* mug + steam */}
-        <mesh position={[3.05, 1.17, -4.22]} castShadow>
-          <cylinderGeometry args={[0.1, 0.09, 0.19, 12]} />
+        <mesh position={[2.72, 1.13, -4.3]} castShadow>
+          <cylinderGeometry args={[0.09, 0.08, 0.17, 12]} />
           <meshStandardMaterial color={C.cream} roughness={0.7} />
         </mesh>
         <group ref={steam}>
           {[0, 1, 2].map((i) => (
-            <mesh key={i} position={[3.05, 1.26, -4.22]}>
+            <mesh key={i} position={[2.75, 1.22, -4.3]}>
               <sphereGeometry args={[1, 8, 8]} />
               <meshStandardMaterial color="#dfe9ec" transparent opacity={0.28} depthWrite={false} />
             </mesh>
           ))}
         </group>
 
-        {/* chair, tucked in to the desk */}
-        <Box position={[1.3, 0.62, -3.35]} size={[0.86, 0.12, 0.8]} color={C.dark} />
-        <Box position={[1.3, 1.12, -3.0]} size={[0.8, 0.72, 0.1]} color={C.dark} rotation={[0.12, 0, 0]} />
-        <Box position={[1.3, 0.3, -3.35]} size={[0.1, 0.6, 0.1]} color={C.metal} />
-        <Box position={[1.3, 0.04, -3.35]} size={[0.62, 0.06, 0.62]} color={C.metal} />
-        {[
-          [0.98, -3.65],
-          [1.62, -3.65],
-          [0.98, -3.05],
-          [1.62, -3.05],
-        ].map(([x, z]) => (
-          <Box key={`${x}${z}`} position={[x, 0.12, z]} size={[0.06, 0.24, 0.06]} color={C.metal} />
-        ))}
+        {/* VR headset resting on the desk */}
+        <group position={[2.9, 1.1, -4.86]} rotation={[0, -0.5, 0]}>
+          <Box position={[0, 0.05, 0]} size={[0.26, 0.1, 0.12]} color="#11161f" />
+          <Box position={[0, 0.05, 0.075]} size={[0.2, 0.075, 0.02]} color="#26313d" />
+          <Box position={[0, 0.05, -0.075]} size={[0.22, 0.085, 0.02]} color="#26313d" />
+          <mesh position={[0, 0.05, 0.08]}>
+            <boxGeometry args={[0.14, 0.014, 0.01]} />
+            <meshStandardMaterial color={ACCENT_LIGHT} emissive={ACCENT_LIGHT} emissiveIntensity={1.5} toneMapped={false} />
+          </mesh>
+        </group>
+
+        {/* RGB tower, standing at the right end of the desk, fans facing the room */}
+        <group position={[3.24, 0, -4.5]}>
+          <Box position={[0, 0.42, 0]} size={[0.46, 0.84, 0.74]} color="#12181f" />
+          <Box position={[0, 0.42, 0.372]} size={[0.38, 0.72, 0.014]} color="#0a0e13" />
+          {[0.66, 0.46, 0.26].map((y, i) => (
+            <mesh
+              key={y}
+              ref={(m) => {
+                if (m) tower.current[i] = m
+              }}
+              position={[0, y, 0.382]}
+            >
+              <torusGeometry args={[0.12, 0.015, 6, 18]} />
+              <meshStandardMaterial
+                color={i === 0 ? '#3fb0b7' : i === 1 ? '#7f5bd6' : '#c07a3e'}
+                emissive={i === 0 ? '#3fb0b7' : i === 1 ? '#7f5bd6' : '#c07a3e'}
+                emissiveIntensity={1.6}
+                toneMapped={false}
+              />
+            </mesh>
+          ))}
+        </group>
+
+        {/* gaming chair: high back behind him, wings, five-star base */}
+        <group position={[1.3, 0, -3.16]}>
+          <Box position={[0, 0.66, 0.04]} size={[0.7, 0.12, 0.72]} color="#191f2a" />
+          <Box position={[0, 0.98, 0.38]} size={[0.62, 0.64, 0.11]} color="#191f2a" rotation={[-0.16, 0, 0]} />
+          <Box position={[0, 0.98, 0.36]} size={[0.28, 0.56, 0.1]} color="#26313d" rotation={[-0.16, 0, 0]} />
+          {[-0.3, 0.3].map((x) => (
+            <Box key={x} position={[x, 0.95, 0.3]} size={[0.11, 0.36, 0.15]} color="#26313d" rotation={[-0.1, 0, 0]} />
+          ))}
+          <Box position={[0, 0.72, 0.42]} size={[0.46, 0.26, 0.09]} color={C.accent} />
+          <Box position={[0, 0.3, 0]} size={[0.09, 0.56, 0.09]} color={C.metal} />
+          <Box position={[0, 0.04, 0]} size={[0.56, 0.06, 0.56]} color={C.metal} />
+          {[
+            [0.98, -3.6],
+            [1.62, -3.6],
+            [0.98, -3.0],
+            [1.62, -3.0],
+          ].map(([x, z]) => (
+            <Box key={`${x}${z}`} position={[x, 0.12, z]} size={[0.06, 0.24, 0.06]} color={C.metal} />
+          ))}
+        </group>
       </group>
     </Hotspot>
   )
@@ -584,6 +691,73 @@ const paintPong = (ctx: CanvasRenderingContext2D, s: PongState, active: boolean)
   ctx.fillText(active ? 'MOVE THE POINTER TO PLAY' : 'NIGHT CIRCUIT · ATTRACT MODE', w / 2, h - 44)
 }
 
+const paintMenu = (ctx: CanvasRenderingContext2D) => {
+  const { w, h } = PONG
+  ctx.fillStyle = '#071019'
+  ctx.fillRect(0, 0, w, h)
+  const glow = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, w * 0.75)
+  glow.addColorStop(0, 'rgba(63,176,183,0.2)')
+  glow.addColorStop(1, 'rgba(7,16,25,0)')
+  ctx.fillStyle = glow
+  ctx.fillRect(0, 0, w, h)
+
+  ctx.textAlign = 'center'
+  ctx.fillStyle = '#e8f1f2'
+  ctx.font = '700 26px ui-monospace, monospace'
+  ctx.fillText('NIGHT CIRCUIT', w / 2, 76)
+  ctx.fillStyle = 'rgba(232,241,242,0.45)'
+  ctx.font = '600 13px ui-monospace, monospace'
+  ctx.fillText('pick something on the right', w / 2, 102)
+
+  const card = (x: number, label: string, sub: string, color: string) => {
+    ctx.fillStyle = 'rgba(255,255,255,0.05)'
+    ctx.beginPath()
+    ctx.roundRect(x, 140, 190, 108, 12)
+    ctx.fill()
+    ctx.strokeStyle = color
+    ctx.lineWidth = 2
+    ctx.beginPath()
+    ctx.roundRect(x, 140, 190, 108, 12)
+    ctx.stroke()
+    ctx.fillStyle = color
+    ctx.font = '700 20px ui-monospace, monospace'
+    ctx.fillText(label, x + 95, 186)
+    ctx.fillStyle = 'rgba(232,241,242,0.5)'
+    ctx.font = '600 12px ui-monospace, monospace'
+    ctx.fillText(sub, x + 95, 214)
+  }
+  card(34, 'PONG', 'play the match', '#3fb0b7')
+  card(256, 'YOUTUBE', 'watch a video', '#ffd08a')
+}
+
+const paintVideo = (ctx: CanvasRenderingContext2D, time: number) => {
+  const { w, h } = PONG
+  const sky = ctx.createLinearGradient(0, 0, 0, h)
+  sky.addColorStop(0, '#0a1424')
+  sky.addColorStop(0.6, '#16394c')
+  sky.addColorStop(1, '#2d5660')
+  ctx.fillStyle = sky
+  ctx.fillRect(0, 0, w, h)
+  // a slow pan of soft shapes stands in for the frame while the real video plays in the panel
+  for (let i = 0; i < 3; i++) {
+    const x = ((time * 22 + i * 160) % (w + 200)) - 100
+    ctx.fillStyle = `rgba(127,214,184,${0.06 + i * 0.03})`
+    ctx.beginPath()
+    ctx.arc(x, h * (0.4 + i * 0.15), 90 - i * 18, 0, Math.PI * 2)
+    ctx.fill()
+  }
+  ctx.fillStyle = 'rgba(7,16,25,0.55)'
+  ctx.fillRect(0, h - 62, w, 62)
+  ctx.fillStyle = '#ffd08a'
+  ctx.font = '700 18px ui-monospace, monospace'
+  ctx.textAlign = 'left'
+  ctx.fillText('NOW PLAYING', 24, h - 26)
+  ctx.fillStyle = 'rgba(232,241,242,0.6)'
+  ctx.font = '600 13px ui-monospace, monospace'
+  ctx.fillText('the player is open in the panel', 168, h - 26)
+  ctx.textAlign = 'center'
+}
+
 type PongState = {
   bx: number
   by: number
@@ -615,59 +789,70 @@ const Lounge = memo(function Lounge({
   onTv,
   onHover,
   active,
+  mode,
 }: {
   onTv: () => void
   onHover: (label: string | null, x: number, y: number) => void
   active: boolean
+  mode: TvMode
 }) {
   const leave = useRef<number | undefined>(undefined)
   const screen = pongScreen()
 
   const match = useRef<PongState>({ bx: 0.5, by: 0.5, vx: 0.62, vy: 0.5, player: 0.5, cpu: 0.5, ps: 0, cs: 0 })
   const paint = useRef(0)
+  const lastMode = useRef<TvMode | null>(null)
 
-  useFrame(({ pointer }, delta) => {
+  useFrame(({ pointer, clock }, delta) => {
     const dt = Math.min(delta, 0.05)
     const s = match.current
-    const move = (from: number, to: number, rate: number) => from + Math.max(-rate * dt, Math.min(rate * dt, to - from))
 
-    // in the TV view the pointer is the paddle; otherwise he plays against himself
-    s.player = move(s.player, active ? 0.5 + pointer.x * 0.45 : s.bx, 1.8)
-    s.cpu = move(s.cpu, s.bx, 0.72)
-    s.bx += s.vx * dt
-    s.by += s.vy * dt
+    if (mode === 'game') {
+      const move = (from: number, to: number, rate: number) => from + Math.max(-rate * dt, Math.min(rate * dt, to - from))
 
-    if (s.bx < 0.035) {
-      s.bx = 0.035
-      s.vx = Math.abs(s.vx)
-    } else if (s.bx > 0.965) {
-      s.bx = 0.965
-      s.vx = -Math.abs(s.vx)
-    }
-    if (s.vy > 0 && s.by > 0.9 && Math.abs(s.bx - s.player) < 0.14) {
-      s.by = 0.9
-      s.vy = -Math.min(Math.abs(s.vy) * 1.02, 0.9)
-    } else if (s.vy < 0 && s.by < 0.1 && Math.abs(s.bx - s.cpu) < 0.14) {
-      s.by = 0.1
-      s.vy = Math.min(Math.abs(s.vy) * 1.02, 0.9)
-    }
-    if (s.by > 1.05 || s.by < -0.05) {
-      const playerMissed = s.by > 1.05
-      if (playerMissed) s.cs += 1
-      else s.ps += 1
-      s.bx = 0.5
-      s.by = 0.5
-      s.vx = playerMissed ? -0.62 : 0.62
-      s.vy = playerMissed ? 0.5 : -0.5
+      // in the TV view the pointer is the paddle; otherwise he plays against himself
+      s.player = move(s.player, active ? 0.5 + pointer.x * 0.45 : s.bx, 1.8)
+      s.cpu = move(s.cpu, s.bx, 0.72)
+      s.bx += s.vx * dt
+      s.by += s.vy * dt
+
+      if (s.bx < 0.035) {
+        s.bx = 0.035
+        s.vx = Math.abs(s.vx)
+      } else if (s.bx > 0.965) {
+        s.bx = 0.965
+        s.vx = -Math.abs(s.vx)
+      }
+      if (s.vy > 0 && s.by > 0.9 && Math.abs(s.bx - s.player) < 0.14) {
+        s.by = 0.9
+        s.vy = -Math.min(Math.abs(s.vy) * 1.02, 0.9)
+      } else if (s.vy < 0 && s.by < 0.1 && Math.abs(s.bx - s.cpu) < 0.14) {
+        s.by = 0.1
+        s.vy = Math.min(Math.abs(s.vy) * 1.02, 0.9)
+      }
+      if (s.by > 1.05 || s.by < -0.05) {
+        const playerMissed = s.by > 1.05
+        if (playerMissed) s.cs += 1
+        else s.ps += 1
+        s.bx = 0.5
+        s.by = 0.5
+        s.vx = playerMissed ? -0.62 : 0.62
+        s.vy = playerMissed ? 0.5 : -0.5
+      }
     }
 
-    // 20 fps is plenty for a CRT-sized screen and keeps the texture upload cheap
+    // the screen repaints at 20 fps for the match and much slower for the menus, which barely move
     paint.current += dt
-    if (paint.current > 0.05) {
-      paint.current = 0
-      paintPong(pongScreen().ctx, s, active)
-      pongScreen().texture.needsUpdate = true
-    }
+    const redraw = lastMode.current !== mode || paint.current > (mode === 'game' ? 0.05 : 0.4)
+    if (!redraw) return
+    paint.current = 0
+    lastMode.current = mode
+
+    const screen = pongScreen()
+    if (mode === 'menu') paintMenu(screen.ctx)
+    else if (mode === 'youtube') paintVideo(screen.ctx, clock.elapsedTime)
+    else paintPong(screen.ctx, s, active)
+    screen.texture.needsUpdate = true
   })
 
   return (
@@ -703,12 +888,26 @@ const Lounge = memo(function Lounge({
             <Box position={[x, 0.16, 0.31]} size={[0.1, 0.02, 0.02]} color={C.trim} />
           </group>
         ))}
-        {/* the console itself */}
+        {/* the console itself, with two pads on the shelf */}
         <Box position={[-0.78, 0.4, 0.05]} size={[0.46, 0.1, 0.34]} color={C.dark} />
         <mesh position={[-0.78, 0.42, 0.225]}>
           <boxGeometry args={[0.2, 0.012, 0.01]} />
           <meshStandardMaterial color={ACCENT_LIGHT} emissive={ACCENT_LIGHT} emissiveIntensity={1.6} toneMapped={false} />
         </mesh>
+        {[-0.28, 0.28].map((x, i) => (
+          <group key={x} position={[x, 0.42, 0.06]} rotation={[0, 0.4 + i * 0.35, 0]}>
+            <Box position={[0, 0.02, 0]} size={[0.34, 0.05, 0.2]} color="#1b2330" />
+            {[-0.13, 0.13].map((hx) => (
+              <Box key={hx} position={[hx, 0.02, -0.03]} size={[0.12, 0.055, 0.15]} color="#232d3a" />
+            ))}
+            {[-0.045, 0.045].map((sx) => (
+              <mesh key={sx} position={[sx, 0.052, 0.03]}>
+                <cylinderGeometry args={[0.022, 0.022, 0.012, 10]} />
+                <meshStandardMaterial color="#4a5a6b" roughness={0.5} />
+              </mesh>
+            ))}
+          </group>
+        ))}
 
         {/* TV on its stand */}
         <Box position={[0, 0.335, -0.06]} size={[0.54, 0.04, 0.3]} color={C.metal} />
@@ -756,22 +955,39 @@ const Lounge = memo(function Lounge({
         ))}
       </group>
 
-      {/* coffee table */}
+      {/* coffee table: sized like the desk, so the lounge doesn't look empty */}
       <group position={[4.35, 0, 1.5]}>
-        <Box position={[0, 0.44, 0]} size={[1.6, 0.08, 0.82]} color={C.wood} />
-        <Box position={[0, 0.32, 0]} size={[1.44, 0.06, 0.7]} color={C.woodDark} />
+        <Box position={[0, 0.44, 0]} size={[3.0, 0.08, 1.05]} color={C.wood} />
+        <Box position={[0, 0.32, 0]} size={[2.84, 0.06, 0.92]} color={C.woodDark} />
         {[
-          [-0.66, -0.3],
-          [0.66, -0.3],
-          [-0.66, 0.3],
-          [0.66, 0.3],
+          [-1.36, -0.4],
+          [1.36, -0.4],
+          [-1.36, 0.4],
+          [1.36, 0.4],
         ].map(([x, z]) => (
           <Box key={`${x}${z}`} position={[x, 0.2, z]} size={[0.07, 0.4, 0.07]} color={C.woodDark} />
         ))}
-        {/* controller, a book and a mug */}
-        <Box position={[0.18, 0.5, 0.12]} size={[0.26, 0.05, 0.16]} color="#1b2330" rotation={[0, 0.3, 0]} />
-        <Box position={[-0.42, 0.49, -0.12]} size={[0.36, 0.04, 0.26]} color={C.cream} rotation={[0, -0.2, 0]} />
-        <mesh position={[-0.35, 0.52, -0.1]} castShadow>
+        {/* two PlayStation-style pads, a book and a mug */}
+        {[-0.62, -0.16].map((x, i) => (
+          <group key={x} position={[x, 0.49, 0.16]} rotation={[0, 0.18 + i * 0.14, 0]}>
+            <Box position={[0, 0.02, 0]} size={[0.34, 0.05, 0.2]} color="#1b2330" />
+            {[-0.13, 0.13].map((hx) => (
+              <Box key={hx} position={[hx, 0.02, -0.03]} size={[0.12, 0.055, 0.15]} color="#232d3a" />
+            ))}
+            {[-0.045, 0.045].map((sx) => (
+              <mesh key={sx} position={[sx, 0.052, 0.03]}>
+                <cylinderGeometry args={[0.022, 0.022, 0.012, 10]} />
+                <meshStandardMaterial color="#4a5a6b" roughness={0.5} />
+              </mesh>
+            ))}
+            <mesh position={[0.02, 0.052, -0.04]}>
+              <sphereGeometry args={[0.014, 8, 6]} />
+              <meshStandardMaterial color={ACCENT_LIGHT} emissive={ACCENT_LIGHT} emissiveIntensity={1.2} toneMapped={false} />
+            </mesh>
+          </group>
+        ))}
+        <Box position={[0.62, 0.49, -0.18]} size={[0.4, 0.04, 0.28]} color={C.cream} rotation={[0, -0.2, 0]} />
+        <mesh position={[0.85, 0.52, 0.22]} castShadow>
           <cylinderGeometry args={[0.06, 0.055, 0.1, 12]} />
           <meshStandardMaterial color="#2f4d56" roughness={0.6} />
         </mesh>
@@ -783,39 +999,36 @@ const Lounge = memo(function Lounge({
 /** Sideboard with a coffee setup, filling the empty floor in front of the rug. */
 const CoffeeNook = memo(function CoffeeNook() {
   return (
-    <group position={[-1.35, 0, 4.35]} rotation={[0, 0.12, 0]}>
-      <Box position={[0, 0.4, 0]} size={[1.5, 0.08, 0.58]} color={C.wood} />
-      <Box position={[0, 0.22, 0]} size={[1.4, 0.28, 0.52]} color={C.woodDark} />
-      {[-0.35, 0.35].map((x) => (
-        <group key={x}>
-          <Box position={[x, 0.22, 0.27]} size={[0.6, 0.22, 0.02]} color={C.wood} />
-          <Box position={[x + 0.22, 0.22, 0.29]} size={[0.06, 0.02, 0.02]} color={C.trim} />
-        </group>
-      ))}
-      {[-0.64, 0.64].map((x) => (
-        <Box key={x} position={[x, 0.08, 0]} size={[0.07, 0.16, 0.5]} color={C.woodDark} />
-      ))}
+    <group position={[-1.2, 0, 4.15]} rotation={[0, 0.12, 0]}>
+      {/* desk-sized top: this is the coffee table the room was missing */}
+      <Box position={[0, 0.98, 0]} size={[3.3, 0.08, 1.12]} color={C.wood} />
+      <Box position={[0, 0.96, 0]} size={[3.24, 0.02, 1.06]} color="#3a2a20" />
+      <Box position={[-1.56, 0.46, 0]} size={[0.1, 0.92, 1.02]} color={C.woodDark} />
+      <Box position={[1.56, 0.46, 0]} size={[0.1, 0.92, 1.02]} color={C.woodDark} />
+      <Box position={[0, 0.62, -0.5]} size={[3.06, 0.68, 0.06]} color={C.woodDark} />
+      <Box position={[0, 0.28, 0.02]} size={[2.9, 0.06, 0.94]} color={C.woodDark} />
 
       {/* kettle, two cups, a jar and a book — a coffee corner, not a prop shelf */}
-      <mesh position={[-0.4, 0.54, 0]} castShadow>
+      <mesh position={[-1.05, 1.12, 0.1]} castShadow>
         <cylinderGeometry args={[0.11, 0.13, 0.2, 14]} />
         <meshStandardMaterial color="#2f4d56" roughness={0.55} metalness={0.25} />
       </mesh>
-      <mesh position={[-0.4, 0.67, 0]}>
+      <mesh position={[-1.05, 1.25, 0.1]}>
         <sphereGeometry args={[0.05, 10, 8]} />
         <meshStandardMaterial color={C.metal} roughness={0.4} metalness={0.4} />
       </mesh>
-      {[0.0, 0.22].map((x) => (
-        <mesh key={x} position={[x, 0.49, 0.1]} castShadow>
+      {[-0.62, -0.36].map((x) => (
+        <mesh key={x} position={[x, 1.07, 0.2]} castShadow>
           <cylinderGeometry args={[0.06, 0.05, 0.1, 12]} />
           <meshStandardMaterial color={C.cream} roughness={0.7} />
         </mesh>
       ))}
-      <mesh position={[0.5, 0.5, -0.02]} castShadow>
+      <mesh position={[0.1, 1.08, -0.12]} castShadow>
         <cylinderGeometry args={[0.085, 0.085, 0.13, 12]} />
         <meshStandardMaterial color="#8a5d3b" roughness={0.85} />
       </mesh>
-      <Box position={[0.48, 0.47, 0.21]} size={[0.3, 0.05, 0.2]} color="#c8a25a" rotation={[0, 0.2, 0]} />
+      <Box position={[0.08, 1.05, 0.3]} size={[0.32, 0.05, 0.22]} color="#c8a25a" rotation={[0, 0.2, 0]} />
+      <Box position={[1.02, 1.05, 0.12]} size={[0.42, 0.04, 0.3]} color={C.cream} rotation={[0, -0.15, 0]} />
     </group>
   )
 })
@@ -847,12 +1060,14 @@ export const Room = memo(function Room({
   onPoster,
   onTv,
   tvActive,
+  tvMode,
 }: {
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
   onPoster: () => void
   onTv: () => void
   tvActive: boolean
+  tvMode: TvMode
 }) {
   return (
     <group>
@@ -865,7 +1080,7 @@ export const Room = memo(function Room({
       <Window />
       <Rack />
 
-      <Lounge onTv={onTv} onHover={onHover} active={tvActive} />
+      <Lounge onTv={onTv} onHover={onHover} active={tvActive} mode={tvMode} />
       <CoffeeNook />
       <GalleryLight />
       <FloorLamp position={[5.45, 0, 3.65]} />

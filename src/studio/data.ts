@@ -4,6 +4,8 @@
  */
 export type StationId = 'projects' | 'skills' | 'experience' | 'certificates' | 'about'
 export type ViewId = 'room' | 'poster' | 'tv' | StationId
+/** What the lounge TV is showing: the picker, the little pong match, or a real YouTube embed. */
+export type TvMode = 'menu' | 'game' | 'youtube'
 
 export interface Pose {
   eye: [number, number, number]
