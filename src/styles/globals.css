@@ -445,3 +445,7 @@ a, button, [role="button"], input[type="submit"], input[type="button"] {
   outline-offset: 3px;
 }
 
+/* 3D studio: body sets touch-action: pan-y, which would swallow the orbit drag on touch */
+.studio-canvas canvas {
+  touch-action: none;
+}

@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-three/fiber": "^9.8.2",
     "@tailwindcss/vite": "^4.2.4",
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
@@ -21,13 +22,15 @@
     "react-icons": "^5.6.0",
     "react-router-dom": "^7.15.0",
     "tailwind-merge": "^3.5.0",
-    "tailwindcss": "^4.2.4"
+    "tailwindcss": "^4.2.4",
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.187.0",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.2.1",
     "eslint-config-prettier": "^10.1.8",

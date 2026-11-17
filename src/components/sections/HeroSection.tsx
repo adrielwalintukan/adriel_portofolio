@@ -1,6 +1,7 @@
 import { memo, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion'
-import { ArrowUpRight, ArrowDown } from 'lucide-react'
+import { ArrowUpRight, ArrowDown, Boxes } from 'lucide-react'
 import { FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi'
 import { TextReveal } from '@/components/animations'
 import { Button, ProfilePreview } from '@/components/ui'
@@ -117,6 +118,14 @@ export const HeroSection = memo(function HeroSection() {
               Resume
               <ArrowDown className="h-4 w-4 transition-transform group-hover:translate-y-0.5" />
             </a>
+            {/* the room gets its own doorway: paper card, so it stays readable over the portrait */}
+            <Link
+              to="/studio"
+              className="group inline-flex h-12 items-center gap-2 rounded-lg border border-accent/70 bg-paper/92 px-5 font-display text-base font-extrabold uppercase tracking-wide text-accent-strong shadow-[0_8px_24px_rgba(11,18,38,0.14)] backdrop-blur transition-colors hover:bg-accent hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <Boxes className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-6" aria-hidden="true" />
+              3D Studio
+            </Link>
             <span className="pointer-events-auto">
               <Button href="#contact" variant="ink" size="lg" icon={<ArrowUpRight className="h-4 w-4" />}>
                 Let&apos;s talk

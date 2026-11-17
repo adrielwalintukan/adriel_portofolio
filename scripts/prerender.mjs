@@ -9,6 +9,9 @@ const { render } = await import(pathToFileURL(`${ssr}entry-server.js`).href)
 const file = `${dist}index.html`
 const html = readFileSync(file, 'utf8')
 if (!html.includes('<div id="root"></div>')) throw new Error('prerender: empty #root not found in dist/index.html')
+// /studio is its own experience: a copy with an empty #root means a hard refresh there never
+// paints the home page first, and no hero images are fetched for nothing
+writeFileSync(`${dist}studio.html`, html)
 writeFileSync(file, html.replace('<div id="root"></div>', `<div id="root">${render('/')}</div>`))
 rmSync(ssr, { recursive: true, force: true })
 console.log('prerendered / into dist/index.html')
