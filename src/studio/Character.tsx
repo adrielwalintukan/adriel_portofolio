@@ -144,7 +144,7 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const moving = !reduced && distance > 0.05
 
     if (moving) {
-      const step = Math.min(distance, 1.15 * real)
+      const step = Math.min(distance, (focus ? 2 : 1.15) * real)
       a.x += (dx / distance) * step
       a.z += (dz / distance) * step
       a.step += real * 7.2
