@@ -195,6 +195,78 @@ export const certificateTexture = () =>
     ctx.fillText('A', 140, 298)
   })
 
+/** TV: the console is on, a game sits paused on the start line. */
+export const tvTexture = () =>
+  make(900, 560, (ctx, w, h) => {
+    const sky = ctx.createLinearGradient(0, 0, 0, h)
+    sky.addColorStop(0, '#0a1424')
+    sky.addColorStop(0.55, '#16394c')
+    sky.addColorStop(1, '#2d5660')
+    ctx.fillStyle = sky
+    ctx.fillRect(0, 0, w, h)
+
+    ctx.fillStyle = '#eef4f2'
+    ctx.beginPath()
+    ctx.arc(710, 110, 40, 0, Math.PI * 2)
+    ctx.fill()
+
+    // layered hills
+    const hill = (base: number, height: number, color: string, step: number) => {
+      ctx.fillStyle = color
+      ctx.beginPath()
+      ctx.moveTo(0, h)
+      for (let x = 0; x <= w; x += step) {
+        ctx.lineTo(x, base + Math.sin(x / 120) * height + Math.cos(x / 61) * height * 0.4)
+      }
+      ctx.lineTo(w, h)
+      ctx.closePath()
+      ctx.fill()
+    }
+    hill(330, 26, '#0d222e', 60)
+    hill(392, 20, '#11303c', 48)
+    hill(452, 14, '#183f47', 40)
+
+    // track markings running to the horizon
+    ctx.strokeStyle = 'rgba(63,176,183,0.65)'
+    ctx.lineWidth = 4
+    for (let i = -3; i <= 3; i++) {
+      ctx.beginPath()
+      ctx.moveTo(w / 2 + i * 26, 470)
+      ctx.lineTo(w / 2 + i * 190, h + 40)
+      ctx.stroke()
+    }
+
+    // HUD
+    ctx.fillStyle = '#e8eef1'
+    ctx.font = '700 30px "JetBrains Mono", monospace'
+    ctx.fillText('NIGHT CIRCUIT', 36, 58)
+    ctx.fillStyle = '#3fb0b7'
+    ctx.font = '600 18px "JetBrains Mono", monospace'
+    ctx.fillText('LAP 01 / 03', 38, 88)
+
+    ctx.strokeStyle = 'rgba(232,238,241,0.65)'
+    ctx.lineWidth = 3
+    ctx.beginPath()
+    ctx.arc(96, h - 92, 48, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.beginPath()
+    ctx.moveTo(36, h - 104)
+    ctx.lineTo(96, h - 130)
+    ctx.lineTo(148, h - 96)
+    ctx.stroke()
+
+    ctx.fillStyle = 'rgba(6,12,20,0.55)'
+    ctx.beginPath()
+    ctx.roundRect(w - 244, h - 118, 208, 78, 14)
+    ctx.fill()
+    ctx.fillStyle = '#ffd08a'
+    ctx.font = '600 19px "JetBrains Mono", monospace'
+    ctx.fillText('PAUSED', w - 222, h - 82)
+    ctx.fillStyle = '#9fb2bb'
+    ctx.font = '500 15px "JetBrains Mono", monospace'
+    ctx.fillText('press start to play', w - 222, h - 58)
+  })
+
 /** Wood floor planks, tiled across the room. */
 export const floorTexture = () => {
   const texture = make(512, 512, (ctx, w, h) => {

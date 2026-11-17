@@ -3,7 +3,7 @@
  * moves the camera to `pose` and opens the matching HTML panel. `room` is the overview.
  */
 export type StationId = 'projects' | 'skills' | 'experience' | 'certificates' | 'about'
-export type ViewId = 'room' | StationId
+export type ViewId = 'room' | 'poster' | StationId
 
 export interface Pose {
   eye: [number, number, number]
@@ -11,12 +11,14 @@ export interface Pose {
 }
 
 export const POSES: Record<ViewId, Pose> = {
-  room: { eye: [11.5, 9.5, 13.5], target: [0.2, 1.5, -0.4] },
+  room: { eye: [12.0, 10.0, 14.1], target: [0.4, 1.4, 0.0] },
   projects: { eye: [1.9, 2.9, 0.1], target: [2.2, 1.8, -4.95] },
   skills: { eye: [0.9, 3.0, 0.4], target: [-5.5, 1.9, -2.85] },
   experience: { eye: [-0.1, 3.05, 0.5], target: [-1.2, 2.6, -5.9] },
   certificates: { eye: [2.55, 3.7, 4.15], target: [-5.9, 2.85, 2.1] },
   about: { eye: [2.7, 1.7, 6.5], target: [1.1, 1.3, 2.05] },
+  // the framed portrait on the back wall, close enough to read the face
+  poster: { eye: [3.35, 3.55, -2.5], target: [1.9, 3.5, -5.92] },
 }
 
 /**
@@ -24,12 +26,13 @@ export const POSES: Record<ViewId, Pose> = {
  * back and re-aimed: the object stays whole in the strip above the bottom sheet.
  */
 export const PORTRAIT_POSES: Record<ViewId, Pose> = {
-  room: { eye: [10.5, 7.6, 12.4], target: [1.2, 1.1, 0.2] },
+  room: { eye: [12.4, 9.1, 14.6], target: [1.2, 1.0, 0.2] },
   projects: { eye: [2.2, 3.2, 3.1], target: [2.2, 1.55, -4.95] },
   skills: { eye: [2.6, 3.29, 1.26], target: [-5.5, 1.9, -2.85] },
   experience: { eye: [-0.08, 3.05, 5.3], target: [-1.9, 2.1, -5.9] },
   certificates: { eye: [3.1, 3.85, 4.95], target: [-5.9, 2.4, 3.1] },
-  about: { eye: [2.6, 1.72, 6.5], target: [1.05, 1.3, 2.05] },
+  about: { eye: [2.45, 2.0, 6.2], target: [0.78, 1.0, 2.05] },
+  poster: { eye: [3.95, 3.65, -0.75], target: [1.9, 3.5, -5.92] },
 }
 
 export const STATIONS: { id: StationId; label: string; where: string }[] = [

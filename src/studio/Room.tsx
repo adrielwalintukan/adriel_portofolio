@@ -1,5 +1,5 @@
-import { memo, useMemo, useRef, type ReactNode } from 'react'
-import { useFrame, useLoader, type ThreeEvent } from '@react-three/fiber'
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { pointerDrag, type StationId } from './data'
 import {
@@ -8,6 +8,7 @@ import {
   floorTexture,
   projectsTexture,
   terminalTexture,
+  tvTexture,
   windowTexture,
 } from './textures'
 
@@ -24,7 +25,11 @@ const C = {
   rug: '#6f2531',
   rugTrim: '#c2a98b',
   accent: '#3fb0b7',
+  sofa: '#2c4a4d',
+  sofaLight: '#35595b',
 } as const
+
+const ACCENT_LIGHT = '#7fd6b8'
 
 type Vec3 = [number, number, number]
 type HotspotProps = {
@@ -99,6 +104,11 @@ const RoomShell = memo(function RoomShell() {
   const floor = useMemo(() => floorTexture(), [])
   return (
     <group>
+      {/* the whole room stands on a thick diorama base, so the floor reads as a slab */}
+      <Box position={[0, -0.55, 0]} size={[12.4, 0.8, 12.4]} color="#241811" />
+      <Box position={[0, -0.15, 0]} size={[12.58, 0.14, 12.58]} color="#3a2719" />
+      <Box position={[0, -0.026, 0]} size={[12.7, 0.05, 12.7]} color="#b8a48a" />
+
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <planeGeometry args={[12, 12]} />
         <meshStandardMaterial map={floor} roughness={0.9} />
@@ -142,7 +152,7 @@ const Desk = memo(function Desk({
     const t = clock.elapsedTime
     steam.current.children.forEach((child, i) => {
       const p = (t * 0.35 + i / 3) % 1
-      child.position.y = 1.16 + p * 0.5
+      child.position.y = 1.22 + p * 0.45
       child.position.x = 3.05 + Math.sin(p * 6 + i) * 0.05
       child.scale.setScalar(0.05 + p * 0.06)
       const puff = child as THREE.Mesh<THREE.BufferGeometry, THREE.MeshStandardMaterial>
@@ -159,9 +169,9 @@ const Desk = memo(function Desk({
         <Box position={[3.48, 0.5, -4.6]} size={[0.12, 1, 1.3]} color={C.woodDark} />
         <Box position={[1.4, 0.62, -5.22]} size={[4.3, 0.76, 0.08]} color={C.woodDark} />
 
-        {/* main monitor */}
-        <Box position={[2.25, 1.35, -5.12]} size={[0.5, 0.06, 0.34]} color={C.metal} />
-        <Box position={[2.25, 1.62, -5.15]} size={[0.09, 0.5, 0.09]} color={C.metal} />
+        {/* main monitor, standing on the desk: base plate, neck, panel */}
+        <Box position={[2.25, 1.1, -5.1]} size={[0.52, 0.06, 0.36]} color={C.metal} />
+        <Box position={[2.25, 1.37, -5.16]} size={[0.09, 0.52, 0.09]} color={C.metal} />
         <Box position={[2.25, 2.12, -5.12]} size={[1.62, 0.98, 0.07]} color={C.dark} />
         <mesh position={[2.25, 2.12, -5.075]} rotation={[0, 0, 0]}>
           <planeGeometry args={[1.5, 0.87]} />
@@ -170,8 +180,8 @@ const Desk = memo(function Desk({
 
         {/* terminal monitor, slightly turned */}
         <group position={[0.55, 0, -5.1]} rotation={[0, 0.22, 0]}>
-          <Box position={[0, 1.32, 0]} size={[0.42, 0.05, 0.3]} color={C.metal} />
-          <Box position={[0, 1.55, -0.02]} size={[0.08, 0.44, 0.08]} color={C.metal} />
+          <Box position={[0, 1.1, 0]} size={[0.44, 0.05, 0.32]} color={C.metal} />
+          <Box position={[0, 1.36, -0.03]} size={[0.08, 0.48, 0.08]} color={C.metal} />
           <Box position={[0, 1.92, 0]} size={[1.3, 0.8, 0.06]} color={C.dark} />
           <mesh position={[0, 1.92, 0.035]}>
             <planeGeometry args={[1.2, 0.71]} />
@@ -185,29 +195,29 @@ const Desk = memo(function Desk({
         <Box position={[0.15, 1.08, -4.3]} size={[0.55, 0.04, 0.4]} color={C.cream} rotation={[0, -0.18, 0]} />
 
         {/* mug + steam */}
-        <mesh position={[3.05, 1.12, -4.22]} castShadow>
+        <mesh position={[3.05, 1.17, -4.22]} castShadow>
           <cylinderGeometry args={[0.1, 0.09, 0.19, 12]} />
           <meshStandardMaterial color={C.cream} roughness={0.7} />
         </mesh>
         <group ref={steam}>
           {[0, 1, 2].map((i) => (
-            <mesh key={i} position={[3.05, 1.2, -4.22]}>
+            <mesh key={i} position={[3.05, 1.26, -4.22]}>
               <sphereGeometry args={[1, 8, 8]} />
               <meshStandardMaterial color="#dfe9ec" transparent opacity={0.28} depthWrite={false} />
             </mesh>
           ))}
         </group>
 
-        {/* chair */}
-        <Box position={[1.3, 0.62, -3.05]} size={[0.86, 0.12, 0.8]} color={C.dark} />
-        <Box position={[1.3, 1.12, -2.7]} size={[0.8, 0.72, 0.1]} color={C.dark} rotation={[0.12, 0, 0]} />
-        <Box position={[1.3, 0.3, -3.05]} size={[0.1, 0.6, 0.1]} color={C.metal} />
-        <Box position={[1.3, 0.04, -3.05]} size={[0.62, 0.06, 0.62]} color={C.metal} />
+        {/* chair, tucked in to the desk */}
+        <Box position={[1.3, 0.62, -3.35]} size={[0.86, 0.12, 0.8]} color={C.dark} />
+        <Box position={[1.3, 1.12, -3.0]} size={[0.8, 0.72, 0.1]} color={C.dark} rotation={[0.12, 0, 0]} />
+        <Box position={[1.3, 0.3, -3.35]} size={[0.1, 0.6, 0.1]} color={C.metal} />
+        <Box position={[1.3, 0.04, -3.35]} size={[0.62, 0.06, 0.62]} color={C.metal} />
         {[
-          [0.98, -3.35],
-          [1.62, -3.35],
-          [0.98, -2.75],
-          [1.62, -2.75],
+          [0.98, -3.65],
+          [1.62, -3.65],
+          [0.98, -3.05],
+          [1.62, -3.05],
         ].map(([x, z]) => (
           <Box key={`${x}${z}`} position={[x, 0.12, z]} size={[0.06, 0.24, 0.06]} color={C.metal} />
         ))}
@@ -318,22 +328,59 @@ const Frames = memo(function Frames({
   )
 })
 
-/** Wall poster: the portrait Adriel already has, framed rather than faked in 3D. */
-const Poster = memo(function Poster() {
-  const source = useLoader(THREE.TextureLoader, '/images/studio-poster.webp')
-  const texture = useMemo(() => {
-    const copy = source.clone()
-    copy.colorSpace = THREE.SRGBColorSpace
-    copy.needsUpdate = true
-    return copy
-  }, [source])
+/** Wall poster: the portrait Adriel already has, framed. Clicking it flies the camera in. */
+const Poster = memo(function Poster({
+  onPick,
+  onHover,
+}: {
+  onPick: () => void
+  onHover: (label: string | null, x: number, y: number) => void
+}) {
+  const leave = useRef<number | undefined>(undefined)
+  // loaded by hand rather than suspended on: a slow poster must never hold the whole room hostage
+  const [texture, setTexture] = useState<THREE.Texture | null>(null)
+  useEffect(() => {
+    let live = true
+    const loader = new THREE.TextureLoader()
+    const loaded = loader.load('/images/studio-poster.webp', (t) => {
+      if (!live) {
+        t.dispose()
+        return
+      }
+      t.colorSpace = THREE.SRGBColorSpace
+      t.anisotropy = 4
+      setTexture(t)
+    })
+    return () => {
+      live = false
+      loaded.dispose()
+    }
+  }, [])
   return (
-    <group position={[1.9, 3.55, -5.92]}>
+    <group
+      position={[1.9, 3.55, -5.92]}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation()
+        window.clearTimeout(leave.current)
+        onHover('Portrait — take a closer look', e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (pointerDrag.moved > 6) return
+        onPick()
+      }}
+    >
       <Box position={[0, 0, 0]} size={[1.5, 1.5, 0.06]} color={C.woodDark} />
-      <mesh position={[0, 0, 0.04]}>
-        <planeGeometry args={[1.34, 1.34]} />
-        <meshStandardMaterial map={texture} roughness={0.8} />
-      </mesh>
+      {texture && (
+        <mesh position={[0, 0, 0.04]}>
+          <planeGeometry args={[1.34, 1.34]} />
+          <meshStandardMaterial map={texture} roughness={0.8} />
+        </mesh>
+      )}
     </group>
   )
 })
@@ -394,30 +441,214 @@ const Rack = memo(function Rack() {
   )
 })
 
-/** Plant by the rug. */
-const Plant = memo(function Plant({ position }: { position: Vec3 }) {
+const LEAF_COLORS = ['#3f7a55', '#2f6b4b', '#4b8a5f', '#2a5c42']
+
+/** Potted plant: a woven pot, arched stems and rounded leaves instead of cones. */
+const Plant = memo(function Plant({ position, tall = false }: { position: Vec3; tall?: boolean }) {
+  const leaves = useMemo(() => {
+    const random = seeded(tall ? 31 : 13)
+    const count = tall ? 12 : 9
+    return Array.from({ length: count }, (_, i) => ({
+      angle: (i / count) * Math.PI * 2 + random() * 0.8,
+      tilt: 0.35 + random() * 0.55,
+      reach: (tall ? 0.85 : 0.42) + random() * (tall ? 0.5 : 0.26),
+      size: (tall ? 0.2 : 0.15) + random() * 0.06,
+      color: LEAF_COLORS[i % LEAF_COLORS.length],
+    }))
+  }, [tall])
+
+  const potH = tall ? 0.8 : 0.46
+  const potR = tall ? 0.3 : 0.25
+
   return (
     <group position={position}>
-      <mesh position={[0, 0.28, 0]} castShadow>
-        <cylinderGeometry args={[0.28, 0.2, 0.56, 10]} />
-        <meshStandardMaterial color="#8a5a3b" roughness={0.9} />
+      {/* pot + soil */}
+      <mesh position={[0, potH / 2, 0]} castShadow receiveShadow>
+        <cylinderGeometry args={[potR, potR * 0.76, potH, 18]} />
+        <meshStandardMaterial color={tall ? '#b5895f' : '#a86f4b'} roughness={0.92} />
       </mesh>
-      <mesh position={[0, 0.56, 0]}>
-        <cylinderGeometry args={[0.26, 0.26, 0.04, 10]} />
-        <meshStandardMaterial color="#3a2a20" roughness={0.9} />
+      <mesh position={[0, potH + 0.005, 0]} receiveShadow>
+        <cylinderGeometry args={[potR * 0.93, potR * 0.93, 0.05, 18]} />
+        <meshStandardMaterial color="#2b1e15" roughness={1} />
       </mesh>
-      {[
-        [0, 1.0, 0, 0.42, 0.9],
-        [0.22, 0.92, 0.12, 0.3, 0.7],
-        [-0.2, 0.95, -0.1, 0.28, 0.65],
-        [0.08, 1.2, -0.2, 0.26, 0.6],
-        [-0.12, 1.18, 0.2, 0.24, 0.55],
-      ].map(([x, y, z, r, h], i) => (
-        <mesh key={i} position={[x, y, z]} rotation={[i * 0.2, i, i * 0.35]} castShadow>
-          <coneGeometry args={[r, h, 5]} />
-          <meshStandardMaterial color={i % 2 ? '#3f7a55' : '#2f6b4b'} roughness={0.8} />
-        </mesh>
+      <mesh position={[0, potH - 0.02, 0]}>
+        <torusGeometry args={[potR * 0.99, 0.022, 6, 20]} />
+        <meshStandardMaterial color={tall ? '#9c7149' : '#8e5b3d'} roughness={0.9} />
+      </mesh>
+
+      {leaves.map((leaf, i) => (
+        <group key={i} position={[0, potH, 0]} rotation={[0, leaf.angle, 0]}>
+          <group rotation={[0, 0, leaf.tilt]}>
+            <mesh position={[0, leaf.reach / 2, 0]} castShadow>
+              <cylinderGeometry args={[0.013, 0.019, leaf.reach, 6]} />
+              <meshStandardMaterial color="#2f5c3c" roughness={0.9} />
+            </mesh>
+            <mesh position={[0, leaf.reach, 0.03]} rotation={[0.3, 0, 0]} scale={[1.15, 0.16, 0.66]} castShadow>
+              <sphereGeometry args={[leaf.size, 16, 10]} />
+              <meshStandardMaterial color={leaf.color} roughness={0.7} />
+            </mesh>
+            {leaf.size > 0.18 && (
+              <mesh position={[0, leaf.reach * 0.62, 0.03]} rotation={[0.55, 0, 0]} scale={[0.85, 0.12, 0.5]} castShadow>
+                <sphereGeometry args={[leaf.size * 0.72, 14, 10]} />
+                <meshStandardMaterial color={LEAF_COLORS[(i + 1) % LEAF_COLORS.length]} roughness={0.72} />
+              </mesh>
+            )}
+          </group>
+        </group>
       ))}
+    </group>
+  )
+})
+
+/** Gallery bar above the certificate frames: the awards wall gets the same warmth as the desk. */
+const GalleryLight = memo(function GalleryLight() {
+  return (
+    <group position={[-5.78, 3.92, 2.65]}>
+      <Box position={[0, 0.06, 0]} size={[0.12, 0.08, 4.4]} color={C.metal} metalness={0.3} roughness={0.5} />
+      <Box position={[0, 0.0, 0]} size={[0.1, 0.05, 4.2]} color="#ffd9a0" />
+      <mesh position={[0, -0.02, 0]}>
+        <boxGeometry args={[0.08, 0.02, 4.1]} />
+        <meshStandardMaterial color="#ffe2b8" emissive="#ffc98a" emissiveIntensity={2.4} toneMapped={false} />
+      </mesh>
+      {[-1.9, 1.9].map((z) => (
+        <Box key={z} position={[0.05, 0.1, z]} size={[0.2, 0.05, 0.05]} color={C.metal} />
+      ))}
+    </group>
+  )
+})
+
+/** Floor lamp by the sofa. */
+const FloorLamp = memo(function FloorLamp({ position }: { position: Vec3 }) {
+  return (
+    <group position={position}>
+      <mesh position={[0, 0.03, 0]} castShadow>
+        <cylinderGeometry args={[0.19, 0.21, 0.06, 16]} />
+        <meshStandardMaterial color={C.metal} roughness={0.6} metalness={0.3} />
+      </mesh>
+      <mesh position={[0, 0.95, 0]} castShadow>
+        <cylinderGeometry args={[0.018, 0.022, 1.84, 8]} />
+        <meshStandardMaterial color={C.metal} roughness={0.6} metalness={0.3} />
+      </mesh>
+      <mesh position={[0, 1.94, 0]} castShadow>
+        <coneGeometry args={[0.3, 0.32, 20, 1, true]} />
+        <meshStandardMaterial color="#d9d2c2" side={THREE.DoubleSide} roughness={0.8} />
+      </mesh>
+      <mesh position={[0, 1.87, 0]}>
+        <sphereGeometry args={[0.09, 12, 10]} />
+        <meshStandardMaterial color="#ffe7bf" emissive="#ffc98a" emissiveIntensity={2.6} toneMapped={false} />
+      </mesh>
+    </group>
+  )
+})
+
+/** Sofa, coffee table and the console — the empty half of the room becomes a lounge. */
+const Lounge = memo(function Lounge() {
+  const screen = useMemo(() => tvTexture(), [])
+
+  return (
+    <group>
+      {/* rug for the seating */}
+      <Box position={[3.85, 0.025, 1.55]} size={[3.1, 0.05, 3.5]} color="#213843" />
+      <Box position={[3.85, 0.055, 1.55]} size={[2.76, 0.012, 3.16]} color="#2e4c57" />
+
+      {/* media console facing the sofa */}
+      <group position={[4.05, 0, 0.05]}>
+        <Box position={[0, 0.3, 0]} size={[2.3, 0.1, 0.62]} color={C.wood} />
+        <Box position={[0, 0.16, 0]} size={[2.16, 0.2, 0.56]} color={C.woodDark} />
+        <Box position={[0, 0.03, 0]} size={[2.22, 0.06, 0.6]} color={C.woodDark} />
+        {[-0.55, 0.55].map((x) => (
+          <group key={x}>
+            <Box position={[x, 0.16, 0.29]} size={[1.0, 0.16, 0.02]} color={C.wood} />
+            <Box position={[x, 0.16, 0.31]} size={[0.1, 0.02, 0.02]} color={C.trim} />
+          </group>
+        ))}
+        {/* the console itself */}
+        <Box position={[-0.78, 0.4, 0.05]} size={[0.46, 0.1, 0.34]} color={C.dark} />
+        <mesh position={[-0.78, 0.42, 0.225]}>
+          <boxGeometry args={[0.2, 0.012, 0.01]} />
+          <meshStandardMaterial color={ACCENT_LIGHT} emissive={ACCENT_LIGHT} emissiveIntensity={1.6} toneMapped={false} />
+        </mesh>
+
+        {/* TV on its stand */}
+        <Box position={[0, 0.335, -0.06]} size={[0.54, 0.04, 0.3]} color={C.metal} />
+        <Box position={[0, 0.46, -0.1]} size={[0.1, 0.26, 0.08]} color={C.metal} />
+        <Box position={[0, 1.02, -0.09]} size={[1.78, 1.02, 0.08]} color="#0d141d" />
+        <mesh position={[0, 1.02, -0.045]}>
+          <planeGeometry args={[1.66, 0.92]} />
+          <meshStandardMaterial map={screen} emissive="#ffffff" emissiveMap={screen} emissiveIntensity={0.75} toneMapped={false} />
+        </mesh>
+      </group>
+
+      {/* sofa, back to the camera so the screen stays in view */}
+      <group position={[3.95, 0, 2.9]} rotation={[0, Math.PI, 0]}>
+        {[-1.03, 1.03].map((x) => (
+          <group key={x}>
+            <Box position={[x, 0.5, 0]} size={[0.2, 0.5, 0.92]} color={C.sofa} />
+            <mesh position={[x, 0.78, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+              <cylinderGeometry args={[0.1, 0.1, 0.92, 12]} />
+              <meshStandardMaterial color={C.sofa} roughness={0.92} />
+            </mesh>
+          </group>
+        ))}
+        <Box position={[0, 0.3, 0]} size={[2.06, 0.24, 0.9]} color={C.sofa} />
+        {[-0.5, 0.5].map((x) => (
+          <Box key={x} position={[x, 0.47, 0.03]} size={[1.0, 0.16, 0.84]} color={C.sofaLight} />
+        ))}
+        <Box position={[0, 0.72, -0.38]} size={[2.06, 0.7, 0.2]} color={C.sofa} />
+        {[-0.5, 0.5].map((x) => (
+          <Box key={x} position={[x, 0.68, -0.25]} size={[0.98, 0.5, 0.18]} color={C.sofaLight} rotation={[-0.12, 0, 0]} />
+        ))}
+        {[
+          [-0.66, '#b4693a'],
+          [0.7, '#c8a25a'],
+        ].map(([x, color]) => (
+          <Box key={x} position={[Number(x), 0.68, -0.08]} size={[0.34, 0.34, 0.14]} color={String(color)} rotation={[0.2, Number(x) * 0.4, 0.1]} />
+        ))}
+        {[-0.84, 0.84].map((x) => (
+          <Box key={x} position={[x, 0.1, 0]} size={[0.1, 0.2, 0.1]} color={C.woodDark} />
+        ))}
+      </group>
+
+      {/* coffee table */}
+      <group position={[3.95, 0, 1.5]}>
+        <Box position={[0, 0.44, 0]} size={[1.6, 0.08, 0.82]} color={C.wood} />
+        <Box position={[0, 0.32, 0]} size={[1.44, 0.06, 0.7]} color={C.woodDark} />
+        {[
+          [-0.66, -0.3],
+          [0.66, -0.3],
+          [-0.66, 0.3],
+          [0.66, 0.3],
+        ].map(([x, z]) => (
+          <Box key={`${x}${z}`} position={[x, 0.2, z]} size={[0.07, 0.4, 0.07]} color={C.woodDark} />
+        ))}
+        {/* controller, a book and a mug */}
+        <Box position={[0.18, 0.5, 0.12]} size={[0.26, 0.05, 0.16]} color="#1b2330" rotation={[0, 0.3, 0]} />
+        <Box position={[-0.42, 0.49, -0.12]} size={[0.36, 0.04, 0.26]} color={C.cream} rotation={[0, -0.2, 0]} />
+        <mesh position={[-0.35, 0.52, -0.1]} castShadow>
+          <cylinderGeometry args={[0.06, 0.055, 0.1, 12]} />
+          <meshStandardMaterial color="#2f4d56" roughness={0.6} />
+        </mesh>
+      </group>
+    </group>
+  )
+})
+
+/** Pendant lamp over the desk — the room's warm key light. */
+const Pendant = memo(function Pendant() {
+  return (
+    <group position={[1.4, 0, -4.4]}>
+      <mesh position={[0, 4.55, 0]}>
+        <cylinderGeometry args={[0.015, 0.015, 1.2, 6]} />
+        <meshStandardMaterial color={C.dark} />
+      </mesh>
+      <mesh position={[0, 3.88, 0]} castShadow>
+        <coneGeometry args={[0.52, 0.42, 16, 1, true]} />
+        <meshStandardMaterial color="#1f3a3a" side={THREE.DoubleSide} roughness={0.7} />
+      </mesh>
+      <mesh position={[0, 3.74, 0]}>
+        <sphereGeometry args={[0.11, 10, 10]} />
+        <meshStandardMaterial color="#ffd9a0" emissive="#ffc275" emissiveIntensity={2.2} toneMapped={false} />
+      </mesh>
     </group>
   )
 })
@@ -426,9 +657,11 @@ const Plant = memo(function Plant({ position }: { position: Vec3 }) {
 export const Room = memo(function Room({
   onPick,
   onHover,
+  onPoster,
 }: {
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
+  onPoster: () => void
 }) {
   return (
     <group>
@@ -437,25 +670,18 @@ export const Room = memo(function Room({
       <Shelf onPick={onPick} onHover={onHover} />
       <Board onPick={onPick} onHover={onHover} />
       <Frames onPick={onPick} onHover={onHover} />
-      <Poster />
+      <Poster onPick={onPoster} onHover={onHover} />
       <Window />
       <Rack />
-      <Plant position={[4.7, 0, 2.0]} />
-      <Plant position={[-4.6, 0, 4.4]} />
 
-      {/* pendant lamp over the desk — the room's warm key light */}
-      <mesh position={[1.4, 4.55, -4.4]}>
-        <cylinderGeometry args={[0.015, 0.015, 1.2, 6]} />
-        <meshStandardMaterial color={C.dark} />
-      </mesh>
-      <mesh position={[1.4, 3.88, -4.4]} castShadow>
-        <coneGeometry args={[0.52, 0.42, 16, 1, true]} />
-        <meshStandardMaterial color="#1f3a3a" side={THREE.DoubleSide} roughness={0.7} />
-      </mesh>
-      <mesh position={[1.4, 3.74, -4.4]}>
-        <sphereGeometry args={[0.11, 10, 10]} />
-        <meshStandardMaterial color="#ffd9a0" emissive="#ffc275" emissiveIntensity={2.2} toneMapped={false} />
-      </mesh>
+      <Lounge />
+      <GalleryLight />
+      <FloorLamp position={[5.45, 0, 3.65]} />
+      <Pendant />
+
+      <Plant position={[5.3, 0, 4.6]} />
+      <Plant position={[-4.6, 0, 4.4]} />
+      <Plant position={[-5.0, 0, -5.1]} tall />
     </group>
   )
 })

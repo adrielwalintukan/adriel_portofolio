@@ -69,7 +69,8 @@ function StudioPage() {
   // station lives in the hash: shareable and refresh-safe without a server rewrite per station
   useEffect(() => {
     if (typeof window === 'undefined') return
-    window.history.replaceState(null, '', view === 'room' ? '/studio' : `/studio#${view}`)
+    const room = view === 'room' || view === 'poster'
+    window.history.replaceState(null, '', room ? '/studio' : `/studio#${view}`)
   }, [view])
 
   useEffect(() => {
@@ -121,7 +122,7 @@ function StudioPage() {
     setHello(false)
   }, [])
 
-  const station = view === 'room' ? null : STATIONS.find((s) => s.id === view)
+  const station = view === 'room' || view === 'poster' ? null : STATIONS.find((s) => s.id === view)
 
   if (!webgl) {
     return (
@@ -155,6 +156,7 @@ function StudioPage() {
           onPick={setView}
           onHover={onHover}
           onGreet={onGreet}
+          onPoster={() => setView('poster')}
         />
       </div>
 
@@ -180,9 +182,11 @@ function StudioPage() {
             >
               <button
                 onClick={() => setView('room')}
-                aria-pressed={view === 'room'}
+                aria-pressed={view === 'room' || view === 'poster'}
                 className={`rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                  view === 'room' ? 'bg-[#3fb0b7]/15 text-[#3fb0b7]' : 'text-[#8fa0ad] hover:text-[#eef2f3]'
+                  view === 'room' || view === 'poster'
+                    ? 'bg-[#3fb0b7]/15 text-[#3fb0b7]'
+                    : 'text-[#8fa0ad] hover:text-[#eef2f3]'
                 }`}
               >
                 Room
@@ -213,9 +217,9 @@ function StudioPage() {
           <nav aria-label="Rooms" className="pointer-events-auto -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:hidden">
             <button
               onClick={() => setView('room')}
-              aria-pressed={view === 'room'}
+              aria-pressed={view === 'room' || view === 'poster'}
               className={`shrink-0 rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider ${
-                view === 'room'
+                view === 'room' || view === 'poster'
                   ? 'border-[#3fb0b7]/60 bg-[#3fb0b7]/15 text-[#3fb0b7]'
                   : 'border-white/10 bg-[#0b1226]/80 text-[#8fa0ad]'
               }`}
