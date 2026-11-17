@@ -125,7 +125,6 @@ const RoomShell = memo(function RoomShell() {
       <Box position={[0, 0.06, -5.92]} size={[12.2, 0.12, 0.08]} color={C.trim} />
       <Box position={[-5.92, 0.06, 0]} size={[0.08, 0.12, 12.2]} color={C.trim} />
 
-      {/* rug */}
       {/* rug: pulled up toward the desk and the shelf, clear of the lounge */}
       <Box position={[-0.1, 0.02, 0.4]} size={[5.4, 0.04, 3.8]} color={C.rug} />
       <Box position={[-0.1, 0.045, 0.4]} size={[4.9, 0.01, 3.3]} color={C.rugTrim} />

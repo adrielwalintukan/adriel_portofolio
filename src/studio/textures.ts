@@ -16,29 +16,6 @@ const make = (w: number, h: number, paint: (ctx: CanvasRenderingContext2D, w: nu
   return texture
 }
 
-/** Terminal screen: what a developer's second monitor actually shows. */
-export const terminalTexture = () =>
-  make(640, 400, (ctx, w, h) => {
-    ctx.fillStyle = '#0b111c'
-    ctx.fillRect(0, 0, w, h)
-    const line = (y: number, text: string, color = '#cdd9dd') => {
-      ctx.fillStyle = color
-      ctx.font = '600 17px "JetBrains Mono", ui-monospace, monospace'
-      ctx.fillText(text, 26, y)
-    }
-    line(48, 'adriel@studio:~$ whoami', '#3fb0b7')
-    line(80, '  fullstack developer', '#9fb2bb')
-    line(124, 'adriel@studio:~$ ls projects', '#3fb0b7')
-    line(156, '  dailyboost   sakip', '#cdd9dd')
-    line(184, '  interview    carta', '#cdd9dd')
-    line(228, 'adriel@studio:~$ stack --check', '#3fb0b7')
-    line(260, '  laravel  postgres  react', '#9fb2bb')
-    line(288, '  typescript  tailwind', '#9fb2bb')
-    line(340, 'adriel@studio:~$ _', '#3fb0b7')
-    ctx.fillStyle = '#3fb0b7'
-    ctx.fillRect(196, 326, 11, 20)
-  })
-
 /** Main monitor: the project wall, small enough to read as an app grid. */
 export const projectsTexture = () =>
   make(900, 560, (ctx, w, h) => {
