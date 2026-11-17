@@ -8,7 +8,6 @@ import {
   floorTexture,
   projectsTexture,
   terminalTexture,
-  tvTexture,
   windowTexture,
 } from './textures'
 
@@ -128,9 +127,9 @@ const RoomShell = memo(function RoomShell() {
       <Box position={[-5.92, 0.06, 0]} size={[0.08, 0.12, 12.2]} color={C.trim} />
 
       {/* rug */}
-      <Box position={[0.4, 0.02, 1.4]} size={[5.4, 0.04, 3.8]} color={C.rug} />
-      <Box position={[0.4, 0.045, 1.4]} size={[4.9, 0.01, 3.3]} color={C.rugTrim} />
-      <Box position={[0.4, 0.052, 1.4]} size={[4.5, 0.01, 2.9]} color={C.rug} />
+      <Box position={[-0.1, 0.02, 1.4]} size={[5.4, 0.04, 3.8]} color={C.rug} />
+      <Box position={[-0.1, 0.045, 1.4]} size={[4.9, 0.01, 3.3]} color={C.rugTrim} />
+      <Box position={[-0.1, 0.052, 1.4]} size={[4.5, 0.01, 2.9]} color={C.rug} />
     </group>
   )
 })
@@ -541,18 +540,160 @@ const FloorLamp = memo(function FloorLamp({ position }: { position: Vec3 }) {
   )
 })
 
+/** The TV's little pong match: the ball, both paddles and the score, in 0..1 screen space. */
+const PONG = { w: 480, h: 300 }
+
+const paintPong = (ctx: CanvasRenderingContext2D, s: PongState, active: boolean) => {
+  const { w, h } = PONG
+  ctx.fillStyle = '#071019'
+  ctx.fillRect(0, 0, w, h)
+
+  const glow = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, w * 0.7)
+  glow.addColorStop(0, 'rgba(63,176,183,0.16)')
+  glow.addColorStop(1, 'rgba(7,16,25,0)')
+  ctx.fillStyle = glow
+  ctx.fillRect(0, 0, w, h)
+
+  ctx.strokeStyle = 'rgba(63,176,183,0.3)'
+  ctx.lineWidth = 3
+  ctx.setLineDash([10, 16])
+  ctx.beginPath()
+  ctx.moveTo(w / 2, 0)
+  ctx.lineTo(w / 2, h)
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  ctx.textAlign = 'center'
+  ctx.fillStyle = '#e8f1f2'
+  ctx.font = '700 44px ui-monospace, monospace'
+  ctx.fillText(String(s.cs), w / 2 - 62, 66)
+  ctx.fillText(String(s.ps), w / 2 + 62, 66)
+
+  ctx.fillStyle = '#ffd08a'
+  ctx.fillRect(s.cpu * w - 34, 18, 68, 9)
+  ctx.fillStyle = '#3fb0b7'
+  ctx.fillRect(s.player * w - 34, h - 27, 68, 9)
+
+  ctx.fillStyle = '#ffffff'
+  ctx.beginPath()
+  ctx.arc(s.bx * w, s.by * h, 7, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.fillStyle = 'rgba(232,241,242,0.5)'
+  ctx.font = '600 14px ui-monospace, monospace'
+  ctx.fillText(active ? 'MOVE THE POINTER TO PLAY' : 'NIGHT CIRCUIT · ATTRACT MODE', w / 2, h - 44)
+}
+
+type PongState = {
+  bx: number
+  by: number
+  vx: number
+  vy: number
+  player: number
+  cpu: number
+  ps: number
+  cs: number
+}
+
+// one canvas for the TV, created on first use: it is painted every frame, so it can't live in useMemo
+let pong: { ctx: CanvasRenderingContext2D; texture: THREE.CanvasTexture } | null = null
+const pongScreen = () => {
+  if (!pong) {
+    const canvas = document.createElement('canvas')
+    canvas.width = PONG.w
+    canvas.height = PONG.h
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.anisotropy = 4
+    pong = { ctx: canvas.getContext('2d')!, texture }
+  }
+  return pong
+}
+
 /** Sofa, coffee table and the console — the empty half of the room becomes a lounge. */
-const Lounge = memo(function Lounge() {
-  const screen = useMemo(() => tvTexture(), [])
+const Lounge = memo(function Lounge({
+  onTv,
+  onHover,
+  active,
+}: {
+  onTv: () => void
+  onHover: (label: string | null, x: number, y: number) => void
+  active: boolean
+}) {
+  const leave = useRef<number | undefined>(undefined)
+  const screen = pongScreen()
+
+  const match = useRef<PongState>({ bx: 0.5, by: 0.5, vx: 0.62, vy: 0.5, player: 0.5, cpu: 0.5, ps: 0, cs: 0 })
+  const paint = useRef(0)
+
+  useFrame(({ pointer }, delta) => {
+    const dt = Math.min(delta, 0.05)
+    const s = match.current
+    const move = (from: number, to: number, rate: number) => from + Math.max(-rate * dt, Math.min(rate * dt, to - from))
+
+    // in the TV view the pointer is the paddle; otherwise he plays against himself
+    s.player = move(s.player, active ? 0.5 + pointer.x * 0.45 : s.bx, 1.8)
+    s.cpu = move(s.cpu, s.bx, 0.72)
+    s.bx += s.vx * dt
+    s.by += s.vy * dt
+
+    if (s.bx < 0.035) {
+      s.bx = 0.035
+      s.vx = Math.abs(s.vx)
+    } else if (s.bx > 0.965) {
+      s.bx = 0.965
+      s.vx = -Math.abs(s.vx)
+    }
+    if (s.vy > 0 && s.by > 0.9 && Math.abs(s.bx - s.player) < 0.14) {
+      s.by = 0.9
+      s.vy = -Math.min(Math.abs(s.vy) * 1.02, 0.9)
+    } else if (s.vy < 0 && s.by < 0.1 && Math.abs(s.bx - s.cpu) < 0.14) {
+      s.by = 0.1
+      s.vy = Math.min(Math.abs(s.vy) * 1.02, 0.9)
+    }
+    if (s.by > 1.05 || s.by < -0.05) {
+      const playerMissed = s.by > 1.05
+      if (playerMissed) s.cs += 1
+      else s.ps += 1
+      s.bx = 0.5
+      s.by = 0.5
+      s.vx = playerMissed ? -0.62 : 0.62
+      s.vy = playerMissed ? 0.5 : -0.5
+    }
+
+    // 20 fps is plenty for a CRT-sized screen and keeps the texture upload cheap
+    paint.current += dt
+    if (paint.current > 0.05) {
+      paint.current = 0
+      paintPong(pongScreen().ctx, s, active)
+      pongScreen().texture.needsUpdate = true
+    }
+  })
 
   return (
     <group>
       {/* rug for the seating */}
-      <Box position={[3.85, 0.025, 1.55]} size={[3.1, 0.05, 3.5]} color="#213843" />
-      <Box position={[3.85, 0.055, 1.55]} size={[2.76, 0.012, 3.16]} color="#2e4c57" />
+      <Box position={[4.25, 0.025, 1.55]} size={[3.1, 0.05, 3.5]} color="#213843" />
+      <Box position={[4.25, 0.055, 1.55]} size={[2.76, 0.012, 3.16]} color="#2e4c57" />
 
-      {/* media console facing the sofa */}
-      <group position={[4.05, 0, 0.05]}>
+      {/* media console facing the sofa; clicking it flies the camera to the screen */}
+      <group
+        position={[4.45, 0, 0.05]}
+        onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+          e.stopPropagation()
+          window.clearTimeout(leave.current)
+          onHover('TV — take a seat and play', e.nativeEvent.clientX, e.nativeEvent.clientY)
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation()
+          leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+        }}
+        onClick={(e) => {
+          e.stopPropagation()
+          if (pointerDrag.moved > 6) return
+          onTv()
+        }}
+      >
         <Box position={[0, 0.3, 0]} size={[2.3, 0.1, 0.62]} color={C.wood} />
         <Box position={[0, 0.16, 0]} size={[2.16, 0.2, 0.56]} color={C.woodDark} />
         <Box position={[0, 0.03, 0]} size={[2.22, 0.06, 0.6]} color={C.woodDark} />
@@ -575,12 +716,18 @@ const Lounge = memo(function Lounge() {
         <Box position={[0, 1.02, -0.09]} size={[1.78, 1.02, 0.08]} color="#0d141d" />
         <mesh position={[0, 1.02, -0.045]}>
           <planeGeometry args={[1.66, 0.92]} />
-          <meshStandardMaterial map={screen} emissive="#ffffff" emissiveMap={screen} emissiveIntensity={0.75} toneMapped={false} />
+          <meshStandardMaterial
+            map={screen.texture}
+            emissive="#ffffff"
+            emissiveMap={screen.texture}
+            emissiveIntensity={0.9}
+            toneMapped={false}
+          />
         </mesh>
       </group>
 
       {/* sofa, back to the camera so the screen stays in view */}
-      <group position={[3.95, 0, 2.9]} rotation={[0, Math.PI, 0]}>
+      <group position={[4.35, 0, 2.9]} rotation={[0, Math.PI, 0]}>
         {[-1.03, 1.03].map((x) => (
           <group key={x}>
             <Box position={[x, 0.5, 0]} size={[0.2, 0.5, 0.92]} color={C.sofa} />
@@ -610,7 +757,7 @@ const Lounge = memo(function Lounge() {
       </group>
 
       {/* coffee table */}
-      <group position={[3.95, 0, 1.5]}>
+      <group position={[4.35, 0, 1.5]}>
         <Box position={[0, 0.44, 0]} size={[1.6, 0.08, 0.82]} color={C.wood} />
         <Box position={[0, 0.32, 0]} size={[1.44, 0.06, 0.7]} color={C.woodDark} />
         {[
@@ -629,6 +776,46 @@ const Lounge = memo(function Lounge() {
           <meshStandardMaterial color="#2f4d56" roughness={0.6} />
         </mesh>
       </group>
+    </group>
+  )
+})
+
+/** Sideboard with a coffee setup, filling the empty floor in front of the rug. */
+const CoffeeNook = memo(function CoffeeNook() {
+  return (
+    <group position={[-1.35, 0, 4.35]} rotation={[0, 0.12, 0]}>
+      <Box position={[0, 0.4, 0]} size={[1.5, 0.08, 0.58]} color={C.wood} />
+      <Box position={[0, 0.22, 0]} size={[1.4, 0.28, 0.52]} color={C.woodDark} />
+      {[-0.35, 0.35].map((x) => (
+        <group key={x}>
+          <Box position={[x, 0.22, 0.27]} size={[0.6, 0.22, 0.02]} color={C.wood} />
+          <Box position={[x + 0.22, 0.22, 0.29]} size={[0.06, 0.02, 0.02]} color={C.trim} />
+        </group>
+      ))}
+      {[-0.64, 0.64].map((x) => (
+        <Box key={x} position={[x, 0.08, 0]} size={[0.07, 0.16, 0.5]} color={C.woodDark} />
+      ))}
+
+      {/* kettle, two cups, a jar and a book — a coffee corner, not a prop shelf */}
+      <mesh position={[-0.4, 0.54, 0]} castShadow>
+        <cylinderGeometry args={[0.11, 0.13, 0.2, 14]} />
+        <meshStandardMaterial color="#2f4d56" roughness={0.55} metalness={0.25} />
+      </mesh>
+      <mesh position={[-0.4, 0.67, 0]}>
+        <sphereGeometry args={[0.05, 10, 8]} />
+        <meshStandardMaterial color={C.metal} roughness={0.4} metalness={0.4} />
+      </mesh>
+      {[0.0, 0.22].map((x) => (
+        <mesh key={x} position={[x, 0.49, 0.1]} castShadow>
+          <cylinderGeometry args={[0.06, 0.05, 0.1, 12]} />
+          <meshStandardMaterial color={C.cream} roughness={0.7} />
+        </mesh>
+      ))}
+      <mesh position={[0.5, 0.5, -0.02]} castShadow>
+        <cylinderGeometry args={[0.085, 0.085, 0.13, 12]} />
+        <meshStandardMaterial color="#8a5d3b" roughness={0.85} />
+      </mesh>
+      <Box position={[0.48, 0.47, 0.21]} size={[0.3, 0.05, 0.2]} color="#c8a25a" rotation={[0, 0.2, 0]} />
     </group>
   )
 })
@@ -658,10 +845,14 @@ export const Room = memo(function Room({
   onPick,
   onHover,
   onPoster,
+  onTv,
+  tvActive,
 }: {
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
   onPoster: () => void
+  onTv: () => void
+  tvActive: boolean
 }) {
   return (
     <group>
@@ -674,12 +865,13 @@ export const Room = memo(function Room({
       <Window />
       <Rack />
 
-      <Lounge />
+      <Lounge onTv={onTv} onHover={onHover} active={tvActive} />
+      <CoffeeNook />
       <GalleryLight />
       <FloorLamp position={[5.45, 0, 3.65]} />
       <Pendant />
 
-      <Plant position={[5.3, 0, 4.6]} />
+      <Plant position={[5.55, 0, 4.6]} />
       <Plant position={[-4.6, 0, 4.4]} />
       <Plant position={[-5.0, 0, -5.1]} tall />
     </group>

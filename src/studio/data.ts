@@ -3,7 +3,7 @@
  * moves the camera to `pose` and opens the matching HTML panel. `room` is the overview.
  */
 export type StationId = 'projects' | 'skills' | 'experience' | 'certificates' | 'about'
-export type ViewId = 'room' | 'poster' | StationId
+export type ViewId = 'room' | 'poster' | 'tv' | StationId
 
 export interface Pose {
   eye: [number, number, number]
@@ -19,6 +19,8 @@ export const POSES: Record<ViewId, Pose> = {
   about: { eye: [2.7, 1.7, 6.5], target: [1.1, 1.3, 2.05] },
   // the framed portrait on the back wall, close enough to read the face
   poster: { eye: [3.35, 3.55, -2.5], target: [1.9, 3.5, -5.92] },
+  // the TV in the lounge: framed from the sofa so the whole screen, including the paddle, is in view
+  tv: { eye: [4.6, 1.95, 4.55], target: [4.5, 1.02, -0.04] },
 }
 
 /**
@@ -33,6 +35,8 @@ export const PORTRAIT_POSES: Record<ViewId, Pose> = {
   certificates: { eye: [3.1, 3.85, 4.95], target: [-5.9, 2.4, 3.1] },
   about: { eye: [2.45, 2.0, 6.2], target: [0.78, 1.0, 2.05] },
   poster: { eye: [3.95, 3.65, -0.75], target: [1.9, 3.5, -5.92] },
+  // portrait sees a third of the room's width, so the TV view needs the extra distance
+  tv: { eye: [4.45, 3.0, 6.4], target: [4.45, 1.05, 0.0] },
 }
 
 export const STATIONS: { id: StationId; label: string; where: string }[] = [

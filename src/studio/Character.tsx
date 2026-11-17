@@ -196,7 +196,7 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const armSwing = Math.sin(a.step) * 0.5 * a.walk
     if (shoulderL.current) {
       shoulderL.current.rotation.x = damp(shoulderL.current.rotation.x, -0.35 * sit - armSwing, 9, dt)
-      shoulderL.current.rotation.z = -0.1
+      shoulderL.current.rotation.z = -0.16
     }
     if (elbowL.current) elbowL.current.rotation.z = damp(elbowL.current.rotation.z, 0.35 * sit, 9, dt)
 
@@ -204,7 +204,7 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const waving = since < 1.9
     if (shoulderR.current) {
       // +z lifts the right arm outward and up: the old -z value folded it across his chest
-      const shoulderZ = waving ? 2.3 + Math.sin(since * 13) * 0.12 : -0.1
+      const shoulderZ = waving ? 2.3 + Math.sin(since * 13) * 0.12 : 0.16
       shoulderR.current.rotation.z = damp(shoulderR.current.rotation.z, shoulderZ, waving ? 18 : 10, dt)
       shoulderR.current.rotation.x = damp(shoulderR.current.rotation.x, waving ? 0 : -0.35 * sit + armSwing, 10, dt)
     }
@@ -286,8 +286,8 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
 
       {/* arms: shoulder -> elbow -> hand */}
       {([
-        [-0.28, shoulderL, elbowL],
-        [0.28, shoulderR, elbowR],
+        [-0.295, shoulderL, elbowL],
+        [0.295, shoulderR, elbowR],
       ] as const).map(([x, shoulder, elbow]) => (
         <group key={x} ref={shoulder} position={[x, 1.36, 0]}>
           <mesh position={[0, -0.01, 0]} castShadow>
@@ -326,15 +326,19 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
           <sphereGeometry args={[0.252, 24, 18, Math.PI, Math.PI]} />
           <meshStandardMaterial color={HAIR} roughness={0.88} side={THREE.DoubleSide} />
         </mesh>
-        <Ball r={0.062} color={HAIR} position={[-0.215, 0.055, 0.015]} scale={[0.32, 0.95, 0.95]} roughness={0.88} />
-        <Ball r={0.062} color={HAIR} position={[0.215, 0.05, 0.01]} scale={[0.32, 0.95, 0.9]} roughness={0.88} />
+        {/* sideburns tuck behind the ear so only the top of it sits under hair */}
+        <Ball r={0.062} color={HAIR} position={[-0.205, 0.058, -0.05]} scale={[0.26, 0.86, 0.8]} roughness={0.88} />
+        <Ball r={0.062} color={HAIR} position={[0.205, 0.054, -0.052]} scale={[0.26, 0.86, 0.8]} roughness={0.88} />
         <Ball r={0.082} color={HAIR} position={[-0.09, 0.182, 0.19]} scale={[1.2, 0.5, 0.6]} roughness={0.88} />
         <Ball r={0.078} color={HAIR} position={[0.02, 0.198, 0.188]} scale={[1.15, 0.45, 0.58]} roughness={0.88} />
         <Ball r={0.07} color={HAIR} position={[0.135, 0.176, 0.172]} scale={[0.85, 0.5, 0.55]} roughness={0.88} />
 
-        {/* ears */}
+        {/* ears, with a lock of hair sitting on the top of each one */}
+        {[-0.23, 0.23].map((x) => (
+          <Ball key={x} r={0.07} color={SKIN} position={[x, -0.024, -0.03]} scale={[0.4, 0.82, 0.72]} roughness={0.75} />
+        ))}
         {[-0.232, 0.232].map((x) => (
-          <Ball key={x} r={0.072} color={SKIN} position={[x, 0.002, -0.015]} scale={[0.5, 0.95, 0.8]} roughness={0.75} />
+          <Ball key={x} r={0.05} color={HAIR} position={[x, 0.022, -0.035]} scale={[0.42, 0.55, 0.85]} roughness={0.88} />
         ))}
 
         {/* eyes behind the lenses */}
@@ -375,7 +379,7 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
 
         {/* brows, nose, smile */}
         {[-0.084, 0.084].map((x) => (
-          <mesh key={x} position={[x, 0.104, 0.226]} rotation={[0.1, 0, Math.sign(x) * 0.12]}>
+          <mesh key={x} position={[x, 0.104, 0.226]} rotation={[0.1, 0, Math.PI / 2 - Math.sign(x) * 0.12]}>
             <capsuleGeometry args={[0.009, 0.05, 4, 8]} />
             <meshStandardMaterial color={HAIR} roughness={0.85} />
           </mesh>

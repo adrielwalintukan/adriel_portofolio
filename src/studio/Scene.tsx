@@ -16,6 +16,7 @@ interface SceneProps {
   onHover: (label: string | null, x: number, y: number) => void
   onGreet: () => void
   onPoster: () => void
+  onTv: () => void
 }
 
 /**
@@ -33,6 +34,7 @@ export const StudioScene = memo(function StudioScene({
   onHover,
   onGreet,
   onPoster,
+  onTv,
 }: SceneProps) {
   return (
     <Canvas
@@ -72,7 +74,7 @@ export const StudioScene = memo(function StudioScene({
       <pointLight position={[4.05, 1.2, 1.1]} intensity={3} distance={4.5} decay={2} color="#5fb2c8" />
 
       <Suspense fallback={null}>
-        <Room onPick={onPick} onHover={onHover} onPoster={onPoster} />
+        <Room onPick={onPick} onHover={onHover} onPoster={onPoster} onTv={onTv} tvActive={view === 'tv'} />
       </Suspense>
       <Character
         greetKey={greetKey}
