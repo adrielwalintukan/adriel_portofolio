@@ -16,16 +16,16 @@ if (!html.includes('<div id="root"></div>'))
 const studio = html
   .replaceAll('Adriel Walintukan | Developer Portfolio', '3D Studio — Adriel Walintukan')
   .replaceAll(
-    'https://adrielportofolio.vercel.app/og-image.jpg',
-    'https://adrielportofolio.vercel.app/og-studio.jpg'
+    'https://www.adrielwalintukan.my.id/og-image.jpg',
+    'https://www.adrielwalintukan.my.id/og-studio.jpg'
   )
   .replaceAll(
-    'content="https://adrielportofolio.vercel.app/"',
-    'content="https://adrielportofolio.vercel.app/studio"'
+    'content="https://www.adrielwalintukan.my.id/"',
+    'content="https://www.adrielwalintukan.my.id/studio"'
   )
   .replace(
-    'href="https://adrielportofolio.vercel.app/"',
-    'href="https://adrielportofolio.vercel.app/studio"'
+    'href="https://www.adrielwalintukan.my.id/"',
+    'href="https://www.adrielwalintukan.my.id/studio"'
   )
   .replace(
     "Adriel Walintukan's portfolio: portrait and name on the home page",
