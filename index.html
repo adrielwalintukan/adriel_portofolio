@@ -5,7 +5,7 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Adriel Walintukan — Developer Portfolio. Full-stack developer crafting modern digital experiences." />
+    <meta name="description" content="Adriel Walintukan, full-stack and AI developer from Manado, Indonesia. Information Systems student at Klabat University. Projects, experience and skills." />
     <meta name="theme-color" content="#ccd2d6" />
     <link rel="canonical" href="https://adrielportofolio.vercel.app/" />
 
@@ -23,6 +23,45 @@
     <meta name="twitter:title" content="Adriel Walintukan | Developer Portfolio" />
     <meta name="twitter:description" content="Information Systems student building AI-powered web and mobile products with clean architecture." />
     <meta name="twitter:image" content="https://adrielportofolio.vercel.app/og-image.jpg" />
+
+    <!-- tells search engines who this site is about, so a search for the name can show it as his profile -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Person",
+            "@id": "https://adrielportofolio.vercel.app/#person",
+            "name": "Adriel Walintukan",
+            "url": "https://adrielportofolio.vercel.app/",
+            "image": "https://adrielportofolio.vercel.app/images/adriel.webp",
+            "jobTitle": "Full-Stack Developer",
+            "description": "Information Systems student building AI-powered web and mobile products with clean architecture.",
+            "address": { "@type": "PostalAddress", "addressLocality": "Manado", "addressCountry": "ID" },
+            "affiliation": { "@type": "CollegeOrUniversity", "name": "Klabat University" },
+            "knowsAbout": ["AI Integration", "Web Development", "Mobile App Development", "Python", "Software Testing"],
+            "sameAs": [
+              "https://github.com/AdrielWalintukan",
+              "https://www.linkedin.com/in/adriel-walintukan-383032332/",
+              "https://www.instagram.com/walintukann.adriel/"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://adrielportofolio.vercel.app/#website",
+            "url": "https://adrielportofolio.vercel.app/",
+            "name": "Adriel Walintukan",
+            "publisher": { "@id": "https://adrielportofolio.vercel.app/#person" }
+          },
+          {
+            "@type": "ProfilePage",
+            "url": "https://adrielportofolio.vercel.app/",
+            "name": "Adriel Walintukan | Developer Portfolio",
+            "mainEntity": { "@id": "https://adrielportofolio.vercel.app/#person" }
+          }
+        ]
+      }
+    </script>
 
     <!-- Preconnect to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
