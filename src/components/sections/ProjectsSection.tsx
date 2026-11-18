@@ -122,13 +122,15 @@ const StackCard = memo(function StackCard({
     <motion.article
       ref={articleRef}
       id={`project-${project.id}`}
-      style={stacked ? { scale, top: `${96 + index * 20}px` } : undefined}
+      // each pinned card fills the screen below its own pin line, so its bottom (video, sound button) never falls off it
+      style={stacked ? { scale, top: `${96 + index * 20}px`, height: `min(680px, calc(100svh - ${112 + index * 20}px))` } : undefined}
       className={cn(
-        'section-dark relative grid scroll-mt-24 origin-top overflow-hidden rounded-2xl border border-border shadow-elevated lg:grid-cols-[1fr_1.35fr]',
+        // grid-cols-1 is minmax(0,1fr): an auto column would grow to the one-line tag row and get clipped
+        'section-dark relative grid grid-cols-1 scroll-mt-24 origin-top overflow-hidden rounded-2xl border border-border shadow-elevated lg:grid-cols-[1fr_1.35fr]',
         // single column on small screens: copy on top, screenshot takes whatever height is left
         stacked && 'grid-rows-[auto_minmax(0,1fr)] lg:grid-rows-1',
         // cards must be direct siblings in one container: sticky only pins within its parent
-        stacked && 'sticky h-[min(78svh,680px)]',
+        stacked && 'sticky',
         stacked && depth > 0 && 'mb-[25svh]'
       )}
     >
@@ -143,17 +145,18 @@ const StackCard = memo(function StackCard({
         <p className={cn('mt-4 max-w-md text-sm leading-relaxed text-foreground-muted sm:text-base', stacked && 'line-clamp-3 lg:line-clamp-none')}>
           {project.description}
         </p>
-        <ul className="mt-6 flex flex-wrap gap-2">
+        {/* one swipeable row on phones, so the tags don't eat the video's height */}
+        <ul className="mt-4 flex gap-2 overflow-x-auto sm:mt-6 sm:flex-wrap sm:overflow-visible [scrollbar-width:none]">
           {project.technologies.map((t) => (
             <li
               key={t}
-              className="rounded-full border border-border-hover px-3 py-1 text-xs text-foreground-muted"
+              className="shrink-0 rounded-full border border-border-hover px-3 py-1 text-xs text-foreground-muted"
             >
               {t}
             </li>
           ))}
         </ul>
-        <div className="mt-6 flex flex-wrap items-center gap-3 lg:mt-auto">
+        <div className="mt-4 flex flex-wrap items-center gap-3 sm:mt-6 lg:mt-auto">
           {project.inDevelopment ? (
             <span className="inline-flex h-11 items-center gap-2 rounded-lg border border-dashed border-border-hover px-4 font-mono text-xs uppercase tracking-widest text-foreground-muted">
               <span className="h-2 w-2 animate-pulse rounded-full bg-accent" aria-hidden="true" />
@@ -162,7 +165,7 @@ const StackCard = memo(function StackCard({
           ) : (
           <button
             onClick={open}
-            className="group inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-paper transition-colors hover:bg-accent-hover"
+            className="group inline-flex w-fit items-center gap-3 rounded-lg bg-accent py-2 pl-5 pr-2 font-display text-base font-extrabold uppercase tracking-wide text-ink transition-colors hover:bg-accent-hover"
           >
             View project
             <span className="flex h-7 w-7 items-center justify-center rounded-md bg-paper text-accent transition-transform group-hover:translate-x-1">
@@ -180,13 +183,13 @@ const StackCard = memo(function StackCard({
               className="inline-flex h-11 items-center gap-2 rounded-lg border border-border-hover px-4 font-display text-base font-extrabold uppercase tracking-wide text-foreground transition-colors hover:border-foreground"
             >
               <FiGithub className="h-4 w-4" />
-              Code
+              <span className="hidden sm:inline">Code</span>
             </a>
           )}
         </div>
       </div>
 
-      <div className={cn('relative overflow-hidden', project.video ? 'bg-black' : 'bg-surface', stacked ? 'min-h-40 lg:min-h-0' : 'h-64 sm:h-80 lg:h-auto')}>
+      <div className={cn('relative overflow-hidden', project.video ? 'bg-black' : 'bg-surface', stacked ? 'min-h-0' : 'h-64 sm:h-80 lg:h-auto')}>
       {project.inDevelopment ? (
         // nothing to show or open yet: screenshots and video come once the project ships
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">

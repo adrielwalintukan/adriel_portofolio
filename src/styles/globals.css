@@ -9,7 +9,7 @@
   --color-ink: #0b1226;
   --color-paper: #f8fafb;
   /* text/lines on paper sections: dim = large secondary text, fg-muted = body text */
-  --color-paper-dim: #77828f;
+  --color-paper-dim: #66707c; /* 3.2:1 on the page grey: large display text only */
   --color-paper-fg-muted: #4a5565;
   --color-paper-line: #b9c1c7;
 
@@ -22,15 +22,15 @@
 
   --color-foreground: #0b1226;
   --color-foreground-muted: #4a5565;
-  --color-foreground-subtle: #56616e;
+  --color-foreground-subtle: #4b5562; /* 4.8:1 on the page grey */
 
   --color-border: #b9c1c7;
   --color-border-hover: #a3acb3;
 
   --color-accent: #1b7a80;
   --color-accent-hover: #15666b;
-  /* small accent text on light backgrounds */
-  --color-accent-strong: #15666b;
+  /* small accent text: 5.2:1 on the page grey (the base accent is 3.3:1) */
+  --color-accent-strong: #11585c;
   --color-accent-glow: rgba(27, 122, 128, 0.25);
 
   /* Legacy decorative colors — collapsed to the single accent + neutral */
@@ -123,6 +123,7 @@
   /* brighter teal: the base accent is too dark to read on navy */
   --color-accent: #3fb0b7;
   --color-accent-hover: #5cc2c8;
+  --color-accent-strong: #3fb0b7;
   background-color: var(--color-background);
   color: var(--color-foreground);
 }

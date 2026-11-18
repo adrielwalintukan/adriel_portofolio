@@ -35,7 +35,7 @@ function CategoryCard({ group }: { group: SkillCategory }) {
 function Heading() {
   return (
     <>
-      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">Skills</p>
+      <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent-strong">Skills</p>
       <h2 className="font-display text-[clamp(2.75rem,10vw,9rem)] font-black uppercase leading-[0.85] tracking-tight text-foreground">
         What
         <br />

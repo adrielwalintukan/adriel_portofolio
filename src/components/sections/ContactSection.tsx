@@ -67,7 +67,7 @@ export const ContactSection = memo(function ContactSection() {
       {/* Contact details + form */}
       <div id="contact-form" className="section-container grid scroll-mt-24 gap-12 pb-24 pt-8 lg:grid-cols-[1fr_1.3fr] lg:gap-16">
         <div>
-          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">Get in touch</p>
+          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent-strong">Get in touch</p>
           <h3 className="font-display text-6xl font-black uppercase leading-[0.9] tracking-tight text-foreground sm:text-7xl">
             Say hello
           </h3>

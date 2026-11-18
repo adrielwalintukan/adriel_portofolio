@@ -10,7 +10,7 @@ import { Room } from './Room'
 interface SceneProps {
   view: ViewId
   reduced: boolean
-  shadows: boolean
+  shadowSize: number
   dpr: [number, number]
   greetKey: number
   onReady: () => void
@@ -53,7 +53,7 @@ function Reflections() {
 export const StudioScene = memo(function StudioScene({
   view,
   reduced,
-  shadows,
+  shadowSize,
   dpr,
   greetKey,
   onReady,
@@ -71,7 +71,7 @@ export const StudioScene = memo(function StudioScene({
 }: SceneProps) {
   return (
     <Canvas
-      shadows={shadows}
+      shadows
       dpr={dpr}
       className="studio-canvas"
       camera={{ fov: 33, near: 0.1, far: 120, position: [16, 13, 19] }}
@@ -86,9 +86,10 @@ export const StudioScene = memo(function StudioScene({
       <directionalLight
         position={[7, 12, 7]}
         intensity={1.4}
-        castShadow={shadows}
-        shadow-mapSize={[2048, 2048]}
-        shadow-bias={-0.0005}
+        castShadow
+        shadow-mapSize={[shadowSize, shadowSize]}
+        shadow-bias={-0.0003}
+        shadow-normalBias={0.02}
         shadow-camera-left={-9}
         shadow-camera-right={9}
         shadow-camera-top={9}
@@ -162,6 +163,7 @@ export const StudioScene = memo(function StudioScene({
       <Character
         greetKey={greetKey}
         focus={view === 'about'}
+        away={view === 'sideboard'}
         reduced={reduced}
         onPick={() => {
           onGreet()

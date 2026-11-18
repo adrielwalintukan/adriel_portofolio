@@ -14,8 +14,9 @@ import {
   type StationId,
   type TvMode,
 } from './data'
-import { POOL, moving, shoot, step, table } from './pool'
+import { POOL, moving, shoot, step, table, type Hit } from './pool'
 import { quadMatrix } from './quad'
+import { poolSound, unlock } from './sound'
 import { PROMPT, TERM_COLORS, type TermLine } from './terminal'
 import { boardTexture, certificateTexture, floorTexture, windowTexture } from './textures'
 
@@ -236,7 +237,7 @@ const deskScreen = () => {
     canvas.height = SCREEN_PX.h
     const texture = new THREE.CanvasTexture(canvas)
     texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 8
+    texture.anisotropy = 16
     desk = { ctx: canvas.getContext('2d')!, texture }
   }
   return desk
@@ -350,7 +351,7 @@ const terminalScreen = () => {
     canvas.height = TERM.h
     const texture = new THREE.CanvasTexture(canvas)
     texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 8
+    texture.anisotropy = 16
     terminalCanvas = { ctx: canvas.getContext('2d')!, texture }
   }
   return terminalCanvas
@@ -718,20 +719,19 @@ const Desk = memo(function Desk({
           ))}
           <Box position={[0, 0.72, 0.42]} size={[0.46, 0.26, 0.09]} color={C.accent} />
           <Box position={[0, 0.3, 0]} size={[0.09, 0.56, 0.09]} color={C.metal} />
-          <Box position={[0, 0.04, 0]} size={[0.56, 0.06, 0.56]} color={C.metal} />
-          {[
-            [0.98, -3.6],
-            [1.62, -3.6],
-            [0.98, -3.0],
-            [1.62, -3.0],
-          ].map(([x, z]) => (
-            <Box
-              key={`${x}${z}`}
-              position={[x, 0.12, z]}
-              size={[0.06, 0.24, 0.06]}
-              color={C.metal}
-            />
-          ))}
+          {/* five-star base on casters (chair-local, like the rest of the chair) */}
+          {[0, 1, 2, 3, 4].map((i) => {
+            const angle = (i / 5) * Math.PI * 2
+            return (
+              <group key={i} rotation={[0, angle, 0]}>
+                <Box position={[0.16, 0.07, 0]} size={[0.32, 0.04, 0.05]} color={C.metal} />
+                <mesh position={[0.3, 0.035, 0]} castShadow>
+                  <sphereGeometry args={[0.035, 16, 12]} />
+                  <meshStandardMaterial color="#0f141b" roughness={0.5} />
+                </mesh>
+              </group>
+            )
+          })}
         </group>
       </group>
     </Hotspot>
@@ -870,7 +870,7 @@ const Poster = memo(function Poster({
         return
       }
       t.colorSpace = THREE.SRGBColorSpace
-      t.anisotropy = 8
+      t.anisotropy = 16
       setTexture(t)
     })
     return () => {
@@ -1180,7 +1180,7 @@ const beanFabricTexture = () => {
   ctx.stroke()
   beanFabric = new THREE.CanvasTexture(canvas)
   beanFabric.colorSpace = THREE.SRGBColorSpace
-  beanFabric.anisotropy = 8
+  beanFabric.anisotropy = 16
   return beanFabric
 }
 
@@ -1453,7 +1453,7 @@ const pongScreen = () => {
     canvas.height = PONG.h
     const texture = new THREE.CanvasTexture(canvas)
     texture.colorSpace = THREE.SRGBColorSpace
-    texture.anisotropy = 8
+    texture.anisotropy = 16
     pong = { ctx: canvas.getContext('2d')!, texture }
   }
   return pong
@@ -1906,6 +1906,17 @@ const Sideboard = memo(function Sideboard({
   )
 })
 
+const lastHit = { ball: 0, cushion: 0, pocket: 0 }
+/** Table hits to sounds; a burst of contacts within 35 ms plays once, at its loudest. */
+const onHit: Hit = (kind, speed) => {
+  const now = performance.now()
+  if (kind !== 'pocket' && speed < 0.08) return
+  if (now - lastHit[kind] < 35) return
+  lastHit[kind] = now
+  if (kind === 'pocket') poolSound.pocket()
+  else poolSound[kind](speed)
+}
+
 const BALL_COLORS = [
   '#f4f1e8',
   '#e3b83c',
@@ -1946,7 +1957,7 @@ const Billiards = memo(function Billiards({
   const aim = useRef({ x: POOL.w / 4, z: 0 })
 
   useFrame((_, delta) => {
-    if (moving(table)) step(table, Math.min(delta, 0.05))
+    if (moving(table)) step(table, Math.min(delta, 0.05), onHit)
     table.balls.forEach((b, i) => {
       const mesh = balls.current[i]
       if (!mesh) return
@@ -2001,7 +2012,9 @@ const Billiards = memo(function Billiards({
         if (!active) return onLook('billiards')
         const spot = toTable(e.point)
         aim.current = spot
-        shoot(table, spot.x, spot.z)
+        unlock()
+        if (shoot(table, spot.x, spot.z))
+          poolSound.cue(Math.hypot(table.balls[0].vx, table.balls[0].vz))
       }}
     >
       {[-1.3, 1.3].flatMap((x) =>

@@ -12,7 +12,7 @@ const make = (w: number, h: number, paint: (ctx: CanvasRenderingContext2D, w: nu
   paint(ctx, w, h)
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
-  texture.anisotropy = 8
+  texture.anisotropy = 16
   return texture
 }
 

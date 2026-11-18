@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, RotateCcw } from 'lucide-react'
+import { ArrowLeft, Music, RotateCcw, VolumeX } from 'lucide-react'
 import { CertificateModal, ProjectGalleryModal } from '@/components/ui'
 import { CONTACT_INFO, SKILLS_DATA, type Certificate, type Project } from '@/lib/constants'
 import {
@@ -18,7 +18,8 @@ import {
   type ViewId,
 } from '@/studio/data'
 import { DeskWindow } from '@/studio/DeskWindow'
-import { rerack } from '@/studio/pool'
+import { potted, rerack, table } from '@/studio/pool'
+import { startMusic, stopMusic, unlock } from '@/studio/sound'
 import { runCommand, type TermData } from '@/studio/terminal'
 import { StudioScene } from '@/studio/Scene'
 import { StudioPanel } from '@/studio/StudioPanel'
@@ -225,6 +226,58 @@ function StudioPage() {
     return () => window.removeEventListener('blur', reclaim)
   }, [tvVideo, deskProject])
 
+  // room music: off until the visitor's first click or key (browsers require one), remembered across visits,
+  // and quiet while a video on the TV, the computer or a project modal has the sound
+  const [musicOn, setMusicOn] = useState(() => {
+    try {
+      return localStorage.getItem('studio-music') !== 'off'
+    } catch {
+      return true
+    }
+  })
+  const [heard, setHeard] = useState(false)
+  useEffect(() => {
+    const first = () => {
+      unlock()
+      setHeard(true)
+    }
+    window.addEventListener('pointerdown', first, { once: true, capture: true })
+    window.addEventListener('keydown', first, { once: true, capture: true })
+    return () => {
+      window.removeEventListener('pointerdown', first, { capture: true })
+      window.removeEventListener('keydown', first, { capture: true })
+    }
+  }, [])
+  const videoPlaying = tvVideo || Boolean(deskProject) || Boolean(project)
+  useEffect(() => {
+    if (heard && musicOn && !videoPlaying) startMusic()
+    else stopMusic()
+  }, [heard, musicOn, videoPlaying])
+  useEffect(() => stopMusic, [])
+  const toggleMusic = () => {
+    unlock()
+    setHeard(true)
+    setMusicOn((on) => {
+      try {
+        localStorage.setItem('studio-music', on ? 'off' : 'on')
+      } catch {
+        // private mode: the choice just isn't remembered
+      }
+      return !on
+    })
+  }
+
+  // the pool score lives in the physics module; read it a few times a second while the table is open
+  const [score, setScore] = useState({ shots: 0, potted: 0 })
+  useEffect(() => {
+    if (view !== 'billiards') return
+    const timer = window.setInterval(() => {
+      const next = { shots: table.shots, potted: potted(table) }
+      setScore((prev) => (prev.shots === next.shots && prev.potted === next.potted ? prev : next))
+    }, 200)
+    return () => window.clearInterval(timer)
+  }, [view])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (view === 'projects' && !project && !certificate) {
@@ -346,8 +399,9 @@ function StudioPage() {
         <StudioScene
           view={view}
           reduced={reducedMotion}
-          shadows={!coarse}
-          dpr={[1, 2]}
+          // supersampled to at least 1.5x for crisp edges; phones get shadows too, on a smaller map
+          shadowSize={coarse ? 1024 : 4096}
+          dpr={[1.5, 2]}
           greetKey={greetKey}
           onReady={() => setReady(true)}
           onPick={setView}
@@ -454,21 +508,32 @@ function StudioPage() {
               ))}
             </nav>
 
-            <button
-              onClick={() => (view === 'room' ? navigate('/') : setView('room'))}
-              className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-[#0b1226]/80 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
-            >
-              {view === 'room' ? (
-                'Exit'
-              ) : (
-                <>
-                  <RotateCcw className="h-3.5 w-3.5" /> Room
-                </>
-              )}
-              <kbd className="hidden rounded border border-white/15 px-1 text-[10px] sm:inline">
-                Esc
-              </kbd>
-            </button>
+            <div className="pointer-events-auto flex items-center gap-2">
+              <button
+                onClick={toggleMusic}
+                aria-pressed={musicOn}
+                aria-label={musicOn ? 'Mute the room music' : 'Play the room music'}
+                title={musicOn ? 'Music on' : 'Music off'}
+                className="flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/10 bg-[#0b1226]/80 text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
+              >
+                {musicOn ? <Music className="h-3.5 w-3.5" /> : <VolumeX className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onClick={() => (view === 'room' ? navigate('/') : setView('room'))}
+                className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-[#0b1226]/80 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
+              >
+                {view === 'room' ? (
+                  'Exit'
+                ) : (
+                  <>
+                    <RotateCcw className="h-3.5 w-3.5" /> Room
+                  </>
+                )}
+                <kbd className="hidden rounded border border-white/15 px-1 text-[10px] sm:inline">
+                  Esc
+                </kbd>
+              </button>
+            </div>
           </div>
 
           <nav
@@ -584,7 +649,14 @@ function StudioPage() {
                 >
                   Rerack
                 </button>
-                <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
+                <p
+                  aria-live="polite"
+                  className="rounded-full border border-[#3fb0b7]/30 bg-[#0b1226]/85 px-3 py-1.5 font-mono text-[11px] text-[#dbe5ea] backdrop-blur"
+                >
+                  {score.potted}/{table.balls.length - 1} potted · {score.shots}{' '}
+                  {score.shots === 1 ? 'shot' : 'shots'}
+                </p>
+                <p className="hidden rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur sm:block">
                   {coarse
                     ? 'Tap the felt to shoot · farther is harder'
                     : 'Aim with the pointer · click to shoot · farther is harder'}

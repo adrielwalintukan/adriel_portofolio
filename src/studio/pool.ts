@@ -62,8 +62,10 @@ export const shoot = (s: PoolState, x: number, z: number) => {
 
 const SUBSTEPS = 6
 
+export type Hit = (kind: 'ball' | 'cushion' | 'pocket', speed: number) => void
+
 /** Advances the table by dt seconds: rolling, cushions, pockets and ball-on-ball hits. */
-export const step = (s: PoolState, dt: number) => {
+export const step = (s: PoolState, dt: number, onHit?: Hit) => {
   const { r } = POOL
   const hx = POOL.w / 2 - r
   const hz = POOL.d / 2 - r
@@ -83,15 +85,18 @@ export const step = (s: PoolState, dt: number) => {
       b.z += b.vz * h
       if (Math.abs(b.x) > hx) {
         b.x = Math.sign(b.x) * hx
+        onHit?.('cushion', Math.abs(b.vx))
         b.vx = -b.vx * CUSHION
       }
       if (Math.abs(b.z) > hz) {
         b.z = Math.sign(b.z) * hz
+        onHit?.('cushion', Math.abs(b.vz))
         b.vz = -b.vz * CUSHION
       }
       if (POCKETS.some((p) => Math.hypot(b.x - p.x, b.z - p.z) < POOL.pocket)) {
         b.in = true
         b.vx = b.vz = 0
+        onHit?.('pocket', 0)
       }
     }
 
@@ -114,6 +119,7 @@ export const step = (s: PoolState, dt: number) => {
         // equal masses: swap the velocity components along the line of centres
         const along = (a.vx - b.vx) * nx + (a.vz - b.vz) * nz
         if (along <= 0) continue
+        onHit?.('ball', along)
         const kick = along * 0.97
         a.vx -= kick * nx
         a.vz -= kick * nz

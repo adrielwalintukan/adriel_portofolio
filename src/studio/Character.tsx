@@ -41,14 +41,24 @@ type Spot = { x: number; z: number; yaw: number; act: Act; hold: number }
 /** Framing of the About view was built around this pose, so it is also his home base. */
 const GREET: Spot = { x: 0.7, z: 2.05, yaw: 0.42, act: 'stand', hold: 0 }
 
+// close enough to the desk that his hands rest on the keyboard
+const SEAT: Spot = { x: 1.3, z: -3.7, yaw: Math.PI, act: 'sit', hold: 14 }
+// beside the chair, before the point where he starts lowering onto it
+const BESIDE_SEAT: Spot = { x: 0.48, z: -3.6, yaw: Math.PI, act: 'stand', hold: 0.3 }
+// in front of the sideboard under the awards wall, well clear of its worktop
+const SIDEBOARD: Spot = { x: -4.5, z: 2.3, yaw: -Math.PI / 2, act: 'stand', hold: 6 }
+// the spot beside the chair (0.83 m out) is just inside this, so he already faces the desk when he gets there
+const SIDESTEP = 0.85
+
 /** A day in the room: stand by the rug, work at the desk, browse the shelf, tinker at the sideboard. */
 const ROUTINE: Spot[] = [
   { x: 1.05, z: 1.75, yaw: 0.3, act: 'stand', hold: 5 },
-  // close enough to the desk that his hands rest on the keyboard
-  { x: 1.3, z: -3.7, yaw: Math.PI, act: 'sit', hold: 14 },
+  // into the chair from its side, never through it, and out the same way
+  BESIDE_SEAT,
+  SEAT,
+  BESIDE_SEAT,
   { x: -4.15, z: -2.45, yaw: -Math.PI / 2, act: 'shelf', hold: 8 },
-  // in front of the sideboard under the awards wall, well clear of its worktop
-  { x: -4.5, z: 2.3, yaw: -Math.PI / 2, act: 'stand', hold: 6 },
+  SIDEBOARD,
 ]
 
 const HIP_Y = 0.95
@@ -113,6 +123,8 @@ interface CharacterProps {
   greetKey: number
   /** About is open: stand at the greeting spot instead of wandering */
   focus: boolean
+  /** the sideboard close-up is open: keep out of its frame */
+  away: boolean
   reduced: boolean
 }
 
@@ -120,7 +132,7 @@ interface CharacterProps {
  * Adriel, built from rounded primitives: he walks the room, sits down at the desk,
  * browses the shelf, turns his head toward the pointer and waves when greeted.
  */
-export const Character = memo(function Character({ onPick, onHover, greetKey, focus, reduced }: CharacterProps) {
+export const Character = memo(function Character({ onPick, onHover, greetKey, focus, away, reduced }: CharacterProps) {
   const root = useRef<THREE.Group>(null)
   const head = useRef<THREE.Group>(null)
   const shoulderL = useRef<THREE.Group>(null)
@@ -157,6 +169,11 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const real = Math.min(delta, 0.25)
     const t = clock.elapsedTime
     const a = anim.current
+    if (away && ROUTINE[a.index] === SIDEBOARD) {
+      a.index = (a.index + 1) % ROUTINE.length
+      a.phase = 'walk'
+      a.timer = 0
+    }
     const target = focus || reduced ? GREET : ROUTINE[a.index]
 
     // --- walk / arrive ------------------------------------------------------
@@ -164,14 +181,17 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const dz = target.z - a.z
     const distance = Math.hypot(dx, dz)
     const moving = !reduced && distance > 0.05
+    // next to the seat he faces the desk and shuffles sideways, lowering as he slides in
+    const fromSeat = Math.hypot(a.x - SEAT.x, a.z - SEAT.z)
+    const sidestep = moving && !focus && fromSeat < SIDESTEP
 
     if (moving) {
-      const step = Math.min(distance, (focus ? 2 : 1.15) * real)
+      const step = Math.min(distance, (focus ? 2 : sidestep ? 0.55 : 1.15) * real)
       a.x += (dx / distance) * step
       a.z += (dz / distance) * step
-      a.step += real * 7.2
-      a.walk = damp(a.walk, 1, 7, dt)
-      a.yaw = turn(a.yaw, Math.atan2(dx, dz), 9, dt)
+      a.step += real * (sidestep ? 4 : 7.2)
+      a.walk = damp(a.walk, sidestep ? 0.3 : 1, 7, dt)
+      a.yaw = turn(a.yaw, sidestep ? SEAT.yaw : Math.atan2(dx, dz), 9, dt)
       a.act = 'stand'
       a.phase = 'walk'
     } else {
@@ -196,7 +216,9 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
       a.yaw = GREET.yaw
     }
 
-    const sit = damp(a.sit, a.act === 'sit' && !moving ? 1 : 0, 7, dt)
+    const sitting =
+      a.act === 'sit' && !moving ? 1 : sidestep ? Math.min(1, Math.max(0, 1 - fromSeat / (SIDESTEP * 0.9))) : 0
+    const sit = damp(a.sit, sitting, 7, dt)
     a.sit = sit
 
     if (root.current) {
@@ -216,15 +238,16 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
 
     // --- arms ---------------------------------------------------------------
     const armSwing = Math.sin(a.step) * 0.5 * a.walk
-    // seated, both arms reach forward and in, forearms level on the keyboard, fingers tapping
+    // seated, upper arms reach well forward and forearms tilt up a little, so the hands rest on the keys
+    // (shoulder ~1.12 m seated, key tops ~1.09 m); fingers tap
     const tap = (phase: number) => Math.sin(t * 15 + phase) * 0.07 * sit
     if (shoulderL.current) {
-      shoulderL.current.rotation.x = damp(shoulderL.current.rotation.x, -1.2 * sit - armSwing, 9, dt)
+      shoulderL.current.rotation.x = damp(shoulderL.current.rotation.x, -1.38 * sit - armSwing, 9, dt)
       shoulderL.current.rotation.z = damp(shoulderL.current.rotation.z, -0.16 + 0.3 * sit, 9, dt)
     }
     if (elbowL.current) {
       elbowL.current.rotation.z = damp(elbowL.current.rotation.z, 0, 9, dt)
-      elbowL.current.rotation.x = damp(elbowL.current.rotation.x, (-0.55 + tap(0)) * sit, 14, dt)
+      elbowL.current.rotation.x = damp(elbowL.current.rotation.x, (-0.6 + tap(0)) * sit, 14, dt)
     }
 
     const since = performance.now() / 1000 - waveAt.current
@@ -233,12 +256,12 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
       // +z lifts the right arm outward and up: the old -z value folded it across his chest
       const shoulderZ = waving ? 2.3 + Math.sin(since * 13) * 0.12 : 0.16 - 0.3 * sit
       shoulderR.current.rotation.z = damp(shoulderR.current.rotation.z, shoulderZ, waving ? 18 : 10, dt)
-      shoulderR.current.rotation.x = damp(shoulderR.current.rotation.x, waving ? 0 : -1.2 * sit + armSwing, 10, dt)
+      shoulderR.current.rotation.x = damp(shoulderR.current.rotation.x, waving ? 0 : -1.38 * sit + armSwing, 10, dt)
     }
     if (elbowR.current) {
       const elbowZ = waving ? 0.72 + Math.sin(since * 14) * 0.3 : 0
       elbowR.current.rotation.z = damp(elbowR.current.rotation.z, elbowZ, waving ? 20 : 9, dt)
-      elbowR.current.rotation.x = damp(elbowR.current.rotation.x, waving ? 0 : (-0.55 + tap(1.7)) * sit, 14, dt)
+      elbowR.current.rotation.x = damp(elbowR.current.rotation.x, waving ? 0 : (-0.6 + tap(1.7)) * sit, 14, dt)
     }
 
     // --- head ---------------------------------------------------------------

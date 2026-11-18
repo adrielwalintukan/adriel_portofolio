@@ -78,7 +78,7 @@ export const GitHubActivitySection = memo(function GitHubActivitySection() {
     <Section id="github" className="section-dark">
       <div ref={ref} className="mb-12 grid items-end gap-6 md:mb-16 md:grid-cols-2">
         <div>
-          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent">GitHub activity</p>
+          <p className="mb-4 font-mono text-xs uppercase tracking-widest text-accent-strong">GitHub activity</p>
           <h2 className="font-display text-[clamp(3.5rem,10vw,9rem)] font-black uppercase leading-[0.85] tracking-tight text-foreground">
             Building
             <br />
