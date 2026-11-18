@@ -3,11 +3,25 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, RotateCcw } from 'lucide-react'
 import { CertificateModal, ProjectGalleryModal } from '@/components/ui'
-import type { Certificate, Project } from '@/lib/constants'
-import { STATIONS, type StationId, type TvMode, type ViewId } from '@/studio/data'
+import { CONTACT_INFO, SKILLS_DATA, type Certificate, type Project } from '@/lib/constants'
+import {
+  DESK_COLS,
+  DESK_PROJECTS,
+  SCREEN_PX,
+  STATIONS,
+  TV_PICKS,
+  deskOverlay,
+  terminalLog,
+  tvOverlay,
+  type StationId,
+  type TvMode,
+  type ViewId,
+} from '@/studio/data'
+import { DeskWindow } from '@/studio/DeskWindow'
+import { rerack } from '@/studio/pool'
+import { runCommand, type TermData } from '@/studio/terminal'
 import { StudioScene } from '@/studio/Scene'
 import { StudioPanel } from '@/studio/StudioPanel'
-import { TvPanel } from '@/studio/TvPanel'
 
 const isStation = (value: string): value is StationId => STATIONS.some((s) => s.id === value)
 
@@ -40,11 +54,67 @@ function StudioPage() {
   const [project, setProject] = useState<Project | null>(null)
   const [certificate, setCertificate] = useState<Certificate | null>(null)
   const [tvMode, setTvMode] = useState<TvMode>('menu')
+  // highlighted item on the TV's menu or video list
+  const [tvSel, setTvSel] = useState(0)
+  const [video, setVideo] = useState(TV_PICKS[0].id)
+  // the computer: highlighted folder, and the project open in its window
+  const [deskSel, setDeskSel] = useState(0)
+  const [deskOpen, setDeskOpen] = useState<number | null>(null)
+  // walking away from the desk closes the window, so coming back shows the folders again
+  const [lastView, setLastView] = useState(view)
+  if (view !== lastView) {
+    setLastView(view)
+    // leaving the desk closes the window; arriving keeps one the terminal asked to open
+    if (view !== 'projects') setDeskOpen(null)
+  }
+
+  // the left monitor's terminal: real commands over the portfolio's own data
+  const [command, setCommand] = useState('')
+  const termData = useMemo<TermData>(
+    () => ({
+      name: 'Adriel Walintukan',
+      about: 'Information Systems student building AI-powered web and mobile products',
+      city: CONTACT_INFO.city,
+      email: CONTACT_INFO.email,
+      availability: CONTACT_INFO.availability,
+      projects: DESK_PROJECTS.map((p) => p.title),
+      skills: SKILLS_DATA.map((s) => ({
+        category: s.category,
+        names: s.skills.map((k) => k.name),
+      })),
+    }),
+    []
+  )
+  const typeCommand = (value: string) => {
+    setCommand(value)
+    terminalLog.input = value
+  }
+  const submitCommand = () => {
+    const result = runCommand(command, termData)
+    terminalLog.lines = result.clear ? [] : [...terminalLog.lines, ...result.lines].slice(-200)
+    typeCommand('')
+    if (result.open !== undefined) {
+      setDeskSel(result.open)
+      setDeskOpen(result.open)
+      setView('projects')
+    }
+  }
 
   const coarse = useMemo(
     () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
     []
   )
+
+  // only one panel layout is mounted, or the TV's YouTube iframe would play twice
+  const [desktop, setDesktop] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+  )
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 768px)')
+    const onChange = () => setDesktop(query.matches)
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [])
 
   // keep the studio out of the page scroll and restore it on the way out
   useEffect(() => {
@@ -69,7 +139,13 @@ function StudioPage() {
   }, [])
 
   // the poster and the TV are room views, not stations: same overview hash, no panel
-  const inRoom = view === 'room' || view === 'poster' || view === 'tv'
+  const inRoom =
+    view === 'room' ||
+    view === 'poster' ||
+    view === 'tv' ||
+    view === 'terminal' ||
+    view === 'sideboard' ||
+    view === 'billiards'
 
   // station lives in the hash: shareable and refresh-safe without a server rewrite per station
   useEffect(() => {
@@ -103,18 +179,104 @@ function StudioPage() {
   // leaving the TV puts it back on its menu, so it never sits on a stale "now playing" frame
   const closeTv = useCallback(() => {
     setTvMode('menu')
+    setTvSel(0)
     setView('room')
   }, [])
 
+  // Enter (or a tap on the screen) on a TV item: menu → pong / video list, video list → play it on the TV
+  const tvPick = useCallback(
+    (index: number) => {
+      if (tvMode === 'menu') {
+        setTvMode(index === 0 ? 'game' : 'videos')
+        setTvSel(0)
+      } else if (tvMode === 'videos') {
+        setVideo(TV_PICKS[index].id)
+        setTvMode('youtube')
+      }
+    },
+    [tvMode]
+  )
+
+  // Esc / Backspace on the TV steps back one screen, and off the menu it leaves the TV
+  const tvBack = useCallback(() => {
+    if (tvMode === 'youtube') setTvMode('videos')
+    else if (tvMode === 'videos') {
+      setTvMode('menu')
+      setTvSel(1)
+    } else if (tvMode === 'game') {
+      setTvMode('menu')
+      setTvSel(0)
+    } else closeTv()
+  }, [tvMode, closeTv])
+
+  // the player takes keyboard focus when it loads or is clicked; take it back so Esc and the arrows keep driving the TV
+  const tvVideo = view === 'tv' && tvMode === 'youtube'
+  const deskProject = view === 'projects' && deskOpen !== null ? DESK_PROJECTS[deskOpen] : null
+  useEffect(() => {
+    if (!tvVideo && !deskProject?.youtubeId) return
+    const reclaim = () =>
+      window.setTimeout(() => {
+        if (document.activeElement instanceof HTMLIFrameElement) {
+          document.activeElement.blur()
+          window.focus()
+        }
+      }, 0)
+    window.addEventListener('blur', reclaim)
+    return () => window.removeEventListener('blur', reclaim)
+  }, [tvVideo, deskProject])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (view === 'projects' && !project && !certificate) {
+        if (deskOpen !== null) {
+          if (e.key === 'Escape' || e.key === 'Backspace') {
+            e.preventDefault()
+            setDeskOpen(null)
+          }
+          return
+        }
+        const n = DESK_PROJECTS.length
+        const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -DESK_COLS, ArrowDown: DESK_COLS }[
+          e.key
+        ]
+        if (step) {
+          e.preventDefault()
+          setDeskSel((s) =>
+            Math.abs(step) === 1 ? (s + step + n) % n : s + step >= 0 && s + step < n ? s + step : s
+          )
+          return
+        }
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          setDeskOpen(deskSel)
+          return
+        }
+      }
+      if (view === 'tv' && !project && !certificate) {
+        const count = tvMode === 'menu' ? 2 : tvMode === 'videos' ? TV_PICKS.length : 0
+        const step = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 }[e.key]
+        if (step && count) {
+          e.preventDefault()
+          setTvSel((s) => (s + step + count) % count)
+          return
+        }
+        if (e.key === 'Enter' && count) {
+          e.preventDefault()
+          tvPick(tvSel)
+          return
+        }
+        if (e.key === 'Escape' || e.key === 'Backspace') {
+          e.preventDefault()
+          tvBack()
+          return
+        }
+      }
       if (e.key !== 'Escape') return
       if (project || certificate) {
         closeAll()
         return
       }
       if (view !== 'room') {
-        if (view === 'tv') setTvMode('menu')
         setView('room')
         return
       }
@@ -122,7 +284,19 @@ function StudioPage() {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [project, certificate, view, closeAll, navigate])
+  }, [
+    project,
+    certificate,
+    view,
+    tvMode,
+    tvSel,
+    tvPick,
+    tvBack,
+    deskOpen,
+    deskSel,
+    closeAll,
+    navigate,
+  ])
 
   const onHover = useCallback((label: string | null, x: number, y: number) => {
     setHover(label ? { label, x, y } : null)
@@ -134,7 +308,17 @@ function StudioPage() {
   }, [])
 
   const station = inRoom ? null : STATIONS.find((s) => s.id === view)
-  const panelOpen = Boolean(station) || view === 'tv'
+  // the computer is used on its own screen, so Projects has no side panel
+  const panel = station?.id === 'projects' ? null : station
+  const panelOpen = Boolean(panel)
+  const tvLabel =
+    tvMode === 'menu'
+      ? ['Pong', 'YouTube'][tvSel]
+      : tvMode === 'videos'
+        ? TV_PICKS[tvSel]?.label
+        : tvMode === 'game'
+          ? 'Pong is playing'
+          : 'Video is playing'
 
   if (!webgl) {
     return (
@@ -142,7 +326,8 @@ function StudioPage() {
         <div className="max-w-sm">
           <h1 className="font-display text-3xl font-black uppercase">3D Studio needs WebGL</h1>
           <p className="mt-3 text-sm text-foreground-muted">
-            Your browser has WebGL turned off, so the room can&apos;t render. The regular portfolio works everywhere.
+            Your browser has WebGL turned off, so the room can&apos;t render. The regular portfolio
+            works everywhere.
           </p>
           <Link
             to="/"
@@ -162,7 +347,7 @@ function StudioPage() {
           view={view}
           reduced={reducedMotion}
           shadows={!coarse}
-          dpr={[1, coarse ? 1.4 : 1.75]}
+          dpr={[1, 2]}
           greetKey={greetKey}
           onReady={() => setReady(true)}
           onPick={setView}
@@ -170,12 +355,59 @@ function StudioPage() {
           onGreet={onGreet}
           onPoster={() => setView('poster')}
           onTv={() => {
+            // a tap on the TV mid-match must not throw the game back to the menu
+            if (view === 'tv') return
             setTvMode('menu')
+            setTvSel(0)
             setView('tv')
           }}
-          tvMode={tvMode}
+          onTvPick={tvPick}
+          // any way out of the TV view (pills, Room, Esc) leaves the screen on its menu
+          tvMode={view === 'tv' ? tvMode : 'menu'}
+          tvSel={view === 'tv' ? tvSel : 0}
+          deskSel={deskSel}
+          onDeskOpen={setDeskOpen}
+          onLook={setView}
         />
       </div>
+
+      {/* screen overlays: laid out at SCREEN_PX, then mapped onto the 3D screen every frame by Room.tsx */}
+      {/* off while Details is open: the gallery plays the same video, and two soundtracks would overlap */}
+      {deskProject && !project && (
+        <div
+          ref={(el) => {
+            deskOverlay.el = el
+          }}
+          style={{ width: SCREEN_PX.w, height: SCREEN_PX.h }}
+          className="invisible absolute left-0 top-0 z-10 origin-top-left overflow-hidden"
+        >
+          <DeskWindow
+            project={deskProject}
+            onClose={() => setDeskOpen(null)}
+            onDetails={() => setProject(deskProject)}
+          />
+        </div>
+      )}
+
+      {tvVideo && (
+        <div
+          ref={(el) => {
+            tvOverlay.el = el
+          }}
+          style={{ width: SCREEN_PX.w, height: SCREEN_PX.h }}
+          className="invisible absolute left-0 top-0 z-10 origin-top-left overflow-hidden bg-black"
+        >
+          <iframe
+            key={video}
+            src={`https://www.youtube-nocookie.com/embed/${video}?autoplay=1&rel=0&modestbranding=1`}
+            title="YouTube player on the TV"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+            className="h-full w-full"
+          />
+        </div>
+      )}
 
       {/* UI layer: pointer-events-none so drags reach the canvas, re-enabled per control */}
       <div className="pointer-events-none absolute inset-0 z-20 flex flex-col">
@@ -201,9 +433,7 @@ function StudioPage() {
                 onClick={() => setView('room')}
                 aria-pressed={inRoom}
                 className={`rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                  inRoom
-                    ? 'bg-[#3fb0b7]/15 text-[#3fb0b7]'
-                    : 'text-[#8fa0ad] hover:text-[#eef2f3]'
+                  inRoom ? 'bg-[#3fb0b7]/15 text-[#3fb0b7]' : 'text-[#8fa0ad] hover:text-[#eef2f3]'
                 }`}
               >
                 Room
@@ -214,7 +444,9 @@ function StudioPage() {
                   onClick={() => setView(item.id)}
                   aria-pressed={view === item.id}
                   className={`rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${
-                    view === item.id ? 'bg-[#3fb0b7]/15 text-[#3fb0b7]' : 'text-[#8fa0ad] hover:text-[#eef2f3]'
+                    view === item.id
+                      ? 'bg-[#3fb0b7]/15 text-[#3fb0b7]'
+                      : 'text-[#8fa0ad] hover:text-[#eef2f3]'
                   }`}
                 >
                   {item.label}
@@ -226,12 +458,23 @@ function StudioPage() {
               onClick={() => (view === 'room' ? navigate('/') : setView('room'))}
               className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-[#0b1226]/80 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
             >
-              {view === 'room' ? 'Exit' : <><RotateCcw className="h-3.5 w-3.5" /> Room</>}
-              <kbd className="hidden rounded border border-white/15 px-1 text-[10px] sm:inline">Esc</kbd>
+              {view === 'room' ? (
+                'Exit'
+              ) : (
+                <>
+                  <RotateCcw className="h-3.5 w-3.5" /> Room
+                </>
+              )}
+              <kbd className="hidden rounded border border-white/15 px-1 text-[10px] sm:inline">
+                Esc
+              </kbd>
             </button>
           </div>
 
-          <nav aria-label="Rooms" className="pointer-events-auto -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:hidden">
+          <nav
+            aria-label="Rooms"
+            className="pointer-events-auto -mx-1 flex gap-1 overflow-x-auto px-1 pb-1 md:hidden"
+          >
             <button
               onClick={() => setView('room')}
               aria-pressed={inRoom}
@@ -264,20 +507,9 @@ function StudioPage() {
           {/* desktop panel */}
           <div className="pointer-events-none absolute bottom-4 right-4 top-2 hidden w-[380px] md:block">
             <AnimatePresence mode="wait">
-              {view === 'tv' ? (
+              {desktop && panel ? (
                 <motion.div
-                  key="tv"
-                  initial={{ opacity: 0, x: 24 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 24 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="h-full"
-                >
-                  <TvPanel mode={tvMode} onMode={setTvMode} onClose={closeTv} />
-                </motion.div>
-              ) : station ? (
-                <motion.div
-                  key={station.id}
+                  key={panel.id}
                   initial={{ opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 24 }}
@@ -285,9 +517,8 @@ function StudioPage() {
                   className="h-full"
                 >
                   <StudioPanel
-                    station={station.id}
+                    station={panel.id}
                     onClose={() => setView('room')}
-                    onOpenProject={setProject}
                     onOpenCertificate={setCertificate}
                   />
                 </motion.div>
@@ -301,9 +532,92 @@ function StudioPage() {
               panelOpen ? 'hidden md:flex' : 'flex'
             }`}
           >
-            <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
-              Drag to look around · Click anything in the room
-            </p>
+            {view === 'tv' ? (
+              <div className="flex items-center gap-2">
+                {tvMode !== 'menu' && (
+                  <button
+                    onClick={tvBack}
+                    className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0b1226]/85 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
+                  >
+                    <ArrowLeft className="h-3 w-3" /> Back
+                  </button>
+                )}
+                <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
+                  {tvMode === 'game'
+                    ? coarse
+                      ? 'Drag left and right to steer'
+                      : 'Move the pointer to steer · Esc to stop'
+                    : tvMode === 'youtube'
+                      ? coarse
+                        ? 'Playing on the TV'
+                        : 'Playing on the TV · Esc for the list'
+                      : coarse
+                        ? 'Tap a choice on the TV'
+                        : '← → choose · Enter select · Esc back'}
+                </p>
+              </div>
+            ) : view === 'projects' ? (
+              <div className="flex items-center gap-2">
+                {deskProject && (
+                  <button
+                    onClick={() => setDeskOpen(null)}
+                    className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0b1226]/85 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
+                  >
+                    <ArrowLeft className="h-3 w-3" /> Folders
+                  </button>
+                )}
+                <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
+                  {deskProject
+                    ? coarse
+                      ? 'Open on the computer'
+                      : 'Open on the computer · Esc for the folders'
+                    : coarse
+                      ? 'Tap a folder on the screen'
+                      : '← → ↑ ↓ choose · Enter open · Esc back'}
+                </p>
+              </div>
+            ) : view === 'billiards' ? (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={rerack}
+                  className="pointer-events-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-[#0b1226]/85 px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider text-[#a7b0bd] backdrop-blur transition-colors hover:border-white/30 hover:text-[#eef2f3]"
+                >
+                  Rerack
+                </button>
+                <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
+                  {coarse
+                    ? 'Tap the felt to shoot · farther is harder'
+                    : 'Aim with the pointer · click to shoot · farther is harder'}
+                </p>
+              </div>
+            ) : view === 'terminal' ? (
+              <form
+                className="pointer-events-auto flex w-full max-w-md items-center gap-2 rounded-full border border-[#3fb0b7]/40 bg-[#0b1226]/90 px-4 py-1.5 backdrop-blur"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  submitCommand()
+                }}
+              >
+                <span className="font-mono text-[11px] text-[#3fb0b7]" aria-hidden="true">
+                  $
+                </span>
+                <input
+                  autoFocus
+                  value={command}
+                  onChange={(e) => typeCommand(e.target.value)}
+                  placeholder="type help, then Enter"
+                  aria-label="Terminal command"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  className="min-w-0 flex-1 bg-transparent font-mono text-[12px] text-[#dbe5ea] outline-none placeholder:text-[#5f7186]"
+                />
+              </form>
+            ) : (
+              <p className="rounded-full border border-white/10 bg-[#0b1226]/85 px-4 py-1.5 text-center font-mono text-[11px] text-[#8fa0ad] backdrop-blur">
+                Drag to look around · Click anything in the room
+              </p>
+            )}
           </div>
 
           <AnimatePresence>
@@ -323,20 +637,9 @@ function StudioPage() {
 
       {/* mobile sheet */}
       <AnimatePresence mode="wait">
-        {view === 'tv' ? (
+        {!desktop && panel ? (
           <motion.div
-            key="tv"
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute inset-x-2 bottom-2 z-30 h-[52svh] md:hidden"
-          >
-            <TvPanel mode={tvMode} onMode={setTvMode} onClose={closeTv} />
-          </motion.div>
-        ) : station ? (
-          <motion.div
-            key={station.id}
+            key={panel.id}
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -344,9 +647,8 @@ function StudioPage() {
             className="absolute inset-x-2 bottom-2 z-30 h-[52svh] md:hidden"
           >
             <StudioPanel
-              station={station.id}
+              station={panel.id}
               onClose={() => setView('room')}
-              onOpenProject={setProject}
               onOpenCertificate={setCertificate}
             />
           </motion.div>
@@ -354,7 +656,7 @@ function StudioPage() {
       </AnimatePresence>
 
       {/* hotspot tooltip */}
-      {hover && !coarse && !panelOpen && (
+      {hover && !coarse && !panelOpen && view !== 'tv' && view !== 'projects' && (
         <div
           className="pointer-events-none fixed z-[70] -translate-x-1/2 -translate-y-[calc(100%+14px)] whitespace-nowrap rounded-md border border-white/15 bg-[#0b1226]/95 px-2.5 py-1.5 font-mono text-[11px] text-[#dbe5ea] shadow-lg"
           style={{ left: hover.x, top: hover.y }}
@@ -365,13 +667,24 @@ function StudioPage() {
       )}
 
       <p className="sr-only" aria-live="polite">
-        {view === 'tv' ? 'TV panel opened' : station ? `${station.label} panel opened` : 'Back to the room'}
+        {view === 'billiards'
+          ? 'Pool table: aim and click the felt to shoot'
+          : view === 'tv'
+            ? `TV: ${tvLabel}`
+            : view === 'projects'
+              ? deskProject
+                ? `Computer: ${deskProject.title} opened`
+                : `Computer: ${DESK_PROJECTS[deskSel].title}`
+              : station
+                ? `${station.label} panel opened`
+                : 'Back to the room'}
       </p>
 
       {!ready && (
         <div className="absolute inset-0 z-40 grid place-items-center bg-[#070c16] transition-opacity duration-500">
           <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.28em] text-[#8fa0ad]">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#3fb0b7]" /> entering the studio
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#3fb0b7]" /> entering the
+            studio
           </p>
         </div>
       )}

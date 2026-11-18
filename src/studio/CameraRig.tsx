@@ -11,9 +11,17 @@ const ease = (dt: number) => 1 - Math.exp(-4.5 * Math.min(dt, 0.1))
  * Orbit is a spherical offset around the station target, so dragging never leaves the room.
  * The maths is plain numbers on purpose: nothing allocated per frame.
  */
-export function CameraRig({ view, reduced }: { view: ViewId; reduced: boolean }) {
+export function CameraRig({ view, reduced, locked }: { view: ViewId; reduced: boolean; locked: boolean }) {
   const { camera, gl } = useThree()
   const orbit = useRef({ yaw: 0, pitch: 0, zoom: 1 })
+  // at the TV and the computer a drag does not swing the camera: it steers pong, and clicks land on the screen;
+  // zoom stays free, and at the desk it reaches far enough back to take in both monitors
+  const lock = useRef(locked)
+  const maxZoom = useRef(1.6)
+  useEffect(() => {
+    lock.current = locked
+    maxZoom.current = view === 'projects' ? 2.3 : 1.6
+  }, [locked, view])
   const pointers = useRef(new Map<number, { x: number; y: number }>())
   const pinch = useRef(0)
   const dragging = useRef(false)
@@ -23,7 +31,7 @@ export function CameraRig({ view, reduced }: { view: ViewId; reduced: boolean })
   // a new station starts from a clean view, not from wherever the last drag left the camera
   useEffect(() => {
     orbit.current = { yaw: 0, pitch: 0, zoom: 1 }
-  }, [view])
+  }, [view, locked])
 
   useEffect(() => {
     const el = gl.domElement
@@ -41,7 +49,7 @@ export function CameraRig({ view, reduced }: { view: ViewId; reduced: boolean })
       const [a, b] = [...pointers.current.values()]
       if (a && b) {
         const distance = Math.hypot(a.x - b.x, a.y - b.y)
-        if (pinch.current) orbit.current.zoom = clamp(orbit.current.zoom * (pinch.current / distance), 0.55, 1.6)
+        if (pinch.current) orbit.current.zoom = clamp(orbit.current.zoom * (pinch.current / distance), 0.55, maxZoom.current)
         pinch.current = distance
         return
       }
@@ -50,6 +58,7 @@ export function CameraRig({ view, reduced }: { view: ViewId; reduced: boolean })
       const dy = e.clientY - last.current.y
       last.current = { x: e.clientX, y: e.clientY }
       pointerDrag.moved += Math.abs(dx) + Math.abs(dy)
+      if (lock.current) return
       orbit.current.yaw = clamp(orbit.current.yaw - dx * 0.005, -1.1, 1.1)
       orbit.current.pitch = clamp(orbit.current.pitch - dy * 0.004, -0.42, 0.42)
     }
@@ -60,7 +69,7 @@ export function CameraRig({ view, reduced }: { view: ViewId; reduced: boolean })
     }
     const wheel = (e: WheelEvent) => {
       e.preventDefault()
-      orbit.current.zoom = clamp(orbit.current.zoom * (1 + e.deltaY * 0.0009), 0.55, 1.6)
+      orbit.current.zoom = clamp(orbit.current.zoom * (1 + e.deltaY * 0.0009), 0.55, maxZoom.current)
     }
 
     el.addEventListener('pointerdown', down)

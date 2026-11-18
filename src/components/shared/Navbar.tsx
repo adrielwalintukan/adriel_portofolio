@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { Boxes } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CONTACT_INFO, NAV_LINKS, SOCIAL_LINKS } from '@/lib/constants'
 import { Magnetic } from '@/components/animations'
@@ -117,6 +119,18 @@ export const Navbar = memo(function Navbar() {
           </div>
         </div>
 
+        <div className="flex items-center gap-2 sm:gap-3">
+        {/* the studio sits beside Menu, styled like it so the pair reads as one control group */}
+        <Link
+          to="/studio"
+          aria-label="Open the 3D studio"
+          className="group flex h-10 items-center gap-2 rounded-lg border border-current px-3 font-display text-sm font-extrabold uppercase tracking-wide transition-colors hover:bg-accent hover:text-paper hover:border-accent sm:px-4"
+        >
+          <Boxes className="h-4 w-4 transition-transform duration-300 group-hover:-rotate-6" aria-hidden="true" />
+          <span>
+            3D<span className="hidden sm:inline"> Studio</span>
+          </span>
+        </Link>
         <Magnetic strength={0.15} disabled={isTouchDevice}>
           <button
             ref={menuButtonRef}
@@ -132,6 +146,7 @@ export const Navbar = memo(function Navbar() {
             </span>
           </button>
         </Magnetic>
+        </div>
       </nav>
     </header>
 

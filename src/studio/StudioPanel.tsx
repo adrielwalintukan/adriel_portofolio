@@ -6,54 +6,19 @@ import {
   CONTACT_INFO,
   CORE_STRENGTHS,
   EXPERIENCE_TIMELINE,
-  PROJECTS,
   SKILLS_DATA,
   SOCIAL_LINKS,
   type Certificate,
-  type Project,
 } from '@/lib/constants'
 import { getSkillIcon } from '@/lib/skillIcons'
 import { STATION_BY_ID, type StationId } from './data'
 
 const SOCIAL_ICONS = { FiGithub, FiLinkedin, FiInstagram } as const
-const PROJECTS_LIST = PROJECTS.filter((p) => !p.inDevelopment)
 
 interface StudioPanelProps {
   station: StationId
   onClose: () => void
-  onOpenProject: (project: Project) => void
   onOpenCertificate: (certificate: Certificate) => void
-}
-
-function ProjectsPanel({ onOpenProject }: Pick<StudioPanelProps, 'onOpenProject'>) {
-  return (
-    <ul className="space-y-2">
-      {PROJECTS_LIST.map((project, i) => (
-        <li key={project.id}>
-          <button
-            onClick={() => onOpenProject(project)}
-            className="group w-full rounded-lg border border-white/5 bg-white/[0.02] p-3 text-left transition-colors hover:border-white/15 hover:bg-white/[0.06]"
-          >
-            <span className="flex items-baseline gap-2">
-              <span className="font-mono text-[10px] text-[#5f7186]">{String(i + 1).padStart(2, '0')}</span>
-              <span className="flex-1 font-display text-base font-extrabold uppercase tracking-wide text-[#eef2f3]">
-                {project.title}
-              </span>
-              <ArrowUpRight className="h-3.5 w-3.5 shrink-0 text-[#5f7186] transition-colors group-hover:text-[#3fb0b7]" />
-            </span>
-            <span className="mt-1 block text-xs text-[#8fa0ad]">{project.category}</span>
-            <span className="mt-2 flex flex-wrap gap-1">
-              {project.technologies.slice(0, 3).map((tech) => (
-                <span key={tech} className="rounded border border-white/10 px-1.5 py-0.5 font-mono text-[9px] text-[#8fa0ad]">
-                  {tech}
-                </span>
-              ))}
-            </span>
-          </button>
-        </li>
-      ))}
-    </ul>
-  )
 }
 
 function SkillsPanel() {
@@ -177,7 +142,6 @@ function AboutPanel() {
 export const StudioPanel = memo(function StudioPanel({
   station,
   onClose,
-  onOpenProject,
   onOpenCertificate,
 }: StudioPanelProps) {
   const panel = useRef<HTMLDivElement>(null)
@@ -212,7 +176,6 @@ export const StudioPanel = memo(function StudioPanel({
         </button>
       </header>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4">
-        {station === 'projects' && <ProjectsPanel onOpenProject={onOpenProject} />}
         {station === 'skills' && <SkillsPanel />}
         {station === 'experience' && <ExperiencePanel />}
         {station === 'certificates' && <CertificatesPanel onOpenCertificate={onOpenCertificate} />}

@@ -12,49 +12,9 @@ const make = (w: number, h: number, paint: (ctx: CanvasRenderingContext2D, w: nu
   paint(ctx, w, h)
   const texture = new THREE.CanvasTexture(canvas)
   texture.colorSpace = THREE.SRGBColorSpace
-  texture.anisotropy = 4
+  texture.anisotropy = 8
   return texture
 }
-
-/** Main monitor: the project wall, small enough to read as an app grid. */
-export const projectsTexture = () =>
-  make(900, 560, (ctx, w, h) => {
-    ctx.fillStyle = '#0d1422'
-    ctx.fillRect(0, 0, w, h)
-    ctx.fillStyle = '#e8eef1'
-    ctx.font = '700 30px "Inter", system-ui, sans-serif'
-    ctx.fillText('selected work', 40, 66)
-    ctx.fillStyle = '#5f7186'
-    ctx.font = '600 16px "JetBrains Mono", monospace'
-    ctx.fillText('06 projects · 2024 — 2026', 40, 96)
-
-    const tiles = [
-      ['DailyBoost AI', '#7f5bd6'],
-      ['SAKIP', '#2f8f8a'],
-      ['Interview AI', '#c07a3e'],
-      ['Carta AI', '#3f6fb0'],
-      ['DentaVision', '#3f9b6a'],
-      ['Rinegetan', '#a34b63'],
-    ]
-    tiles.forEach(([label, color], i) => {
-      const x = 40 + (i % 3) * 278
-      const y = 132 + Math.floor(i / 3) * 196
-      ctx.fillStyle = '#141d2f'
-      ctx.beginPath()
-      ctx.roundRect(x, y, 250, 168, 12)
-      ctx.fill()
-      ctx.fillStyle = color
-      ctx.beginPath()
-      ctx.roundRect(x + 18, y + 18, 60, 60, 8)
-      ctx.fill()
-      ctx.fillStyle = '#dbe5ea'
-      ctx.font = '600 21px "Inter", system-ui, sans-serif'
-      ctx.fillText(label, x + 18, y + 118)
-      ctx.fillStyle = '#4d6076'
-      ctx.font = '500 15px "JetBrains Mono", monospace'
-      ctx.fillText('live · case study', x + 18, y + 146)
-    })
-  })
 
 /** Whiteboard: the stack, drawn like the sketch it is. */
 export const boardTexture = () =>
