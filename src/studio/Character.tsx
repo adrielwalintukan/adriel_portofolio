@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from 'react'
 import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
+import { ARM, CARRY_POSE, READ_POSE } from './armpose'
 import { charPos, dogPet, pointerDrag } from './data'
 
 // dressed like the portrait on the wall: red jacket with black shoulders and white piping, black tee
@@ -102,6 +103,9 @@ const SEAT_DROP = 0.24
 // the bean bag is lower than the chair: he sinks in so his feet still reach the floor
 const BEAN_DROP = 0.4
 
+const HAND_A = new THREE.Vector3()
+const HAND_B = new THREE.Vector3()
+
 const damp = (current: number, target: number, rate: number, dt: number) =>
   current + (target - current) * (1 - Math.exp(-rate * Math.min(dt, 0.12)))
 
@@ -181,6 +185,8 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
   const kneeL = useRef<THREE.Group>(null)
   const kneeR = useRef<THREE.Group>(null)
   const waveAt = useRef(-20)
+  const handL = useRef<THREE.Group>(null)
+  const handR = useRef<THREE.Group>(null)
   const closedBook = useRef<THREE.Group>(null)
   const openBook = useRef<THREE.Group>(null)
 
@@ -199,6 +205,7 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     holding: false,
     hold: 0,
     reach: 0,
+    read: 0,
     drop: SEAT_DROP,
   })
   const petSpot = useRef<Spot | null>(null)
@@ -225,7 +232,8 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
       petSpot.current = null
       dogPet.active = false
       a.holding = false
-    } else if (!petSpot.current && dogPet.want && a.sit < 0.05 && routine !== SEAT && routine !== BESIDE_SEAT) {
+    // not with a book in his hands: he puts it back on the shelf first
+    } else if (!petSpot.current && dogPet.want && !a.holding && a.sit < 0.05 && routine !== SEAT && routine !== BESIDE_SEAT) {
       petSpot.current = {
         x: dogPet.x + Math.sin(dogPet.yaw) * PET_GAP,
         z: dogPet.z + Math.cos(dogPet.yaw) * PET_GAP,
@@ -298,14 +306,17 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const reaching = !moving && target.book !== undefined && a.timer < 1.6
     const reach = damp(a.reach, reaching ? 1 : 0, 8, dt)
     a.reach = reach
-    if (closedBook.current) closedBook.current.visible = hold > 0.15 && !(a.act === 'read' && sit > 0.5)
-    if (openBook.current) openBook.current.visible = hold > 0.15 && a.act === 'read' && sit > 0.5
+    // rb: 0 while he carries the closed book, 1 once he is settled in to read it open with both hands
+    const rb = damp(a.read, a.act === 'read' && sit > 0.5 ? 1 : 0, 6, dt)
+    a.read = rb
+    const wl = hold * rb
 
     // the dog reads this to trail him; busy = settled somewhere (seat, shelf, sideboard)
     charPos.x = a.x
     charPos.z = a.z
     charPos.yaw = a.yaw
     charPos.busy = !moving && (a.act !== 'stand' || target === SIDEBOARD)
+    charPos.holding = a.holding
 
     if (root.current) {
       const bob = Math.abs(Math.sin(a.step)) * 0.03 * a.walk + Math.sin(t * 1.5) * 0.008 * (1 - a.walk)
@@ -329,28 +340,48 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
     const tap = (phase: number) => Math.sin(t * 15 + phase) * 0.07 * sit
     if (shoulderL.current) {
       // crouched, the left hand rests forward on his knee
-      shoulderL.current.rotation.x = damp(shoulderL.current.rotation.x, (-1.38 * sit - 0.7 * crouch - armSwing) * (1 - hold) - 0.85 * hold, 9, dt)
-      shoulderL.current.rotation.z = damp(shoulderL.current.rotation.z, (-0.16 + 0.3 * sit) * (1 - hold) + 0.1 * hold, 9, dt)
+      shoulderL.current.rotation.x = damp(shoulderL.current.rotation.x, (-1.38 * sit - 0.7 * crouch - armSwing) * (1 - wl) + READ_POSE.L.sx * wl, 9, dt)
+      shoulderL.current.rotation.z = damp(shoulderL.current.rotation.z, (-0.16 + 0.3 * sit) * (1 - wl) + READ_POSE.L.sz * wl, 9, dt)
     }
     if (elbowL.current) {
       elbowL.current.rotation.z = damp(elbowL.current.rotation.z, 0, 9, dt)
-      elbowL.current.rotation.x = damp(elbowL.current.rotation.x, (-0.6 + tap(0)) * sit * (1 - hold) - 1.3 * hold, 14, dt)
+      elbowL.current.rotation.x = damp(elbowL.current.rotation.x, (-0.6 + tap(0)) * sit * (1 - wl) + READ_POSE.L.ex * wl, 14, dt)
     }
 
     const since = performance.now() / 1000 - waveAt.current
     const waving = since < 1.9
     if (shoulderR.current) {
       // +z lifts the right arm outward and up: the old -z value folded it across his chest
-      const shoulderZ = waving ? 2.3 + Math.sin(since * 13) * 0.12 : (0.16 - 0.3 * sit) * (1 - hold) - 0.1 * hold + 0.5 * reach
+      const shoulderZ = waving ? 2.3 + Math.sin(since * 13) * 0.12 : (0.16 - 0.3 * sit) * (1 - hold) + (CARRY_POSE.sz * (1 - rb) + READ_POSE.R.sz * rb) * hold + 0.5 * reach
       shoulderR.current.rotation.z = damp(shoulderR.current.rotation.z, shoulderZ, waving ? 18 : 10, dt)
       // petting: the right arm reaches down to the dog's head and pats it
       const pat = (-1.3 + Math.sin(t * 7) * 0.12) * crouch
-      shoulderR.current.rotation.x = damp(shoulderR.current.rotation.x, waving ? 0 : (-1.38 * sit + pat + armSwing) * (1 - hold) - 0.85 * hold - 1.7 * reach, 10, dt)
+      shoulderR.current.rotation.x = damp(shoulderR.current.rotation.x, waving ? 0 : (-1.38 * sit + pat + armSwing) * (1 - hold) + (CARRY_POSE.sx * (1 - rb) + READ_POSE.R.sx * rb) * hold - 1.7 * reach, 10, dt)
     }
     if (elbowR.current) {
       const elbowZ = waving ? 0.72 + Math.sin(since * 14) * 0.3 : 0
       elbowR.current.rotation.z = damp(elbowR.current.rotation.z, elbowZ, waving ? 20 : 9, dt)
-      elbowR.current.rotation.x = damp(elbowR.current.rotation.x, waving ? 0 : (-0.6 + tap(1.7)) * sit * (1 - hold) - 1.3 * hold, 14, dt)
+      elbowR.current.rotation.x = damp(elbowR.current.rotation.x, waving ? 0 : (-0.6 + tap(1.7)) * sit * (1 - hold) + (CARRY_POSE.ex * (1 - rb) + READ_POSE.R.ex * rb) * hold, 14, dt)
+    }
+
+    // the book lives in his hands: carried in the right one, held between both when he reads
+    const book = rb > 0.5 ? openBook.current : closedBook.current
+    if (closedBook.current) closedBook.current.visible = hold > 0.15 && rb <= 0.5
+    if (openBook.current) openBook.current.visible = hold > 0.15 && rb > 0.5
+    if (book && root.current && handR.current && handL.current) {
+      root.current.updateWorldMatrix(true, false)
+      handR.current.updateWorldMatrix(true, false)
+      handR.current.getWorldPosition(HAND_A)
+      if (rb > 0.5) {
+        handL.current.updateWorldMatrix(true, false)
+        handL.current.getWorldPosition(HAND_B)
+        HAND_A.lerp(HAND_B, 0.5)
+      }
+      root.current.worldToLocal(HAND_A)
+      book.position.copy(HAND_A)
+      // closed: tucked against the palm; open: tipped back toward his face
+      book.position.z += rb > 0.5 ? 0.02 : 0.03
+      book.position.x += rb > 0.5 ? 0 : -0.045
     }
 
     // --- head ---------------------------------------------------------------
@@ -396,12 +427,12 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
         </group>
       ))}
 
-      {/* the book from the shelf: closed against his chest while he carries it, open in both hands while he reads */}
+      {/* the book from the shelf: closed against his chest while he carries it, open in both hands while he reads, turned half way round and tipped up so the pages face his face and not the room */}
       <group ref={closedBook} position={[0, 1.12, 0.3]} rotation={[-0.35, 0, 0]} visible={false}>
         <mesh position={[0, 0, 0]}><boxGeometry args={[0.2, 0.27, 0.04]} /><meshStandardMaterial color="#8a3b34" roughness={0.8} /></mesh>
         <mesh position={[0.012, 0, 0]}><boxGeometry args={[0.18, 0.25, 0.034]} /><meshStandardMaterial color="#efe8d6" roughness={0.8} /></mesh>
       </group>
-      <group ref={openBook} position={[0, 1.0, 0.3]} rotation={[-0.75, 0, 0]} visible={false}>
+      <group ref={openBook} position={[0, 1.0, 0.3]} rotation={[0.55, Math.PI, 0]} visible={false}>
         <mesh position={[0, 0, -0.012]}><boxGeometry args={[0.38, 0.27, 0.016]} /><meshStandardMaterial color="#8a3b34" roughness={0.8} /></mesh>
         {[-1, 1].map((side) => (
           <mesh key={side} position={[side * 0.088, 0, 0.004]} rotation={[0, side * 0.12, 0]}>
@@ -462,16 +493,18 @@ export const Character = memo(function Character({ onPick, onHover, greetKey, fo
 
       {/* arms: black shoulders, red forearms with a cuff, hands */}
       {([
-        [-0.295, shoulderL, elbowL],
-        [0.295, shoulderR, elbowR],
-      ] as const).map(([x, shoulder, elbow]) => (
-        <group key={x} ref={shoulder} position={[x, 1.36, 0]}>
+        [-ARM.x, shoulderL, elbowL, handL],
+        [ARM.x, shoulderR, elbowR, handR],
+      ] as const).map(([x, shoulder, elbow, hand]) => (
+        <group key={x} ref={shoulder} position={[x, ARM.y, 0]}>
           <mesh position={[0, -0.01, 0]} castShadow>
             <sphereGeometry args={[0.094, 32, 24]} />
             <meshStandardMaterial color={JACKET_DARK} roughness={0.85} />
           </mesh>
           <Capsule r={0.077} len={0.16} color={JACKET_DARK} position={[0, -0.16, 0]} />
-          <group ref={elbow} position={[0, -0.32, 0]}>
+          <group ref={elbow} position={[0, -ARM.upper, 0]}>
+            {/* where the book is held */}
+            <group ref={hand} position={[0, -ARM.hand, 0]} />
             <Capsule r={0.068} len={0.1} color={JACKET} position={[0, -0.08, 0]} />
             <mesh position={[0, -0.2, 0]}>
               <cylinderGeometry args={[0.07, 0.07, 0.04, 32]} />

@@ -66,7 +66,7 @@ export const CertificateModal = memo(function CertificateModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className={`relative z-10 my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-2xl ${glass ? 'border-white/40 bg-surface/55 backdrop-saturate-150' : 'border-border bg-surface/95'}`}
+          className={`relative z-10 my-auto flex max-h-[calc(100vh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border shadow-2xl backdrop-blur-2xl ${glass ? 'border-white/40 bg-surface/78 backdrop-saturate-150' : 'border-border bg-surface/95'}`}
         >
           {/* Header Bar */}
           <div className="flex items-center justify-between border-b border-border px-6 py-4">

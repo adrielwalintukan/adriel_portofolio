@@ -110,7 +110,7 @@ export const QuickContactModal = memo(function QuickContactModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 15 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-white/40 bg-surface/55 p-5 shadow-2xl backdrop-blur-2xl backdrop-saturate-150 sm:p-6 select-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="relative z-10 my-auto w-full max-w-lg overflow-hidden rounded-3xl border border-white/40 bg-surface/78 p-5 shadow-2xl backdrop-blur-2xl backdrop-saturate-150 sm:p-6 select-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {/* Ambient Background Glow */}
             <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-accent/20 blur-3xl" />

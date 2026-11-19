@@ -127,7 +127,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className={`relative z-10 flex h-full max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl sm:rounded-3xl border shadow-glow-xl ${glass ? 'border-white/40 bg-surface/55 backdrop-blur-2xl backdrop-saturate-150' : 'glass-strong border-border/50 bg-surface/60'}`}
+          className={`relative z-10 flex h-full max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl sm:rounded-3xl border shadow-glow-xl ${glass ? 'border-white/40 bg-surface/78 backdrop-blur-2xl backdrop-saturate-150' : 'glass-strong border-border/50 bg-surface/60'}`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Metadata Bar */}

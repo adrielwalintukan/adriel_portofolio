@@ -34,6 +34,7 @@ import {
   guestTitleTexture,
   neonTexture,
   noteTexture,
+  spineTexture,
   phoneTexture,
   polaroidTexture,
   windowTexture,
@@ -569,6 +570,48 @@ const Confetti = memo(function Confetti() {
   )
 })
 
+// the PC's lighting: one colour per click, after the default rainbow
+const PC_COLORS = ['#3fb0b7', '#ffb35a', '#e58aa5', '#a794f0', '#7fd6a0', '#ffffff'].map((c) => new THREE.Color(c))
+// the case has glass on both sides with the motherboard down the middle: the main parts (cooler, RAM, graphics
+// card) on the +x side and a radiator, drives and cables on the -x side. Only their lights and fans glow, in the
+// PC's colour; everything else is dark metal.
+type PcPart = { at: Vec3; size?: Vec3; ring?: number; color?: string; glow?: boolean }
+const PC_PARTS: PcPart[] = [
+  { at: [-0.02, 0.46, -0.04], size: [0.008, 0.66, 0.6], color: '#14221f' }, // motherboard
+  { at: [-0.0, 0.46, -0.33], size: [0.04, 0.66, 0.05], color: '#2c343f' }, // rear I/O shield
+  // +x side
+  { at: [0.04, 0.64, -0.14], size: [0.09, 0.12, 0.11], color: '#4a5461' }, // CPU cooler
+  { at: [0.088, 0.64, -0.14], ring: 0.045, glow: true }, // its fan
+  ...[0, 1, 2, 3].flatMap((k): PcPart[] => [
+    { at: [0.0, 0.66, 0.0 + k * 0.028], size: [0.03, 0.15, 0.009], color: '#2d3540' }, // RAM stick
+    { at: [0.015, 0.742, 0.0 + k * 0.028], size: [0.012, 0.02, 0.012], glow: true }, // its light bar
+  ]),
+  { at: [0.05, 0.32, 0.03], size: [0.1, 0.1, 0.5], color: '#323b47' }, // graphics card
+  { at: [0.102, 0.32, -0.1], ring: 0.037, glow: true },
+  { at: [0.102, 0.32, 0.15], ring: 0.037, glow: true },
+  { at: [0.1, 0.372, 0.03], size: [0.008, 0.008, 0.46], glow: true }, // its light strip
+  // -x side
+  { at: [-0.12, 0.6, 0.22], size: [0.03, 0.34, 0.14], color: '#2d3540' }, // radiator
+  { at: [-0.142, 0.69, 0.22], ring: 0.05, glow: true }, // its two fans
+  { at: [-0.142, 0.52, 0.22], ring: 0.05, glow: true },
+  { at: [-0.07, 0.3, -0.12], size: [0.012, 0.1, 0.08], color: '#252c36' }, // two drives
+  { at: [-0.07, 0.3, 0.0], size: [0.012, 0.1, 0.08], color: '#252c36' },
+  { at: [-0.078, 0.3, -0.12], size: [0.004, 0.016, 0.05], glow: true },
+  { at: [-0.078, 0.3, 0.0], size: [0.004, 0.016, 0.05], glow: true },
+  { at: [-0.05, 0.5, -0.27], size: [0.012, 0.3, 0.012], color: '#05070a' }, // cables
+  { at: [-0.05, 0.4, -0.2], size: [0.012, 0.012, 0.16], color: '#05070a' },
+  // across the bottom
+  { at: [0, 0.095, 0], size: [0.4, 0.14, 0.64], color: '#1a2029' }, // power supply shroud
+  { at: [0.19, 0.168, 0], size: [0.006, 0.006, 0.58], glow: true }, // shroud edge lights
+  { at: [-0.19, 0.168, 0], size: [0.006, 0.006, 0.58], glow: true },
+]
+const PC_GLOW_COUNT = PC_PARTS.filter((p) => p.glow).length
+// light strips down the two front corners of the case
+const PC_EDGES: { at: Vec3; size: Vec3 }[] = [
+  { at: [-0.226, 0.42, 0.376], size: [0.007, 0.76, 0.007] },
+  { at: [0.226, 0.42, 0.376], size: [0.007, 0.76, 0.007] },
+]
+
 const Desk = memo(function Desk({
   onPick,
   onHover,
@@ -584,6 +627,8 @@ const Desk = memo(function Desk({
   const steam = useRef<THREE.Group>(null)
   const tower = useRef<THREE.Mesh[]>([])
   const strips = useRef<THREE.Mesh[]>([])
+  const pcMode = useRef(0)
+  const pcLeave = useRef<number | undefined>(undefined)
   // black covers in front of both screens while AdrielOS is shut down
   const blanks = useRef<THREE.Mesh[]>([])
   const live = terminalScreen()
@@ -623,12 +668,16 @@ const Desk = memo(function Desk({
     // RGB: the hue drifts once every 20 s, and each kick of the music flashes it brighter
     const beat = musicPulse()
     const hue = (t / 20) % 1
+    const solid = pcMode.current > 0 ? PC_COLORS[pcMode.current - 1] : null
     ;[...tower.current, ...strips.current].forEach((mesh, i) => {
       if (!mesh) return
       const m = mesh.material as THREE.MeshStandardMaterial
-      m.color.setHSL((hue + i * 0.12) % 1, 0.7, 0.55)
+      // a click on the PC picks one colour for all of it; the default is the drifting rainbow
+      if (solid) m.color.copy(solid)
+      else m.color.setHSL((hue + i * (i < 3 ? 0.12 : 0.05)) % 1, 0.7, 0.55)
       m.emissive.copy(m.color)
-      m.emissiveIntensity = 1.2 + Math.sin(t * 2 + i * 1.7) * 0.3 + beat * 2
+      // the parts inside the case glow more quietly than the fans on the front
+      m.emissiveIntensity = (i < 3 ? 1.2 : 1.3) + Math.sin(t * 2 + i * 1.7) * 0.25 + beat * (i < 3 ? 2 : 1.2)
     })
   })
 
@@ -781,9 +830,80 @@ const Desk = memo(function Desk({
         </group>
 
         {/* RGB tower, standing at the right end of the desk, fans facing the room */}
-        <group position={[3.24, 0, -4.5]}>
-          <Box position={[0, 0.42, 0]} size={[0.46, 0.84, 0.74]} color="#12181f" />
+        <group
+          position={[3.24, 0, -4.5]}
+          onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+            e.stopPropagation()
+            window.clearTimeout(pcLeave.current)
+            onHover('PC — change the lighting', e.nativeEvent.clientX, e.nativeEvent.clientY)
+          }}
+          onPointerOut={(e) => {
+            e.stopPropagation()
+            pcLeave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+          }}
+          onClick={(e) => {
+            e.stopPropagation()
+            if (pointerDrag.moved > 6) return
+            pcMode.current = (pcMode.current + 1) % (PC_COLORS.length + 1)
+          }}
+        >
+          {/* the case: closed panels top, bottom, back and front; glass on both sides */}
+          <Box position={[0, 0.834, 0]} size={[0.46, 0.012, 0.74]} color="#12181f" />
+          <Box position={[0, 0.012, 0]} size={[0.46, 0.024, 0.74]} color="#12181f" />
+          <Box position={[0, 0.42, -0.364]} size={[0.46, 0.84, 0.012]} color="#12181f" />
+          <Box position={[0, 0.42, 0.364]} size={[0.46, 0.84, 0.012]} color="#12181f" />
           <Box position={[0, 0.42, 0.372]} size={[0.38, 0.72, 0.014]} color="#0a0e13" />
+          {/* what is inside */}
+          {PC_PARTS.map((part, k) => {
+            const glowIndex = PC_PARTS.slice(0, k).filter((p) => p.glow).length
+            const glowing = part.glow
+            const material = glowing ? (
+              <meshStandardMaterial color="#3fb0b7" emissive="#3fb0b7" emissiveIntensity={1} toneMapped={false} />
+            ) : (
+              <meshStandardMaterial color={part.color} roughness={0.55} metalness={0.5} />
+            )
+            return (
+              <mesh
+                key={k}
+                position={part.at}
+                rotation={part.ring ? [0, Math.PI / 2, 0] : undefined}
+                ref={
+                  glowing
+                    ? (m) => {
+                        if (m) tower.current[3 + glowIndex] = m
+                      }
+                    : undefined
+                }
+              >
+                {part.ring ? <torusGeometry args={[part.ring, 0.0065, 10, 40]} /> : <boxGeometry args={part.size} />}
+                {material}
+              </mesh>
+            )
+          })}
+          {/* the glass sides: a faint tint and sheen over the parts */}
+          {[1, -1].map((side) => (
+            <group key={side}>
+              <mesh position={[side * 0.229, 0.42, 0]} rotation={[0, (side * Math.PI) / 2, 0]}>
+                <planeGeometry args={[0.72, 0.82]} />
+                <meshStandardMaterial color="#9db8c6" transparent opacity={0.1} roughness={0.08} metalness={0.4} depthWrite={false} />
+              </mesh>
+              <Box position={[side * 0.229, 0.84, 0]} size={[0.006, 0.01, 0.74]} color="#222a33" />
+              <Box position={[side * 0.229, 0.004, 0]} size={[0.006, 0.01, 0.74]} color="#222a33" />
+            </group>
+          ))}
+          {/* light strips down the two front corners */}
+          {PC_EDGES.map((edge, k) => (
+            <mesh
+              key={k}
+              ref={(m) => {
+                if (m) tower.current[3 + PC_GLOW_COUNT + k] = m
+              }}
+              position={edge.at}
+            >
+              <boxGeometry args={edge.size} />
+              <meshStandardMaterial color="#3fb0b7" emissive="#3fb0b7" emissiveIntensity={1.6} toneMapped={false} />
+            </mesh>
+          ))}
           {[0.66, 0.46, 0.26].map((y, i) => (
             <mesh
               key={y}
@@ -849,6 +969,28 @@ const Desk = memo(function Desk({
 })
 
 /** Bookshelf against the left wall — the skills station. */
+// real books a developer's shelf might hold, set dressing only: a title on the spine, the author on hover
+const SHELF_BOOKS = [
+  ['Clean Code', 'Robert C. Martin'],
+  ['The Pragmatic Programmer', 'Andrew Hunt, David Thomas'],
+  ['Designing Data-Intensive Applications', 'Martin Kleppmann'],
+  ['Refactoring', 'Martin Fowler'],
+  ['Eloquent JavaScript', 'Marijn Haverbeke'],
+  ["You Don't Know JS", 'Kyle Simpson'],
+  ["Don't Make Me Think", 'Steve Krug'],
+  ['The Design of Everyday Things', 'Don Norman'],
+  ['Atomic Habits', 'James Clear'],
+  ['Code Complete', 'Steve McConnell'],
+  ['Clean Architecture', 'Robert C. Martin'],
+  ['Laravel: Up & Running', 'Matt Stauffer'],
+  ['Python Crash Course', 'Eric Matthes'],
+  ['Introduction to Algorithms', 'Cormen, Leiserson, Rivest, Stein'],
+  ['The Mythical Man-Month', 'Frederick P. Brooks Jr.'],
+  ['Cracking the Coding Interview', 'Gayle Laakmann McDowell'],
+  ['Learning React', 'Alex Banks, Eve Porcello'],
+  ['Head First Design Patterns', 'Freeman, Robson'],
+] as const
+
 const Shelf = memo(function Shelf({
   onPick,
   onHover,
@@ -858,7 +1000,7 @@ const Shelf = memo(function Shelf({
 }) {
   const books = useMemo(() => {
     const random = seeded(7)
-    const rows: { position: Vec3; size: Vec3; color: string }[] = []
+    const rows: { position: Vec3; size: Vec3; color: string; title?: readonly [string, string] }[] = []
     for (let shelf = 0; shelf < 5; shelf++) {
       let z = -4.35
       while (z < -1.35) {
@@ -874,8 +1016,14 @@ const Shelf = memo(function Shelf({
         z += thickness + 0.012
       }
     }
+    // about every ninth book gets a real title, spread over the shelves
+    let named = 0
+    rows.forEach((row, i) => {
+      if (i % 9 === 4 && named < SHELF_BOOKS.length) row.title = SHELF_BOOKS[named++]
+    })
     return rows
   }, [])
+  const leave = useRef<number | undefined>(undefined)
 
   return (
     <Hotspot station="skills" label="Skills — the shelf" onPick={onPick} onHover={onHover}>
@@ -893,7 +1041,27 @@ const Shelf = memo(function Shelf({
           />
         ))}
         {books.map((b, i) => (
-          <Box key={i} position={b.position} size={b.size} color={b.color} />
+          <group key={i}>
+            <Box position={b.position} size={b.size} color={b.color} />
+            {b.title && (
+              <mesh
+                position={[b.position[0] + b.size[0] / 2 + 0.002, b.position[1], b.position[2]]}
+                rotation={[0, Math.PI / 2, 0]}
+                onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+                  e.stopPropagation()
+                  window.clearTimeout(leave.current)
+                  onHover(`${b.title![0]} — ${b.title![1]}`, e.nativeEvent.clientX, e.nativeEvent.clientY)
+                }}
+                onPointerOut={(e) => {
+                  e.stopPropagation()
+                  leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+                }}
+              >
+                <planeGeometry args={[b.size[2], b.size[1]]} />
+                <meshStandardMaterial map={spineTexture(b.title[0], b.color)} roughness={0.8} />
+              </mesh>
+            )}
+          </group>
         ))}
         {/* a few horizontal stacks, like the reference shelf */}
         <Box position={[-5.62, 1.68, -4.05]} size={[0.3, 0.09, 0.5]} color="#c8a25a" />
@@ -1325,18 +1493,125 @@ const Window = memo(function Window({ onHover }: { onHover: (label: string | nul
 })
 
 /** Small server rack with blinking LEDs, for the hum of the place. */
-const Rack = memo(function Rack() {
+// the rack's status screen: real numbers from this page, redrawn twice a second
+let rackCanvas: { ctx: CanvasRenderingContext2D; texture: THREE.CanvasTexture } | null = null
+const rackScreen = () => {
+  if (!rackCanvas) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 384
+    canvas.height = 128
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    rackCanvas = { ctx: canvas.getContext('2d')!, texture }
+  }
+  return rackCanvas
+}
+const clockText = () => new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Makassar', hour12: false })
+const uptimeText = () => {
+  const s = Math.floor(performance.now() / 1000)
+  return [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60].map((n) => String(n).padStart(2, '0')).join(':')
+}
+
+const paintRack = (ctx: CanvasRenderingContext2D, lines: string[], page: string) => {
+  ctx.fillStyle = '#06100d'
+  ctx.fillRect(0, 0, 384, 128)
+  ctx.font = '600 20px "JetBrains Mono", ui-monospace, monospace'
+  ctx.textBaseline = 'top'
+  ctx.fillStyle = '#7fd6b8'
+  ctx.fillText('SERVER-01', 12, 8)
+  ctx.textAlign = 'right'
+  ctx.fillStyle = '#4f8f7a'
+  ctx.fillText(page, 372, 8)
+  ctx.textAlign = 'left'
+  ctx.fillStyle = '#b6f0dc'
+  lines.forEach((line, i) => ctx.fillText(line, 12, 38 + i * 26))
+}
+
+/** Server rack: blinking drives, and a status screen with live numbers; a click switches it to a ping test. */
+const Rack = memo(function Rack({ onHover }: { onHover: (label: string | null, x: number, y: number) => void }) {
   const leds = useRef<THREE.Mesh[]>([])
-  useFrame(({ clock }) => {
+  const leave = useRef<number | undefined>(undefined)
+  const page = useRef<'stats' | 'ping'>('stats')
+  const ping = useRef<{ ms: number | null; busy: boolean }>({ ms: null, busy: false })
+  const stat = useRef({ frames: 0, since: 0, fps: 0, drawn: 0 })
+  const busyUntil = useRef(0)
+
+  // time the round trip to this site itself: three tiny requests, the fastest wins
+  const runPing = async () => {
+    if (ping.current.busy) return
+    ping.current = { ms: null, busy: true }
+    let best = Infinity
+    for (let i = 0; i < 3; i++) {
+      const start = performance.now()
+      try {
+        await fetch(`/robots.txt?ping=${Date.now()}${i}`, { cache: 'no-store' })
+        best = Math.min(best, performance.now() - start)
+      } catch {
+        /* offline: no number */
+      }
+    }
+    ping.current = { ms: Number.isFinite(best) ? Math.round(best) : null, busy: false }
+  }
+
+  useFrame(({ clock, gl }) => {
     const t = clock.elapsedTime
+    // drives flicker harder for a moment after a click
+    const hot = performance.now() < busyUntil.current
     leds.current.forEach((led, i) => {
       if (!led) return
       const mat = led.material as THREE.MeshStandardMaterial
-      mat.emissiveIntensity = Math.sin(t * (2 + i * 0.6) + i) > 0.2 ? 2.4 : 0.25
+      mat.emissiveIntensity = Math.sin(t * (hot ? 14 + i : 2 + i * 0.6) + i) > 0.2 ? 2.4 : 0.25
     })
+    const s = stat.current
+    s.frames += 1
+    if (t - s.since < 0.5) return
+    s.fps = Math.round(s.frames / (t - s.since))
+    s.frames = 0
+    s.since = t
+    s.drawn = gl.info.render.calls
+    const lines =
+      page.current === 'stats'
+        ? [
+            `UP    ${uptimeText()}`,
+            `TIME  ${clockText()} WITA`,
+            `FPS   ${s.fps}   DRAW ${s.drawn}`,
+            `TRI   ${gl.info.render.triangles.toLocaleString('en-US')}`,
+          ]
+        : [
+            'PING  /robots.txt',
+            ping.current.busy ? 'measuring...' : ping.current.ms === null ? 'no answer' : `${ping.current.ms} ms`,
+            'click: back to stats',
+          ]
+    const screen = rackScreen()
+    paintRack(screen.ctx, lines, page.current === 'stats' ? 'STATS' : 'PING')
+    screen.texture.needsUpdate = true
   })
   return (
-    <group position={[4.9, 0, -4.9]}>
+    <group
+      position={[4.9, 0, -4.9]}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation()
+        window.clearTimeout(leave.current)
+        onHover('Server — click to switch stats and ping', e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (pointerDrag.moved > 6) return
+        busyUntil.current = performance.now() + 1500
+        if (page.current === 'stats') {
+          page.current = 'ping'
+          void runPing()
+        } else page.current = 'stats'
+      }}
+    >
+      <mesh position={[0, 1.4, 0.427]}>
+        <planeGeometry args={[0.74, 0.246]} />
+        <meshBasicMaterial map={rackScreen().texture} toneMapped={false} />
+      </mesh>
       <Box position={[0, 0.78, 0]} size={[0.86, 1.56, 0.8]} color={C.dark} />
       {[0.35, 0.62, 0.89, 1.16].map((y, i) => (
         <group key={y}>
@@ -3246,7 +3521,7 @@ export const Room = memo(function Room({
       <GuestBoard notes={guestNotes} onSign={onSign} onHover={onHover} />
       <Poster onPick={onPoster} onHover={onHover} />
       <Window onHover={onHover} />
-      <Rack />
+      <Rack onHover={onHover} />
 
       <group position={LOUNGE_AT} scale={LOUNGE_SCALE}>
         <Lounge

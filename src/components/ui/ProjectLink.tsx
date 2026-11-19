@@ -64,7 +64,7 @@ export const ProjectLink = function ProjectLink({ project, compact, className }:
                 aria-modal="true"
                 aria-labelledby="download-title"
                 onClick={(e) => e.stopPropagation()}
-                className="relative w-full max-w-lg rounded-2xl border border-white/40 bg-surface/60 p-6 text-foreground shadow-elevated backdrop-blur-2xl backdrop-saturate-150 sm:p-8"
+                className="relative w-full max-w-lg rounded-2xl border border-white/40 bg-surface/82 p-6 text-foreground shadow-elevated backdrop-blur-2xl backdrop-saturate-150 sm:p-8"
               >
                 <button
                   type="button"

@@ -186,6 +186,40 @@ export const guestTitleTexture = () =>
     ctx.fillText('click to leave a note', w / 2, 84)
   })
 
+const spines = new Map<string, THREE.CanvasTexture>()
+/** A book spine with its title running top to bottom, in dark or light ink depending on the cover colour. */
+export const spineTexture = (title: string, color: string) => {
+  const key = `${title}|${color}`
+  const cached = spines.get(key)
+  if (cached) return cached
+  const texture = make(96, 384, (ctx, w, h) => {
+    ctx.fillStyle = color
+    ctx.fillRect(0, 0, w, h)
+    const c = new THREE.Color(color)
+    const dark = c.r * 0.299 + c.g * 0.587 + c.b * 0.114 > 0.55
+    const ink = dark ? '#1b1410' : '#f3efe4'
+    // two thin bands near the ends, like a bound book
+    ctx.fillStyle = dark ? 'rgba(0,0,0,0.28)' : 'rgba(255,255,255,0.4)'
+    ctx.fillRect(0, 14, w, 5)
+    ctx.fillRect(0, h - 19, w, 5)
+    ctx.fillStyle = ink
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.translate(w / 2, h / 2)
+    ctx.rotate(Math.PI / 2)
+    let size = 48
+    ctx.font = `700 ${size}px "Big Shoulders Display", "Arial Narrow", sans-serif`
+    // shrink the title until it fits between the bands
+    while (ctx.measureText(title).width > h - 70 && size > 14) {
+      size -= 2
+      ctx.font = `700 ${size}px "Big Shoulders Display", "Arial Narrow", sans-serif`
+    }
+    ctx.fillText(title, 0, 0)
+  })
+  spines.set(key, texture)
+  return texture
+}
+
 /**
  * The neon sign: a tube-style outline of the name on a transparent ground, with the letters spaced a little apart.
  * Drawn in white so the sign's material colour tints it; a click on the sign cycles that colour.

@@ -27,7 +27,7 @@ export const deskOverlay: { el: HTMLDivElement | null } = { el: null }
 export const screenPower = { on: true }
 
 /** Where the character is right now, for the dog to trail; Character writes it every frame. */
-export const charPos = { x: 0, z: 0, yaw: 0, busy: false }
+export const charPos = { x: 0, z: 0, yaw: 0, busy: false, holding: false }
 
 /**
  * A petting moment: the dog asks (want, with where it stands and faces), the character walks over,

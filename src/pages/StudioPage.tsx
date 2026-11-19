@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { ArrowLeft, Music, Route, RotateCcw, VolumeX } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronLeft, ChevronRight, Music, Route, RotateCcw, VolumeX } from 'lucide-react'
 import { CertificateModal, ProjectGalleryModal } from '@/components/ui'
 import { CERTIFICATES_DATA, CONTACT_INFO, EXPERIENCE_TIMELINE, PROJECTS, SKILLS_DATA, type Certificate, type Project } from '@/lib/constants'
 import {
@@ -74,6 +74,13 @@ function StudioPage() {
     const hash = window.location.hash.replace('#', '')
     return isStation(hash) ? hash : 'room'
   })
+  // the side panel can be tucked away for a full view of the room; it comes back whenever the view changes
+  const [panelHidden, setPanelHidden] = useState(false)
+  const [panelView, setPanelView] = useState(view)
+  if (view !== panelView) {
+    setPanelView(view)
+    setPanelHidden(false)
+  }
   const [ready, setReady] = useState(false)
   const [hover, setHover] = useState<{ label: string; x: number; y: number } | null>(null)
   const [greetKey, setGreetKey] = useState(0)
@@ -465,7 +472,7 @@ function StudioPage() {
   const station = inRoom ? null : STATIONS.find((s) => s.id === view)
   // the computer is used on its own screen and experience is written on the whiteboard: no side panel
   const panel = tour !== null || station?.id === 'projects' || station?.id === 'experience' ? null : station
-  const panelOpen = Boolean(panel)
+  const panelOpen = Boolean(panel) && !panelHidden
   const tvLabel =
     tvMode === 'menu'
       ? ['Pong', 'Breakout', 'YouTube'][tvSel]
@@ -736,15 +743,23 @@ function StudioPage() {
           {/* desktop panel */}
           <div className="pointer-events-none absolute bottom-4 right-4 top-2 hidden w-[380px] md:block">
             <AnimatePresence mode="wait">
-              {desktop && panel ? (
+              {desktop && panel && !panelHidden ? (
                 <motion.div
                   key={panel.id}
                   initial={{ opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 24 }}
                   transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="h-full"
+                  className="relative h-full"
                 >
+                  <button
+                    onClick={() => setPanelHidden(true)}
+                    aria-label="Hide the panel for a full view"
+                    title="Hide panel"
+                    className="pointer-events-auto absolute -left-11 top-1/2 flex h-10 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 glass-dark text-[#a7b0bd] transition-colors hover:border-white/35 hover:text-white"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
                   <StudioPanel
                     station={panel.id}
                     onClose={() => setView('room')}
@@ -905,9 +920,21 @@ function StudioPage() {
         </div>
       </div>
 
+      {/* a tab to bring a hidden panel back */}
+      {panel && panelHidden && (
+        <button
+          onClick={() => setPanelHidden(false)}
+          aria-label="Show the panel"
+          title="Show panel"
+          className="absolute right-3 top-1/2 z-30 flex h-11 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 glass-dark text-[#a7b0bd] transition-colors hover:border-white/35 hover:text-white md:right-4"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+      )}
+
       {/* mobile sheet */}
       <AnimatePresence mode="wait">
-        {!desktop && panel ? (
+        {!desktop && panel && !panelHidden ? (
           <motion.div
             key={panel.id}
             initial={{ y: '100%' }}
@@ -916,6 +943,13 @@ function StudioPage() {
             transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-x-2 bottom-2 z-30 h-[52svh] md:hidden"
           >
+            <button
+              onClick={() => setPanelHidden(true)}
+              aria-label="Hide the panel for a full view"
+              className="absolute -top-11 right-2 z-10 flex h-9 w-10 items-center justify-center rounded-full border border-white/15 glass-dark text-[#a7b0bd]"
+            >
+              <ChevronDown className="h-4 w-4" />
+            </button>
             <StudioPanel
               station={panel.id}
               onClose={() => setView('room')}
