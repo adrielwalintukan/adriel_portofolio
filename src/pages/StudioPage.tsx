@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { ArrowLeft, Music, RotateCcw, VolumeX } from 'lucide-react'
 import { CertificateModal, ProjectGalleryModal } from '@/components/ui'
-import { CONTACT_INFO, SKILLS_DATA, type Certificate, type Project } from '@/lib/constants'
+import { CONTACT_INFO, EXPERIENCE_TIMELINE, SKILLS_DATA, type Certificate, type Project } from '@/lib/constants'
 import {
   DESK_COLS,
   DESK_PROJECTS,
@@ -361,8 +361,8 @@ function StudioPage() {
   }, [])
 
   const station = inRoom ? null : STATIONS.find((s) => s.id === view)
-  // the computer is used on its own screen, so Projects has no side panel
-  const panel = station?.id === 'projects' ? null : station
+  // the computer is used on its own screen and experience is written on the whiteboard: no side panel
+  const panel = station?.id === 'projects' || station?.id === 'experience' ? null : station
   const panelOpen = Boolean(panel)
   const tvLabel =
     tvMode === 'menu'
@@ -747,8 +747,10 @@ function StudioPage() {
               ? deskProject
                 ? `Computer: ${deskProject.title} opened`
                 : `Computer: ${DESK_PROJECTS[deskSel].title}`
-              : station
-                ? `${station.label} panel opened`
+              : view === 'experience'
+                ? `Whiteboard: ${EXPERIENCE_TIMELINE.map((e) => `${e.title}, ${e.role}, ${e.year}`).join('; ')}`
+                : station
+                  ? `${station.label} panel opened`
                 : 'Back to the room'}
       </p>
 

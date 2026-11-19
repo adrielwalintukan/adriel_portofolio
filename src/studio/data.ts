@@ -49,7 +49,8 @@ export const POSES: Record<ViewId, Pose> = {
   // facing the main monitor, high enough to look over him when he sits at the desk
   projects: { eye: [1.95, 2.25, -2.75], target: [1.95, 1.68, -4.905] },
   skills: { eye: [0.9, 3.0, 0.4], target: [-5.5, 1.9, -2.85] },
-  experience: { eye: [-0.1, 3.05, 0.5], target: [-1.2, 2.6, -5.9] },
+  // square to the whiteboard, where the timeline is written: no side panel for this view
+  experience: { eye: [-1.9, 2.62, -1.7], target: [-1.9, 2.62, -5.9] },
   certificates: { eye: [2.55, 3.7, 4.15], target: [-5.9, 2.85, 2.4] },
   about: { eye: [2.7, 1.7, 6.5], target: [1.1, 1.3, 2.05] },
   // the framed portrait on the back wall, close enough to read the face
@@ -73,7 +74,8 @@ export const PORTRAIT_POSES: Record<ViewId, Pose> = {
   room: { eye: [11.3, 8.4, 13.1], target: [0.9, 0.9, -0.3] },
   projects: { eye: [1.95, 2.3, -0.95], target: [1.95, 1.68, -4.905] },
   skills: { eye: [2.6, 3.29, 1.26], target: [-5.5, 1.9, -2.85] },
-  experience: { eye: [-0.08, 3.05, 5.3], target: [-1.9, 2.1, -5.9] },
+  // the timeline half of the board, square on
+  experience: { eye: [-2.35, 2.66, 0.4], target: [-2.35, 2.62, -5.9] },
   certificates: { eye: [3.1, 3.85, 4.95], target: [-5.9, 2.4, 3.0] },
   about: { eye: [2.45, 2.0, 6.2], target: [0.78, 1.0, 2.05] },
   poster: { eye: [3.95, 3.65, -0.75], target: [1.9, 3.5, -5.92] },

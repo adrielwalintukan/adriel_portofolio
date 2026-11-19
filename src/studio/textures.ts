@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { EXPERIENCE_TIMELINE } from '@/lib/constants'
 
 /**
  * Screens, boards and poster art are painted on 2D canvases and used as textures: no image
@@ -16,63 +17,61 @@ const make = (w: number, h: number, paint: (ctx: CanvasRenderingContext2D, w: nu
   return texture
 }
 
-/** Whiteboard: the stack, drawn like the sketch it is. */
-export const boardTexture = () =>
-  make(1024, 600, (ctx, w, h) => {
+/**
+ * Whiteboard: the experience timeline, written in marker. The right third and the top-left corner
+ * stay clear for the pinned notes. Repaints once the web fonts arrive so the lettering is right.
+ */
+export const boardTexture = () => {
+  const paint = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
     ctx.fillStyle = '#e9e6d9'
     ctx.fillRect(0, 0, w, h)
     ctx.fillStyle = '#1f6f6b'
-    ctx.font = '700 54px "Big Shoulders Display", "Arial Narrow", sans-serif'
-    ctx.fillText('ADRIEL / SYSTEMS', 56, 90)
+    ctx.font = '700 104px "Big Shoulders Display", "Arial Narrow", sans-serif'
+    ctx.fillText('EXPERIENCE', 290, 150)
     ctx.strokeStyle = '#8fb3ae'
-    ctx.lineWidth = 3
+    ctx.lineWidth = 5
     ctx.beginPath()
-    ctx.moveTo(56, 116)
-    ctx.lineTo(700, 116)
+    ctx.moveTo(290, 186)
+    ctx.lineTo(1300, 186)
     ctx.stroke()
 
-    ctx.font = '600 27px "JetBrains Mono", monospace'
-    const rows = [
-      ['frontend', 'React · Next.js · Tailwind'],
-      ['backend', 'Laravel · Node · PostgreSQL'],
-      ['mobile', 'React Native · Expo'],
-      ['ai', 'Gemini · RAG · evals'],
-    ]
-    rows.forEach(([left, right], i) => {
-      ctx.fillStyle = '#2a6f6a'
-      ctx.fillText(left, 60, 182 + i * 52)
-      ctx.fillStyle = '#4c5560'
-      ctx.fillText(right, 300, 182 + i * 52)
-    })
-
-    // data flow sketch
-    const box = (x: number, y: number, label: string) => {
-      ctx.fillStyle = '#fffdf6'
-      ctx.strokeStyle = '#1f6f6b'
-      ctx.lineWidth = 3
+    // the timeline: a marker line with a dot per entry, newest first
+    const top = 300
+    const gap = 232
+    ctx.strokeStyle = '#b4693a'
+    ctx.lineWidth = 6
+    ctx.beginPath()
+    ctx.moveTo(130, top - 20)
+    ctx.lineTo(130, top + gap * (EXPERIENCE_TIMELINE.length - 1) + 20)
+    ctx.stroke()
+    EXPERIENCE_TIMELINE.forEach((item, i) => {
+      const y = top + i * gap
+      ctx.fillStyle = '#e9e6d9'
+      ctx.strokeStyle = '#b4693a'
+      ctx.lineWidth = 6
       ctx.beginPath()
-      ctx.roundRect(x, y, 150, 62, 8)
+      ctx.arc(130, y, 18, 0, Math.PI * 2)
       ctx.fill()
       ctx.stroke()
-      ctx.fillStyle = '#1f6f6b'
-      ctx.font = '600 22px "JetBrains Mono", monospace'
-      ctx.fillText(label, x + 18, y + 39)
-    }
-    box(70, 430, 'client')
-    box(300, 430, 'api')
-    box(530, 430, 'postgres')
-    ctx.strokeStyle = '#b4693a'
-    ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(222, 461)
-    ctx.lineTo(298, 461)
-    ctx.moveTo(452, 461)
-    ctx.lineTo(528, 461)
-    ctx.stroke()
-    ctx.fillStyle = '#b4693a'
-    ctx.font = '600 20px "JetBrains Mono", monospace'
-    ctx.fillText('never skip the middle layer', 706, 466)
+      ctx.fillStyle = '#b4693a'
+      ctx.font = '600 34px "JetBrains Mono", monospace'
+      ctx.fillText(`${item.year}  ·  ${item.category}`, 190, y + 12)
+      ctx.fillStyle = '#1d2a33'
+      ctx.font = '700 66px "Big Shoulders Display", "Arial Narrow", sans-serif'
+      ctx.fillText(item.title, 190, y + 84, 1150)
+      ctx.fillStyle = '#4c5560'
+      ctx.font = '500 34px "JetBrains Mono", monospace'
+      ctx.fillText(item.role, 190, y + 132, 1150)
+    })
+  }
+  const texture = make(2048, 1210, paint)
+  const canvas = texture.image as HTMLCanvasElement
+  void document.fonts?.ready.then(() => {
+    paint(canvas.getContext('2d')!, canvas.width, canvas.height)
+    texture.needsUpdate = true
   })
+  return texture
+}
 
 /** Window at night: a soft city below, so the room feels lived in. */
 export const windowTexture = () =>
@@ -107,29 +106,66 @@ export const windowTexture = () =>
     }
   })
 
-/** One certificate face, reused for every frame on the wall. */
-export const certificateTexture = () =>
-  make(300, 380, (ctx, w, h) => {
-    ctx.fillStyle = '#f2eee2'
+/** A paper pinned to the board: coloured stock with a few handwritten-looking lines. */
+export const noteTexture = (paper: string, ink: string, lines: string[]) =>
+  make(256, 256, (ctx, w, h) => {
+    ctx.fillStyle = paper
     ctx.fillRect(0, 0, w, h)
-    ctx.strokeStyle = '#1f6f6b'
-    ctx.lineWidth = 6
-    ctx.strokeRect(16, 16, w - 32, h - 32)
-    ctx.fillStyle = '#1f6f6b'
-    ctx.font = '700 22px "Big Shoulders Display", "Arial Narrow", sans-serif'
-    ctx.fillText('CERTIFICATE', 34, 70)
+    // a faint fold shadow along the top, where the pin holds it
+    const fold = ctx.createLinearGradient(0, 0, 0, 40)
+    fold.addColorStop(0, 'rgba(0,0,0,0.12)')
+    fold.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = fold
+    ctx.fillRect(0, 0, w, 40)
+    ctx.fillStyle = ink
+    ctx.font = '600 30px "JetBrains Mono", monospace'
+    lines.forEach((line, i) => ctx.fillText(line, 24, 88 + i * 46))
+  })
+
+/** A polaroid of the night skyline: white border, a deeper bottom lip. */
+export const polaroidTexture = () =>
+  make(256, 300, (ctx, w, h) => {
+    ctx.fillStyle = '#f6f3ea'
+    ctx.fillRect(0, 0, w, h)
+    const sky = ctx.createLinearGradient(0, 18, 0, 238)
+    sky.addColorStop(0, '#12304a')
+    sky.addColorStop(1, '#3fb0b7')
+    ctx.fillStyle = sky
+    ctx.fillRect(18, 18, w - 36, 220)
+    ctx.fillStyle = '#0b1420'
+    for (let i = 0; i < 9; i++) ctx.fillRect(18 + i * 25, 238 - (40 + ((i * 37) % 90)), 20, 40 + ((i * 37) % 90))
     ctx.fillStyle = '#4c5560'
-    ctx.font = '600 13px "JetBrains Mono", monospace'
-    ctx.fillText('of completion', 34, 94)
-    ctx.fillStyle = '#8b939b'
-    for (let i = 0; i < 4; i++) ctx.fillRect(34, 140 + i * 22, 190 - i * 18, 8)
-    ctx.fillStyle = '#b4693a'
+    ctx.font = '600 22px "JetBrains Mono", monospace'
+    ctx.fillText('manado', 24, 276)
+  })
+
+/** Phone lock screen: the time over a dusk gradient, with a notification card. */
+export const phoneTexture = () =>
+  make(240, 480, (ctx, w, h) => {
+    const sky = ctx.createLinearGradient(0, 0, 0, h)
+    sky.addColorStop(0, '#12304a')
+    sky.addColorStop(1, '#1f6f6b')
+    ctx.fillStyle = sky
+    ctx.fillRect(0, 0, w, h)
+    ctx.fillStyle = '#f3efe4'
+    ctx.textAlign = 'center'
+    ctx.font = '600 22px "JetBrains Mono", monospace'
+    const now = new Date()
+    ctx.fillText(now.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }), w / 2, 92)
+    ctx.font = '700 84px "Big Shoulders Display", "Arial Narrow", sans-serif'
+    ctx.fillText(now.toTimeString().slice(0, 5), w / 2, 178)
+    ctx.fillStyle = 'rgba(243, 239, 228, 0.16)'
     ctx.beginPath()
-    ctx.arc(150, 288, 30, 0, Math.PI * 2)
+    ctx.roundRect(18, 236, w - 36, 74, 14)
     ctx.fill()
-    ctx.fillStyle = '#f2eee2'
-    ctx.font = '700 26px "Inter", system-ui, sans-serif'
-    ctx.fillText('A', 140, 298)
+    ctx.fillStyle = '#f3efe4'
+    ctx.textAlign = 'left'
+    ctx.font = '600 17px "JetBrains Mono", monospace'
+    ctx.fillText('GitHub', 34, 266)
+    ctx.font = '400 15px "JetBrains Mono", monospace'
+    ctx.fillText('CI passed on main', 34, 292)
+    ctx.fillStyle = 'rgba(243, 239, 228, 0.7)'
+    ctx.fillRect(w / 2 - 40, h - 22, 80, 5)
   })
 
 /** Wood floor planks, tiled across the room. */

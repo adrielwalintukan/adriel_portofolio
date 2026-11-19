@@ -14,11 +14,12 @@ import {
   type StationId,
   type TvMode,
 } from './data'
+import { CERTIFICATES_DATA } from '@/lib/constants'
 import { POOL, moving, shoot, step, table, type Hit } from './pool'
 import { quadMatrix } from './quad'
-import { poolSound, unlock } from './sound'
+import { bark, poolSound, unlock } from './sound'
 import { PROMPT, TERM_COLORS, type TermLine } from './terminal'
-import { boardTexture, certificateTexture, floorTexture, windowTexture } from './textures'
+import { boardTexture, floorTexture, noteTexture, phoneTexture, polaroidTexture, windowTexture } from './textures'
 
 const C = {
   floor: '#6b4a33',
@@ -518,6 +519,7 @@ const Desk = memo(function Desk({
   const tower = useRef<THREE.Mesh[]>([])
   const live = terminalScreen()
   const termPaint = useRef(0)
+  const phone = useMemo(() => phoneTexture(), [])
 
   useFrame(({ clock, camera, size }, delta) => {
     const t = clock.elapsedTime
@@ -622,6 +624,21 @@ const Desk = memo(function Desk({
           color={C.cream}
           rotation={[0, -0.2, 0]}
         />
+
+        {/* phone face up beside the mouse, its lock screen lit */}
+        <group position={[2.36, 1.035, -4.3]} rotation={[0, 0.35, 0]}>
+          <Box position={[0, 0.006, 0]} size={[0.08, 0.012, 0.16]} color="#151a21" metalness={0.4} roughness={0.35} />
+          <mesh position={[0, 0.0125, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[0.072, 0.144]} />
+            <meshStandardMaterial
+              map={phone}
+              emissive="#ffffff"
+              emissiveMap={phone}
+              emissiveIntensity={0.55}
+              toneMapped={false}
+            />
+          </mesh>
+        </group>
 
         {/* mug + steam */}
         <mesh position={[2.72, 1.13, -4.3]} castShadow>
@@ -819,12 +836,99 @@ const Board = memo(function Board({
         <Box position={[-1.9, 1.5, -5.84]} size={[3.2, 0.06, 0.14]} color={C.trim} />
         <Box position={[-2.4, 1.55, -5.84]} size={[0.2, 0.04, 0.04]} color="#1f6f6b" />
         <Box position={[-2.1, 1.55, -5.84]} size={[0.2, 0.04, 0.04]} color="#b4693a" />
+        <PinBoard />
       </group>
     </Hotspot>
   )
 })
 
-/** Frames on the left wall — the awards station. */
+/** One straight length of thread between two pins. */
+function Thread({ from, to }: { from: Vec3; to: Vec3 }) {
+  const { position, quaternion, length } = useMemo(() => {
+    const a = new THREE.Vector3(...from)
+    const b = new THREE.Vector3(...to)
+    const dir = b.clone().sub(a)
+    return {
+      position: a.clone().add(b).multiplyScalar(0.5),
+      quaternion: new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize()),
+      length: dir.length(),
+    }
+  }, [from, to])
+  return (
+    <mesh position={position} quaternion={quaternion}>
+      <cylinderGeometry args={[0.0035, 0.0035, length, 6]} />
+      <meshStandardMaterial color="#b03a2e" roughness={0.8} />
+    </mesh>
+  )
+}
+
+// pinned to the empty top-right of the board and one corner hanging off its frame; z is the board's face
+const BOARD_Z = -5.885
+const NOTES: { at: [number, number]; size: [number, number]; tilt: number; paper: string; ink: string; lines: string[]; pin: string }[] = [
+  { at: [-1.05, 3.28], size: [0.3, 0.3], tilt: 0.07, paper: '#e8c66a', ink: '#5a4520', lines: ['ship it', 'small'], pin: '#c0392b' },
+  { at: [-0.5, 3.3], size: [0.28, 0.28], tilt: -0.09, paper: '#8fcfc9', ink: '#1d4f4b', lines: ['test', 'first'], pin: '#c0392b' },
+  { at: [-0.8, 2.72], size: [0.42, 0.28], tilt: 0.03, paper: '#fbfaf5', ink: '#4c5560', lines: ['why > how', 'read the', 'error'], pin: '#1f6f6b' },
+  { at: [-3.43, 3.52], size: [0.28, 0.28], tilt: -0.14, paper: '#e9a77f', ink: '#5a2c18', lines: ['todo', 'sleep'], pin: '#1f6f6b' },
+]
+const PHOTO = { at: [-0.4, 2.55] as [number, number], size: [0.24, 0.28] as [number, number], tilt: -0.1 }
+// the pins sit near each paper's top edge; one more marks the latest entry of the timeline
+const pinOf = (at: [number, number], size: [number, number]): Vec3 => [at[0], at[1] + size[1] / 2 - 0.035, BOARD_Z + 0.02]
+const ENTRY_PIN: Vec3 = [-1.32, 3.1, BOARD_Z + 0.02]
+
+/** Cork-board corner of the whiteboard: notes, an index card and a photo, pinned and strung together. */
+const PinBoard = memo(function PinBoard() {
+  const faces = useMemo(() => NOTES.map((n) => noteTexture(n.paper, n.ink, n.lines)), [])
+  const photo = useMemo(() => polaroidTexture(), [])
+  useEffect(() => () => [...faces, photo].forEach((t) => t.dispose()), [faces, photo])
+  const pins = [...NOTES.map((n) => pinOf(n.at, n.size)), pinOf(PHOTO.at, PHOTO.size), ENTRY_PIN]
+  // note, note, card, photo, then down to the sketch: the red string a planning board always has
+  const strings: [number, number][] = [
+    [0, 2],
+    [2, 1],
+    [1, 4],
+    [2, 5],
+    [4, 5],
+  ]
+  return (
+    <group>
+      {NOTES.map((n, i) => (
+        <mesh key={i} position={[n.at[0], n.at[1], BOARD_Z + 0.004 + i * 0.001]} rotation={[0, 0, n.tilt]} castShadow>
+          <planeGeometry args={n.size} />
+          <meshStandardMaterial map={faces[i]} roughness={0.9} />
+        </mesh>
+      ))}
+      <mesh position={[PHOTO.at[0], PHOTO.at[1], BOARD_Z + 0.009]} rotation={[0, 0, PHOTO.tilt]} castShadow>
+        <planeGeometry args={PHOTO.size} />
+        <meshStandardMaterial map={photo} roughness={0.6} />
+      </mesh>
+      {pins.map((p, i) => (
+        <mesh key={i} position={p} castShadow>
+          <sphereGeometry args={[0.018, 16, 12]} />
+          <meshStandardMaterial
+            color={i < NOTES.length ? NOTES[i].pin : '#c0392b'}
+            roughness={0.35}
+            metalness={0.1}
+          />
+        </mesh>
+      ))}
+      {strings.map(([a, b]) => (
+        <Thread key={`${a}-${b}`} from={pins[a]} to={pins[b]} />
+      ))}
+    </group>
+  )
+})
+
+// A small salon hang of real certificates above the sideboard: two stacked on the left, the award in the
+// middle, the portrait one on the right. Each slot is a box the scan is fitted into, so a landscape scan
+// gets a landscape frame and a portrait one a portrait frame. The rest stay in the Awards panel.
+const WALL_CERTS = [
+  { id: 'cert-anthropic-ai-fluency', z: 0.72, y: 3.27, w: 0.82, h: 0.66 },
+  { id: 'cert-dicoding-aws-cloud-genai', z: 0.72, y: 2.43, w: 0.82, h: 0.66 },
+  { id: 'cert-proxo-appreciation', z: 2.35, y: 2.85, w: 1.34, h: 1.08, plaque: true },
+  { id: 'cert-ibm-genai-software-dev', z: 3.97, y: 2.85, w: 0.96, h: 0.7 },
+]
+
+/** Frames on the left wall — the awards station, showing real certificates. */
 const Frames = memo(function Frames({
   onPick,
   onHover,
@@ -832,19 +936,56 @@ const Frames = memo(function Frames({
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
 }) {
-  const face = useMemo(() => certificateTexture(), [])
+  // loaded by hand like the poster: a slow scan never holds the room back, and its frame appears with it
+  const [scans, setScans] = useState<(THREE.Texture | null)[]>(() => WALL_CERTS.map(() => null))
+  useEffect(() => {
+    let live = true
+    const loader = new THREE.TextureLoader()
+    const loaded = WALL_CERTS.map((slot, i) => {
+      const image = CERTIFICATES_DATA.find((c) => c.id === slot.id)?.image
+      if (!image) return null
+      return loader.load(image, (t) => {
+        if (!live) return
+        t.colorSpace = THREE.SRGBColorSpace
+        t.anisotropy = 16
+        setScans((prev) => prev.map((s, j) => (j === i ? t : s)))
+      })
+    })
+    return () => {
+      live = false
+      loaded.forEach((t) => t?.dispose())
+    }
+  }, [])
+
   return (
     <Hotspot station="certificates" label="Awards — the wall" onPick={onPick} onHover={onHover}>
       <group>
-        {[0.6, 1.8, 3.0, 4.2].map((z, i) => (
-          <group key={z} position={[-5.9, 2.75 + (i % 2) * 0.35, z]} rotation={[0, Math.PI / 2, 0]}>
-            <Box position={[0, 0, 0]} size={[1.02, 1.3, 0.06]} color={C.woodDark} />
-            <mesh position={[0, 0, 0.04]}>
-              <planeGeometry args={[0.86, 1.12]} />
-              <meshStandardMaterial map={face} roughness={0.9} />
-            </mesh>
-          </group>
-        ))}
+        {WALL_CERTS.map((slot, i) => {
+          const scan = scans[i]
+          const image = scan?.image as { width: number; height: number } | undefined
+          if (!scan || !image) return null
+          // fit the scan inside its slot without cropping, then hug it with mat and frame
+          const aspect = image.width / image.height
+          const w = aspect > slot.w / slot.h ? slot.w : slot.h * aspect
+          const h = w / aspect
+          return (
+            <group key={slot.id} position={[-5.9, slot.y, slot.z]} rotation={[0, Math.PI / 2, 0]}>
+              <Box position={[0, 0, 0]} size={[w + 0.16, h + 0.16, 0.05]} color="#2a1d16" roughness={0.6} />
+              <Box position={[0, 0, 0.012]} size={[w + 0.11, h + 0.11, 0.035]} color="#b58a4a" roughness={0.4} metalness={0.5} />
+              <mesh position={[0, 0, 0.031]}>
+                <planeGeometry args={[w + 0.08, h + 0.08]} />
+                <meshStandardMaterial color="#f4f1e8" roughness={0.95} />
+              </mesh>
+              <mesh position={[0, 0, 0.033]}>
+                <planeGeometry args={[w, h]} />
+                <meshStandardMaterial map={scan} roughness={0.75} />
+              </mesh>
+              {slot.plaque && (
+                <Box position={[0, -h / 2 - 0.17, 0.01]} size={[0.34, 0.07, 0.015]} color="#b58a4a" roughness={0.35} metalness={0.6} />
+              )}
+            </group>
+          )
+        })}
       </group>
     </Hotspot>
   )
@@ -1043,8 +1184,25 @@ const Plant = memo(function Plant({ position, tall = false }: { position: Vec3; 
 
 /** Gallery bar above the certificate frames: the awards wall gets the same warmth as the desk. */
 const GalleryLight = memo(function GalleryLight() {
+  // the spot washes the whole frame wall from the bar's side of the room so every scan reads
+  const aim = useMemo(() => {
+    const o = new THREE.Object3D()
+    o.position.set(-2.1, -2.17, 0)
+    return o
+  }, [])
   return (
     <group position={[-5.78, 3.92, 2.4]}>
+      <primitive object={aim} />
+      <spotLight
+        position={[1.9, 0.05, 0]}
+        target={aim}
+        angle={0.72}
+        penumbra={0.55}
+        intensity={22}
+        distance={7}
+        decay={2}
+        color="#fff0dc"
+      />
       <Box
         position={[0, 0.06, 0]}
         size={[0.12, 0.08, 4.4]}
@@ -1687,12 +1845,7 @@ const Lounge = memo(function Lounge({
             color={C.woodDark}
           />
         ))}
-        {/* two game pads, a book and a mug */}
-        {[-0.62, -0.16].map((x, i) => (
-          <group key={x} position={[x, 0.49, 0.16]} rotation={[0, 0.18 + i * 0.14, 0]}>
-            <Gamepad />
-          </group>
-        ))}
+        {/* a book and a mug; the pads live on the TV console */}
         <Box
           position={[0.62, 0.49, -0.18]}
           size={[0.4, 0.04, 0.28]}
@@ -1790,7 +1943,7 @@ const Sideboard = memo(function Sideboard({
           <meshStandardMaterial
             color="#fff1d6"
             emissive="#ffd59a"
-            emissiveIntensity={1.6}
+            emissiveIntensity={0.6}
             transparent
             opacity={0.85}
             side={THREE.DoubleSide}
@@ -1802,7 +1955,7 @@ const Sideboard = memo(function Sideboard({
           <meshStandardMaterial
             color="#fff1d6"
             emissive="#ffd59a"
-            emissiveIntensity={1.2}
+            emissiveIntensity={0.45}
             transparent
             opacity={0.8}
             toneMapped={false}
@@ -1810,7 +1963,7 @@ const Sideboard = memo(function Sideboard({
         </mesh>
         <pointLight
           position={[0, 0.15, 0.15]}
-          intensity={2.2}
+          intensity={0.6}
           distance={2.4}
           decay={2}
           color="#ffcf8a"
@@ -2102,6 +2255,225 @@ const Billiards = memo(function Billiards({
   )
 })
 
+/**
+ * The studio dog: a shiba-ish pup that roams the main rug, stopping to stand or lie down for a
+ * while. It breathes, wags, follows the pointer with its head, and a click makes it perk up, wag
+ * hard and bark. Built facing +z.
+ */
+// the main rug's inner area, kept clear of its edges (see RoomShell)
+const DOG_AREA = { x0: -2.7, x1: 0.7, z0: -1.8, z1: 1.1 }
+const DOG_SPEED = 0.4
+// hip and shoulder pivots: front left, front right, back left, back right
+const DOG_LEGS: Vec3[] = [
+  [-0.065, -0.03, 0.15],
+  [0.065, -0.03, 0.15],
+  [-0.075, -0.03, -0.15],
+  [0.075, -0.03, -0.15],
+]
+
+const Dog = memo(function Dog({
+  onHover,
+}: {
+  onHover: (label: string | null, x: number, y: number) => void
+}) {
+  const root = useRef<THREE.Group>(null)
+  const body = useRef<THREE.Group>(null)
+  const head = useRef<THREE.Group>(null)
+  const tail = useRef<THREE.Group>(null)
+  const legs = useRef<(THREE.Group | null)[]>([])
+  const s = useRef({
+    x: -1.2,
+    z: 0.3,
+    yaw: 0.5,
+    tx: -1.2,
+    tz: 0.3,
+    walking: false,
+    lying: true,
+    until: 6,
+    lie: 1,
+    phase: 0,
+  })
+  const excited = useRef(-10)
+  // set by a click, turned into a timestamp on the next frame (the clock lives in useFrame)
+  const poke = useRef(false)
+  const leave = useRef<number | undefined>(undefined)
+  const coat = '#c98a4b'
+  const cream = '#f1e3c8'
+
+  useFrame(({ clock, pointer }, delta) => {
+    const t = clock.elapsedTime
+    const dt = Math.min(delta, 0.05)
+    const d = s.current
+    if (poke.current) {
+      excited.current = t
+      poke.current = false
+    }
+    const since = t - excited.current
+    const happy = since < 1.6 ? 1 - since / 1.6 : 0
+
+    let speed = 0
+    if (!d.walking && t > d.until) {
+      // next spot somewhere on the rug, far enough away to be worth the walk
+      do {
+        d.tx = DOG_AREA.x0 + Math.random() * (DOG_AREA.x1 - DOG_AREA.x0)
+        d.tz = DOG_AREA.z0 + Math.random() * (DOG_AREA.z1 - DOG_AREA.z0)
+      } while (Math.hypot(d.tx - d.x, d.tz - d.z) < 0.8)
+      d.walking = true
+    }
+    if (d.walking && d.lie < 0.15) {
+      const dx = d.tx - d.x
+      const dz = d.tz - d.z
+      const dist = Math.hypot(dx, dz)
+      let turn = Math.atan2(dx, dz) - d.yaw
+      turn = Math.atan2(Math.sin(turn), Math.cos(turn))
+      d.yaw += THREE.MathUtils.clamp(turn, -2.6 * dt, 2.6 * dt)
+      // slow down while turning so it never strafes
+      speed = DOG_SPEED * Math.max(0, Math.cos(turn)) * Math.min(1, dist / 0.25 + 0.3)
+      d.x += Math.sin(d.yaw) * speed * dt
+      d.z += Math.cos(d.yaw) * speed * dt
+      if (dist < 0.06) {
+        d.walking = false
+        d.lying = Math.random() < 0.6
+        d.until = t + (d.lying ? 8 + Math.random() * 8 : 2 + Math.random() * 3)
+      }
+    }
+    const lieTo = d.walking ? 0 : d.lying ? 1 : 0
+    d.lie += (lieTo - d.lie) * Math.min(1, dt * 2.5)
+    d.phase += dt * 22 * speed
+    const stride = (speed / DOG_SPEED) * (1 - d.lie)
+
+    if (root.current) {
+      root.current.position.set(d.x, 0.057, d.z)
+      root.current.rotation.y = d.yaw
+    }
+    if (body.current) {
+      body.current.position.y =
+        THREE.MathUtils.lerp(0.3, 0.12, d.lie) + Math.abs(Math.sin(d.phase)) * 0.012 * stride
+      body.current.scale.y = 1 + Math.sin(t * 2.2) * 0.02
+    }
+    // front legs stretch forward and back legs tuck when lying; diagonal pairs swing when walking
+    legs.current.forEach((leg, i) => {
+      if (!leg) return
+      const front = i < 2
+      const swing = Math.sin(d.phase + (i === 0 || i === 3 ? 0 : Math.PI)) * 0.55 * stride
+      leg.rotation.x = swing - d.lie * (front ? 1.45 : 1.3)
+    })
+    if (tail.current) tail.current.rotation.y = Math.sin(t * (4 + happy * 14)) * (0.25 + happy * 0.35)
+    if (head.current) {
+      // rests its chin low when lying, perks up when clicked, keeps half an eye on the pointer
+      head.current.rotation.x = THREE.MathUtils.lerp(
+        head.current.rotation.x,
+        0.22 * d.lie - happy * 0.5,
+        0.12
+      )
+      head.current.rotation.y = THREE.MathUtils.lerp(
+        head.current.rotation.y,
+        d.walking ? 0 : pointer.x * 0.5,
+        0.05
+      )
+    }
+  })
+
+  return (
+    <group
+      ref={root}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation()
+        window.clearTimeout(leave.current)
+        onHover('Dog — say hi', e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (pointerDrag.moved > 6) return
+        unlock()
+        bark()
+        poke.current = true
+      }}
+    >
+      <group ref={body} position={[0, 0.3, 0]}>
+        {/* body along z, with a cream belly and chest */}
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <capsuleGeometry args={[0.11, 0.3, 10, 24]} />
+          <meshStandardMaterial color={coat} roughness={0.85} />
+        </mesh>
+        <mesh position={[0, -0.05, 0.12]} scale={[0.85, 0.6, 1]}>
+          <sphereGeometry args={[0.11, 24, 16]} />
+          <meshStandardMaterial color={cream} roughness={0.85} />
+        </mesh>
+        {/* haunches */}
+        {[-1, 1].map((side) => (
+          <mesh key={side} position={[side * 0.08, -0.01, -0.13]} scale={[0.6, 0.85, 1]} castShadow>
+            <sphereGeometry args={[0.1, 20, 16]} />
+            <meshStandardMaterial color={coat} roughness={0.85} />
+          </mesh>
+        ))}
+        {/* legs pivot at the hip and shoulder; a cream paw at each foot */}
+        {DOG_LEGS.map((at, i) => (
+          <group
+            key={i}
+            position={at}
+            ref={(g) => {
+              legs.current[i] = g
+            }}
+          >
+            <mesh position={[0, -0.1, 0]} castShadow>
+              <capsuleGeometry args={[0.032, 0.15, 8, 16]} />
+              <meshStandardMaterial color={coat} roughness={0.85} />
+            </mesh>
+            <mesh position={[0, -0.2, 0.015]} scale={[1, 0.7, 1.25]}>
+              <sphereGeometry args={[0.038, 16, 12]} />
+              <meshStandardMaterial color={cream} roughness={0.85} />
+            </mesh>
+          </group>
+        ))}
+        {/* curled tail over the back */}
+        <group ref={tail} position={[0, 0.09, -0.2]}>
+          <mesh position={[0, 0.03, -0.02]} rotation={[0, Math.PI / 2, 0]} castShadow>
+            <torusGeometry args={[0.055, 0.03, 12, 24, Math.PI * 1.4]} />
+            <meshStandardMaterial color={coat} roughness={0.85} />
+          </mesh>
+        </group>
+
+        {/* head: skull, cream muzzle, nose, eyes, pointed ears, a collar */}
+        <group ref={head} position={[0, 0.12, 0.24]}>
+          <mesh castShadow>
+            <sphereGeometry args={[0.11, 32, 24]} />
+            <meshStandardMaterial color={coat} roughness={0.85} />
+          </mesh>
+          <mesh position={[0, -0.035, 0.08]} scale={[0.75, 0.6, 0.9]}>
+            <sphereGeometry args={[0.08, 24, 16]} />
+            <meshStandardMaterial color={cream} roughness={0.85} />
+          </mesh>
+          <mesh position={[0, -0.01, 0.155]}>
+            <sphereGeometry args={[0.018, 16, 12]} />
+            <meshStandardMaterial color="#1a1513" roughness={0.3} />
+          </mesh>
+          {[-1, 1].map((side) => (
+            <group key={side}>
+              <mesh position={[side * 0.045, 0.025, 0.095]}>
+                <sphereGeometry args={[0.013, 12, 10]} />
+                <meshStandardMaterial color="#1a1513" roughness={0.25} />
+              </mesh>
+              <mesh position={[side * 0.065, 0.11, -0.01]} rotation={[-0.15, 0, side * -0.25]} castShadow>
+                <coneGeometry args={[0.04, 0.09, 4]} />
+                <meshStandardMaterial color={coat} roughness={0.85} />
+              </mesh>
+            </group>
+          ))}
+          <mesh position={[0, -0.075, -0.02]} rotation={[Math.PI / 2 - 0.3, 0, 0]}>
+            <torusGeometry args={[0.075, 0.012, 10, 32]} />
+            <meshStandardMaterial color="#b4693a" roughness={0.5} />
+          </mesh>
+        </group>
+      </group>
+    </group>
+  )
+})
+
 /** Pendant lamp over the desk — the room's warm key light. */
 const Pendant = memo(function Pendant() {
   return (
@@ -2188,6 +2560,7 @@ export const Room = memo(function Room({
       <FloorLamp position={[5.2, 0, 4.5]} onHover={onHover} />
       <Plant position={[0.85, 0, 4.3]} />
       <BeanBag position={[-3.0, 0, -4.4]} yaw={0.6} />
+      <Dog onHover={onHover} />
       <Billiards active={billiardsActive} onLook={onLook} onHover={onHover} />
       <Sideboard onLook={onLook} onHover={onHover} />
       <GalleryLight />

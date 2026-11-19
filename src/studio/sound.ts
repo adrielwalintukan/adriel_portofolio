@@ -71,6 +71,29 @@ const tick = (volume: number, cutoff: number) => {
 
 const loud = (speed: number, max: number) => Math.min(1, speed / 3) * max
 
+/** Two short woofs: a falling tone with a breathy edge, the second a little lower. */
+export const bark = () => {
+  const a = ready()
+  if (!a) return
+  ;[0, 0.22].forEach((delay, i) => {
+    const at = a.ctx.currentTime + delay
+    const osc = a.ctx.createOscillator()
+    const gain = a.ctx.createGain()
+    const filter = a.ctx.createBiquadFilter()
+    osc.type = 'sawtooth'
+    osc.frequency.setValueAtTime(i ? 420 : 470, at)
+    osc.frequency.exponentialRampToValueAtTime(i ? 210 : 240, at + 0.13)
+    filter.type = 'lowpass'
+    filter.frequency.value = 1400
+    gain.gain.setValueAtTime(0.0001, at)
+    gain.gain.exponentialRampToValueAtTime(0.3, at + 0.015)
+    gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.16)
+    osc.connect(filter).connect(gain).connect(a.master)
+    osc.start(at)
+    osc.stop(at + 0.18)
+  })
+}
+
 export const poolSound = {
   cue: (power: number) => {
     tick(loud(power, 0.5), 2600)
