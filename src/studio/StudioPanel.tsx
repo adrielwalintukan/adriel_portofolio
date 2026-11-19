@@ -158,7 +158,7 @@ export const StudioPanel = memo(function StudioPanel({
       role="dialog"
       aria-label={`${meta.label} — ${meta.where}`}
       style={{ outline: 'none' }}
-      className="pointer-events-auto flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0c1424]/95 shadow-[0_24px_80px_rgba(0,0,0,0.55)] backdrop-blur-xl outline-none"
+      className="pointer-events-auto flex h-full w-full flex-col overflow-hidden rounded-2xl border border-white/10 glass-dark outline-none"
     >
       <header className="flex items-start justify-between gap-3 border-b border-white/10 px-5 py-4">
         <div>

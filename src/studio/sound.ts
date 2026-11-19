@@ -127,6 +127,7 @@ let music: {
   next: number
   step: number
   crackle: AudioBufferSourceNode
+  kicks: number[]
 } | null = null
 
 const schedule = (c: AudioContext, bus: GainNode, at: number, step: number) => {
@@ -198,15 +199,25 @@ export const startMusic = () => {
   crackle.connect(cf).connect(cg).connect(bus)
   crackle.start()
 
-  const state = { bus, timer: 0, next: a.ctx.currentTime + 0.1, step: 0, crackle }
+  const state = { bus, timer: 0, next: a.ctx.currentTime + 0.1, step: 0, crackle, kicks: [] as number[] }
   state.timer = window.setInterval(() => {
     while (state.next < a.ctx.currentTime + 0.4) {
       schedule(a.ctx, bus, state.next, state.step)
+      // kicks land on beats 1 and 3; the lights read these times back
+      if (state.step % 2 === 0) state.kicks = [...state.kicks.slice(-7), state.next]
       state.next += BEAT
       state.step += 1
     }
   }, 100)
   music = state
+}
+
+/** 0..1: jumps to 1 on each kick of the music and fades out; 0 while the music is off. */
+export const musicPulse = () => {
+  if (!music || !ctx) return 0
+  const now = ctx.currentTime
+  const last = music.kicks.filter((k) => k <= now).pop()
+  return last === undefined ? 0 : Math.exp(-(now - last) * 6)
 }
 
 export const stopMusic = () => {

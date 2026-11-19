@@ -20,7 +20,13 @@ const pad = (n: number) => String(n).padStart(2, '0')
  * Runs one command typed into the studio terminal. Pure: it returns the lines to print and, for
  * `open`, which project the computer should open; the page applies both.
  */
-export const runCommand = (input: string, data: TermData): { lines: TermLine[]; clear?: boolean; open?: number } => {
+/** Room effects the hidden commands set off; the page and the room play them. */
+export type TermEffect = 'hire' | 'matrix' | 'bark' | 'rain'
+
+export const runCommand = (
+  input: string,
+  data: TermData
+): { lines: TermLine[]; clear?: boolean; open?: number; effect?: TermEffect } => {
   const echo: TermLine = [PROMPT + input, TERM_COLORS.prompt]
   const [cmd = '', ...rest] = input.trim().split(/\s+/)
   const arg = rest.join(' ')
@@ -46,6 +52,20 @@ export const runCommand = (input: string, data: TermData): { lines: TermLine[]; 
             'echo <text>   print text',
             'clear         clear the screen'
           ),
+          ['psst: this room has secrets. type hint', TERM_COLORS.ok],
+        ],
+      }
+    case 'hint':
+      return {
+        lines: [
+          echo,
+          ['a few things this terminal can do to the room:', TERM_COLORS.dim],
+          ...out(
+            'sudo hire adriel   you know you want to',
+            'matrix             follow the white rabbit',
+            'bark               wake the dog',
+            'rain               change the weather'
+          ),
         ],
       }
     case 'whoami':
@@ -69,6 +89,20 @@ export const runCommand = (input: string, data: TermData): { lines: TermLine[]; 
       }
     case 'echo':
       return { lines: [echo, ...out(arg)] }
+    // hidden: not listed in help
+    case 'sudo':
+      if (arg.toLowerCase() === 'hire adriel')
+        return {
+          lines: [echo, ['[sudo] access granted. great choice.', TERM_COLORS.ok], ...out(data.email, data.availability)],
+          effect: 'hire',
+        }
+      return { lines: [echo, ['adriel is not in the sudoers file. This incident will be reported.', TERM_COLORS.err]] }
+    case 'matrix':
+      return { lines: [echo, ['wake up, neo...', TERM_COLORS.ok]], effect: 'matrix' }
+    case 'bark':
+      return { lines: [echo, ['woof.', TERM_COLORS.out]], effect: 'bark' }
+    case 'rain':
+      return { lines: [echo, ['toggling the weather outside.', TERM_COLORS.dim]], effect: 'rain' }
     default:
       return { lines: [echo, [`command not found: ${cmd}. type help`, TERM_COLORS.err]] }
   }

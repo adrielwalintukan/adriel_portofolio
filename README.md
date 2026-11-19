@@ -167,6 +167,18 @@ Update Tailwind CSS custom theme values in `src/styles/globals.css`.
 
 ---
 
+### Guest Book (3D studio)
+
+Visitors' notes on the studio's cork board are stored in Upstash Redis through `api/guestbook.ts`.
+
+1. In the Vercel project, open **Storage → Marketplace → Upstash (Redis)** and connect a free database.
+   Vercel adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` to the project (`UPSTASH_REDIS_REST_URL` /
+   `UPSTASH_REDIS_REST_TOKEN` also work). Redeploy.
+2. Without these the board stays empty and the form says the guest book is offline.
+
+Notes go live at once (length limits, a blocked-words filter in `src/lib/guestbook.ts`, 3 posts per IP per hour).
+To remove one, open the database's **Data Browser** in Upstash, pick the `gb:notes` list and delete that entry.
+
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).

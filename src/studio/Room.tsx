@@ -3,23 +3,41 @@ import { useFrame, type ThreeEvent } from '@react-three/fiber'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import {
-  DESK_COLS,
-  DESK_PROJECTS,
   SCREEN_PX,
   TV_PICKS,
+  charPos,
   deskOverlay,
+  screenPower,
+  dogPet,
+  fxLevel,
   pointerDrag,
+  roomFx,
   terminalLog,
   tvOverlay,
   type StationId,
   type TvMode,
 } from './data'
 import { CERTIFICATES_DATA } from '@/lib/constants'
+import type { Note } from '@/lib/guestbook'
+import { BALL_R, COLS as BREAKOUT_COLS, PADDLE_HALF, PADDLE_Y, brickAt, newGame, stepBreakout, type BreakoutState } from './breakout'
 import { POOL, moving, shoot, step, table, type Hit } from './pool'
+import { togglePhase, usePhase } from './daylight'
+import { DESKTOP_ICONS } from './os/icons'
 import { quadMatrix } from './quad'
-import { bark, poolSound, unlock } from './sound'
+import { bark, musicPulse, poolSound, unlock } from './sound'
 import { PROMPT, TERM_COLORS, type TermLine } from './terminal'
-import { boardTexture, floorTexture, noteTexture, phoneTexture, polaroidTexture, windowTexture } from './textures'
+import {
+  boardTexture,
+  corkTexture,
+  floorTexture,
+  guestNoteTexture,
+  guestTitleTexture,
+  neonTexture,
+  noteTexture,
+  phoneTexture,
+  polaroidTexture,
+  windowTexture,
+} from './textures'
 
 const C = {
   floor: '#6b4a33',
@@ -143,93 +161,64 @@ const pinToScreen = (
   el.style.visibility = 'visible'
 }
 
-/** The main monitor's desktop: a folder per project, drawn at the overlay's size. */
-const DESK_TOP = 52
-const DESK_CELL = { w: SCREEN_PX.w / DESK_COLS, h: 146 }
+/** The main monitor's desktop as seen from the room: the same wallpaper, icons and taskbar as the live one. */
+const DESK_ICON_COLORS: Record<string, string> = {
+  explorer: '#d9a44a',
+  photos: '#8fcfc9',
+  projects: '#3fb0b7',
+  about: '#dbe5ea',
+  terminal: '#7fd6b8',
+  bin: '#a7b0bd',
+}
 
-const paintDesk = (ctx: CanvasRenderingContext2D, sel: number) => {
+const paintDesk = (ctx: CanvasRenderingContext2D) => {
   const { w, h } = SCREEN_PX
   const wall = ctx.createLinearGradient(0, 0, w, h)
-  wall.addColorStop(0, '#0d1422')
-  wall.addColorStop(1, '#16283a')
+  wall.addColorStop(0, '#0b1626')
+  wall.addColorStop(1, '#14283a')
   ctx.fillStyle = wall
   ctx.fillRect(0, 0, w, h)
+  const glow = ctx.createRadialGradient(w * 0.2, h * 0.15, 10, w * 0.2, h * 0.15, w * 0.5)
+  glow.addColorStop(0, 'rgba(63,176,183,0.28)')
+  glow.addColorStop(1, 'rgba(63,176,183,0)')
+  ctx.fillStyle = glow
+  ctx.fillRect(0, 0, w, h)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.05)'
-  ctx.fillRect(0, 0, w, 40)
-  ctx.textAlign = 'left'
-  ctx.fillStyle = '#dbe5ea'
-  ctx.font = '600 16px ui-monospace, monospace'
-  ctx.fillText('~/projects', 18, 26)
-  ctx.textAlign = 'right'
-  ctx.fillStyle = '#5f7186'
-  ctx.fillText(`${DESK_PROJECTS.length} items`, w - 18, 26)
-
+  // six icons in two columns, like the live desktop
   ctx.textAlign = 'center'
-  DESK_PROJECTS.forEach((project, i) => {
-    const x = (i % DESK_COLS) * DESK_CELL.w
-    const y = DESK_TOP + Math.floor(i / DESK_COLS) * DESK_CELL.h
-    const cx = x + DESK_CELL.w / 2
-    if (i === sel) {
-      ctx.fillStyle = 'rgba(63,176,183,0.16)'
-      ctx.strokeStyle = '#3fb0b7'
-      ctx.lineWidth = 2
-      ctx.beginPath()
-      ctx.roundRect(x + 8, y + 4, DESK_CELL.w - 16, DESK_CELL.h - 8, 10)
-      ctx.fill()
-      ctx.stroke()
-    }
-    // folder: a tab and a body, with a play mark when the project has a video
-    ctx.fillStyle = '#b9853a'
+  DESKTOP_ICONS.forEach((icon, i) => {
+    const cx = 12 + 43 + (i % 2) * 90
+    const y = 12 + Math.floor(i / 2) * 100
+    ctx.fillStyle = DESK_ICON_COLORS[icon.id]
     ctx.beginPath()
-    ctx.roundRect(cx - 34, y + 16, 30, 12, 3)
+    ctx.roundRect(cx - 20, y + 8, 40, 34, 6)
     ctx.fill()
-    ctx.fillStyle = '#d9a44a'
-    ctx.beginPath()
-    ctx.roundRect(cx - 34, y + 22, 68, 48, 5)
-    ctx.fill()
-    if (project.video || project.youtubeId) {
-      ctx.fillStyle = 'rgba(11,18,32,0.75)'
-      ctx.beginPath()
-      ctx.moveTo(cx - 7, y + 36)
-      ctx.lineTo(cx + 10, y + 46)
-      ctx.lineTo(cx - 7, y + 56)
-      ctx.closePath()
-      ctx.fill()
-    }
-
-    // title under the icon, on up to two lines
-    ctx.fillStyle = i === sel ? '#ffffff' : '#c9d4da'
-    ctx.font = '600 15px system-ui, sans-serif'
-    const lines: string[] = []
-    for (const word of project.title.split(' ')) {
-      const last = lines[lines.length - 1]
-      if (last && ctx.measureText(`${last} ${word}`).width < DESK_CELL.w - 24)
-        lines[lines.length - 1] = `${last} ${word}`
-      else lines.push(word)
-    }
-    lines.slice(0, 2).forEach((line, l) => ctx.fillText(line, cx, y + 96 + l * 19))
+    ctx.fillStyle = '#eef2f3'
+    ctx.font = '600 13px ui-monospace, monospace'
+    ctx.fillText(icon.label, cx, y + 66)
   })
 
-  ctx.fillStyle = 'rgba(0,0,0,0.35)'
-  ctx.fillRect(0, h - 36, w, 36)
-  ctx.textAlign = 'left'
-  ctx.fillStyle = '#8fa0ad'
-  ctx.font = '600 13px ui-monospace, monospace'
-  ctx.fillText('adriel@studio', 18, h - 13)
+  const bar = 40
+  ctx.fillStyle = 'rgba(10,16,28,0.95)'
+  ctx.fillRect(0, h - bar, w, bar)
+  ctx.fillStyle = '#3fb0b7'
+  ctx.beginPath()
+  ctx.roundRect(12, h - bar + 9, 22, 22, 5)
+  ctx.fill()
+  ctx.fillStyle = '#06202a'
+  ctx.font = '900 15px ui-monospace, monospace'
+  ctx.fillText('A', 23, h - bar + 26)
   ctx.textAlign = 'right'
-  ctx.fillText('arrows + enter, or click a folder', w - 18, h - 13)
+  ctx.fillStyle = '#a7b0bd'
+  ctx.font = '600 14px ui-monospace, monospace'
+  const time = new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Makassar', hour: '2-digit', minute: '2-digit' })
+  ctx.fillText(time, w - 14, h - 22)
+  ctx.fillStyle = '#5f7186'
+  ctx.font = '600 10px ui-monospace, monospace'
+  ctx.fillText('WITA', w - 14, h - 9)
 }
 
-/** Which folder a click at uv (0..1, origin bottom-left) lands on, or -1. */
-const deskHit = (u: number, v: number) => {
-  const col = Math.floor((u * SCREEN_PX.w) / DESK_CELL.w)
-  const row = Math.floor(((1 - v) * SCREEN_PX.h - DESK_TOP) / DESK_CELL.h)
-  const index = row * DESK_COLS + col
-  return row >= 0 && col >= 0 && col < DESK_COLS && index < DESK_PROJECTS.length ? index : -1
-}
-
-// the desktop canvas, created on first use and repainted when the selection moves
+// the desktop canvas, created on first use and repainted once a minute for the clock
 let desk: { ctx: CanvasRenderingContext2D; texture: THREE.CanvasTexture } | null = null
 const deskScreen = () => {
   if (!desk) {
@@ -497,19 +486,96 @@ const Gamepad = memo(function Gamepad() {
 })
 
 /** Gaming desk: two screens on low arms, an RGB tower, a headset — the projects station. */
+/* --- terminal easter eggs: green rain on the monitors, confetti over the desk ---------------- */
+
+let matrix: { ctx: CanvasRenderingContext2D; texture: THREE.CanvasTexture; drops: number[]; last: number } | null = null
+const matrixScreen = () => {
+  if (!matrix) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 320
+    canvas.height = 180
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    matrix = { ctx: canvas.getContext('2d')!, texture, drops: Array.from({ length: 32 }, () => Math.random() * -20), last: 0 }
+  }
+  return matrix
+}
+const GLYPHS = 'アイウエオカキクケコサシスセソ0123456789ADRIEL'
+
+/** Sits over a monitor's screen; shown only while `matrix` runs. Both monitors share one canvas. */
+const MatrixScreen = ({ position, size }: { position: Vec3; size: [number, number] }) => {
+  const mesh = useRef<THREE.Mesh>(null)
+  useFrame(() => {
+    const m = matrixScreen()
+    const on = fxLevel('matrix') > 0
+    if (mesh.current) mesh.current.visible = on
+    const now = performance.now()
+    if (!on || now - m.last < 50) return
+    m.last = now
+    const { ctx } = m
+    ctx.fillStyle = 'rgba(2, 10, 6, 0.25)'
+    ctx.fillRect(0, 0, 320, 180)
+    ctx.font = '700 11px "JetBrains Mono", monospace'
+    m.drops.forEach((y, i) => {
+      ctx.fillStyle = i % 5 ? '#3fdc7f' : '#c8ffd9'
+      ctx.fillText(GLYPHS[Math.floor(Math.random() * GLYPHS.length)], i * 10, y * 11)
+      m.drops[i] = y * 11 > 180 && Math.random() > 0.93 ? 0 : y + 1
+    })
+    m.texture.needsUpdate = true
+  })
+  return (
+    <mesh ref={mesh} position={position} visible={false}>
+      <planeGeometry args={size} />
+      <meshBasicMaterial map={matrixScreen().texture} toneMapped={false} />
+    </mesh>
+  )
+}
+
+const CONFETTI = 70
+const CONFETTI_COLORS = ['#3fb0b7', '#e8c66a', '#b4693a', '#f3efe4', '#8fcfc9']
+const CONFETTI_BITS = Array.from({ length: CONFETTI }, () => ({
+  x: 0.2 + Math.random() * 2.4,
+  z: -4.9 + Math.random() * 1.4,
+  speed: 0.6 + Math.random() * 0.6,
+  spin: Math.random() * 6,
+}))
+/** A burst of paper squares falling over the desk while `sudo hire adriel` plays. */
+const Confetti = memo(function Confetti() {
+  const mesh = useRef<THREE.InstancedMesh>(null)
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  useEffect(() => {
+    CONFETTI_BITS.forEach((_, i) => mesh.current?.setColorAt(i, new THREE.Color(CONFETTI_COLORS[i % CONFETTI_COLORS.length])))
+  }, [])
+  useFrame(() => {
+    const m = mesh.current
+    if (!m) return
+    const on = fxLevel('hire') > 0
+    m.visible = on
+    if (!on) return
+    const t = (performance.now() - roomFx.at) / 1000
+    CONFETTI_BITS.forEach((b, i) => {
+      dummy.position.set(b.x + Math.sin(t * 2 + i) * 0.08, 3.6 - ((t * b.speed + i * 0.037) % 1) * 2.6, b.z)
+      dummy.rotation.set(t * b.spin, t * b.spin * 0.7, 0)
+      dummy.updateMatrix()
+      m.setMatrixAt(i, dummy.matrix)
+    })
+    m.instanceMatrix.needsUpdate = true
+  })
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, CONFETTI]} visible={false}>
+      <planeGeometry args={[0.05, 0.05]} />
+      <meshBasicMaterial side={THREE.DoubleSide} toneMapped={false} />
+    </instancedMesh>
+  )
+})
+
 const Desk = memo(function Desk({
   onPick,
   onHover,
-  active,
-  sel,
-  onOpen,
   onLook,
 }: {
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
-  active: boolean
-  sel: number
-  onOpen: (index: number) => void
   onLook: (view: 'terminal' | 'sideboard' | 'billiards') => void
 }) {
   const screen = deskScreen()
@@ -517,15 +583,22 @@ const Desk = memo(function Desk({
   const painted = useRef(-1)
   const steam = useRef<THREE.Group>(null)
   const tower = useRef<THREE.Mesh[]>([])
+  const strips = useRef<THREE.Mesh[]>([])
+  // black covers in front of both screens while AdrielOS is shut down
+  const blanks = useRef<THREE.Mesh[]>([])
   const live = terminalScreen()
   const termPaint = useRef(0)
   const phone = useMemo(() => phoneTexture(), [])
 
   useFrame(({ clock, camera, size }, delta) => {
     const t = clock.elapsedTime
-    if (painted.current !== sel) {
-      painted.current = sel
-      paintDesk(deskScreen().ctx, sel)
+    blanks.current.forEach((m) => {
+      if (m) m.visible = !screenPower.on
+    })
+    const minute = Math.floor(Date.now() / 60_000)
+    if (painted.current !== minute) {
+      painted.current = minute
+      paintDesk(deskScreen().ctx)
       deskScreen().texture.needsUpdate = true
     }
     if (deskOverlay.el && glass.current)
@@ -547,10 +620,15 @@ const Desk = memo(function Desk({
       paintTerminal(terminalScreen().ctx, t)
       terminalScreen().texture.needsUpdate = true
     }
-    tower.current.forEach((fan, i) => {
-      if (fan)
-        (fan.material as THREE.MeshStandardMaterial).emissiveIntensity =
-          1.4 + Math.sin(t * 2 + i * 1.7) * 0.7
+    // RGB: the hue drifts once every 20 s, and each kick of the music flashes it brighter
+    const beat = musicPulse()
+    const hue = (t / 20) % 1
+    ;[...tower.current, ...strips.current].forEach((mesh, i) => {
+      if (!mesh) return
+      const m = mesh.material as THREE.MeshStandardMaterial
+      m.color.setHSL((hue + i * 0.12) % 1, 0.7, 0.55)
+      m.emissive.copy(m.color)
+      m.emissiveIntensity = 1.2 + Math.sin(t * 2 + i * 1.7) * 0.3 + beat * 2
     })
   })
 
@@ -560,6 +638,22 @@ const Desk = memo(function Desk({
         {/* desk: narrower than the old workbench, angled like a gaming setup */}
         <Box position={[1.4, 1.0, -4.62]} size={[3.3, 0.08, 1.12]} color={C.wood} />
         <Box position={[1.4, 0.98, -4.62]} size={[3.24, 0.02, 1.06]} color="#1d2733" />
+        {/* LED strips under the front lip and along the back edge */}
+        {([
+          [1.4, 0.952, -4.07],
+          [1.4, 1.048, -5.16],
+        ] as Vec3[]).map((at, i) => (
+          <mesh
+            key={i}
+            position={at}
+            ref={(m) => {
+              if (m) strips.current[i] = m
+            }}
+          >
+            <boxGeometry args={[3.2, 0.012, 0.014]} />
+            <meshStandardMaterial color="#3fb0b7" emissive="#3fb0b7" emissiveIntensity={1.2} toneMapped={false} />
+          </mesh>
+        ))}
         <Box position={[-0.14, 0.48, -4.62]} size={[0.1, 0.96, 1.02]} color={C.woodDark} />
         <Box position={[2.94, 0.48, -4.62]} size={[0.1, 0.96, 1.02]} color={C.woodDark} />
         <Box position={[1.4, 0.6, -5.1]} size={[3.06, 0.72, 0.06]} color={C.woodDark} />
@@ -568,18 +662,7 @@ const Desk = memo(function Desk({
         <Box position={[1.95, 1.06, -4.92]} size={[0.42, 0.04, 0.28]} color={C.metal} />
         <Box position={[1.95, 1.2, -4.96]} size={[0.07, 0.24, 0.07]} color={C.metal} />
         <Box position={[1.95, 1.68, -4.94]} size={[1.5, 0.86, 0.06]} color={C.dark} />
-        <mesh
-          ref={glass}
-          position={[1.95, 1.68, -4.905]}
-          onClick={(e) => {
-            // at the desk a click opens the folder under it; from the room it falls through to the hotspot
-            if (!active || !e.uv) return
-            e.stopPropagation()
-            if (pointerDrag.moved > 6) return
-            const index = deskHit(e.uv.x, e.uv.y)
-            if (index >= 0) onOpen(index)
-          }}
-        >
+        <mesh ref={glass} position={[1.95, 1.68, -4.905]}>
           <planeGeometry args={[1.39, 0.77]} />
           <meshStandardMaterial
             map={screen.texture}
@@ -588,6 +671,11 @@ const Desk = memo(function Desk({
             emissiveIntensity={0.55}
             toneMapped={false}
           />
+        </mesh>
+        <MatrixScreen position={[1.95, 1.68, -4.9]} size={[1.39, 0.77]} />
+        <mesh position={[1.95, 1.68, -4.898]} visible={false} ref={(m) => { if (m) blanks.current[0] = m }}>
+          <planeGeometry args={[1.39, 0.77]} />
+          <meshBasicMaterial color="#030508" />
         </mesh>
 
         {/* second screen: the live terminal, turned toward him; clicking it turns the camera to it */}
@@ -612,6 +700,11 @@ const Desk = memo(function Desk({
               emissiveIntensity={0.7}
               toneMapped={false}
             />
+          </mesh>
+          <MatrixScreen position={[0, 1.55, 0.034]} size={[1.03, 0.6]} />
+          <mesh position={[0, 1.55, 0.036]} visible={false} ref={(m) => { if (m) blanks.current[1] = m }}>
+            <planeGeometry args={[1.03, 0.6]} />
+            <meshBasicMaterial color="#030508" />
           </mesh>
         </group>
 
@@ -918,6 +1011,85 @@ const PinBoard = memo(function PinBoard() {
   )
 })
 
+// the guest book: a cork board on the left wall between the bookshelf and the certificates
+const GUEST_AT: Vec3 = [-5.9, 2.6, -0.5]
+const GUEST_PAPER = ['#e8c66a', '#8fcfc9', '#e9a77f', '#fbfaf5']
+const GUEST_INK = ['#5a4520', '#1d4f4b', '#5a2c18', '#4c5560']
+const GUEST_SLOTS: [number, number, number][] = [-0.42, -0.14, 0.14, 0.42].flatMap((x, col) =>
+  [0.1, -0.22].map((y, row): [number, number, number] => [x, y, ((col * 2 + row) % 3) * 0.05 - 0.05])
+)
+
+/** Visitors' notes, pinned to cork. A click opens the form; the page fetches and posts the notes. */
+const GuestBoard = memo(function GuestBoard({
+  notes,
+  onSign,
+  onHover,
+}: {
+  notes: Note[]
+  onSign: () => void
+  onHover: (label: string | null, x: number, y: number) => void
+}) {
+  const leave = useRef<number | undefined>(undefined)
+  const cork = useMemo(() => corkTexture(), [])
+  const title = useMemo(() => guestTitleTexture(), [])
+  const faces = useMemo(
+    () =>
+      notes.length
+        ? notes.slice(0, GUEST_SLOTS.length).map((n, i) =>
+            guestNoteTexture(GUEST_PAPER[i % GUEST_PAPER.length], GUEST_INK[i % GUEST_INK.length], n.message, n.name)
+          )
+        : [guestNoteTexture('#fbfaf5', '#4c5560', 'Be the first to sign the guest book.', 'Adriel')],
+    [notes]
+  )
+  useEffect(() => () => faces.forEach((t) => t.dispose()), [faces])
+  useEffect(() => () => [cork, title].forEach((t) => t.dispose()), [cork, title])
+  return (
+    <group
+      position={GUEST_AT}
+      rotation={[0, Math.PI / 2, 0]}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation()
+        window.clearTimeout(leave.current)
+        onHover('Guest book — sign it', e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (pointerDrag.moved > 6) return
+        onSign()
+      }}
+    >
+      <Box position={[0, 0, 0]} size={[1.28, 0.98, 0.05]} color={C.woodDark} />
+      <mesh position={[0, 0, 0.027]}>
+        <planeGeometry args={[1.2, 0.9]} />
+        <meshStandardMaterial map={cork} roughness={0.95} />
+      </mesh>
+      <mesh position={[0, 0.355, 0.031]}>
+        <planeGeometry args={[0.5, 0.094]} />
+        <meshStandardMaterial map={title} roughness={0.9} />
+      </mesh>
+      {faces.map((face, i) => {
+        const [x, y, tilt] = GUEST_SLOTS[i]
+        return (
+          <group key={i} position={[x, y, 0.032 + i * 0.001]} rotation={[0, 0, tilt]}>
+            <mesh castShadow>
+              <planeGeometry args={[0.24, 0.24]} />
+              <meshStandardMaterial map={face} roughness={0.9} />
+            </mesh>
+            <mesh position={[0, 0.095, 0.012]}>
+              <sphereGeometry args={[0.015, 16, 12]} />
+              <meshStandardMaterial color={i % 2 ? '#1f6f6b' : '#c0392b'} roughness={0.35} />
+            </mesh>
+          </group>
+        )
+      })}
+    </group>
+  )
+})
+
 // A small salon hang of real certificates above the sideboard: two stacked on the left, the award in the
 // middle, the portrait one on the right. Each slot is a box the scan is fitted into, so a landscape scan
 // gets a landscape frame and a portrait one a portrait frame. The rest stay in the Awards panel.
@@ -925,17 +1097,20 @@ const WALL_CERTS = [
   { id: 'cert-anthropic-ai-fluency', z: 0.72, y: 3.27, w: 0.82, h: 0.66 },
   { id: 'cert-dicoding-aws-cloud-genai', z: 0.72, y: 2.43, w: 0.82, h: 0.66 },
   { id: 'cert-proxo-appreciation', z: 2.35, y: 2.85, w: 1.34, h: 1.08, plaque: true },
-  { id: 'cert-ibm-genai-software-dev', z: 3.97, y: 2.85, w: 0.96, h: 0.7 },
+  { id: 'cert-ibm-granite-code-gen', z: 3.97, y: 2.85, w: 0.96, h: 0.74 },
 ]
 
 /** Frames on the left wall — the awards station, showing real certificates. */
 const Frames = memo(function Frames({
   onPick,
   onHover,
+  onCert,
 }: {
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
+  onCert: (id: string) => void
 }) {
+  const leave = useRef<number | undefined>(undefined)
   // loaded by hand like the poster: a slow scan never holds the room back, and its frame appears with it
   const [scans, setScans] = useState<(THREE.Texture | null)[]>(() => WALL_CERTS.map(() => null))
   useEffect(() => {
@@ -969,7 +1144,27 @@ const Frames = memo(function Frames({
           const w = aspect > slot.w / slot.h ? slot.w : slot.h * aspect
           const h = w / aspect
           return (
-            <group key={slot.id} position={[-5.9, slot.y, slot.z]} rotation={[0, Math.PI / 2, 0]}>
+            <group
+              key={slot.id}
+              position={[-5.9, slot.y, slot.z]}
+              rotation={[0, Math.PI / 2, 0]}
+              // a frame opens its own certificate; the wall around them still opens the list
+              onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+                e.stopPropagation()
+                window.clearTimeout(leave.current)
+                const title = CERTIFICATES_DATA.find((c) => c.id === slot.id)?.title ?? 'Certificate'
+                onHover(title, e.nativeEvent.clientX, e.nativeEvent.clientY)
+              }}
+              onPointerOut={(e) => {
+                e.stopPropagation()
+                leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                if (pointerDrag.moved > 6) return
+                onCert(slot.id)
+              }}
+            >
               <Box position={[0, 0, 0]} size={[w + 0.16, h + 0.16, 0.05]} color="#2a1d16" roughness={0.6} />
               <Box position={[0, 0, 0.012]} size={[w + 0.11, h + 0.11, 0.035]} color="#b58a4a" roughness={0.4} metalness={0.5} />
               <mesh position={[0, 0, 0.031]}>
@@ -978,7 +1173,7 @@ const Frames = memo(function Frames({
               </mesh>
               <mesh position={[0, 0, 0.033]}>
                 <planeGeometry args={[w, h]} />
-                <meshStandardMaterial map={scan} roughness={0.75} />
+                <meshStandardMaterial map={scan} roughness={1} metalness={0} envMapIntensity={0.2} />
               </mesh>
               {slot.plaque && (
                 <Box position={[0, -h / 2 - 0.17, 0.01]} size={[0.34, 0.07, 0.015]} color="#b58a4a" roughness={0.35} metalness={0.6} />
@@ -1048,11 +1243,69 @@ const Poster = memo(function Poster({
   )
 })
 
-/** Night window with a warm sill light. */
-const Window = memo(function Window() {
-  const sky = useMemo(() => windowTexture(), [])
+// rain streaks on the glass: one tall canvas that scrolls down while it rains
+let rainSheet: THREE.CanvasTexture | null = null
+const rainTexture = () => {
+  if (!rainSheet) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 256
+    canvas.height = 512
+    const ctx = canvas.getContext('2d')!
+    ctx.strokeStyle = 'rgba(200, 225, 240, 0.55)'
+    ctx.lineWidth = 1.4
+    for (let i = 0; i < 140; i++) {
+      const x = Math.random() * 256
+      const y = Math.random() * 512
+      const len = 10 + Math.random() * 22
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      ctx.lineTo(x - len * 0.15, y + len)
+      ctx.stroke()
+    }
+    rainSheet = new THREE.CanvasTexture(canvas)
+    rainSheet.wrapS = rainSheet.wrapT = THREE.RepeatWrapping
+  }
+  return rainSheet
+}
+
+/** Window onto Manado at the real time of day; on some visits (or after `rain`) it rains outside. */
+const Window = memo(function Window({ onHover }: { onHover: (label: string | null, x: number, y: number) => void }) {
+  const leave = useRef<number | undefined>(undefined)
+  const phase = usePhase()
+  const sky = useMemo(() => windowTexture(phase), [phase])
+  useEffect(() => () => sky.dispose(), [sky])
+  const rain = useRef<THREE.Mesh>(null)
+  useEffect(() => {
+    roomFx.rain = Math.random() < 1 / 3
+  }, [])
+  useFrame((_, delta) => {
+    if (!rain.current) return
+    rain.current.visible = roomFx.rain
+    if (roomFx.rain) rainTexture().offset.y += Math.min(delta, 0.05) * 1.5
+  })
   return (
-    <group position={[4.0, 3.0, -5.94]}>
+    <group
+      position={[4.0, 3.0, -5.94]}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation()
+        window.clearTimeout(leave.current)
+        onHover(phase === 'night' || phase === 'dawn' ? 'Window — switch to day' : 'Window — switch to night', e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (pointerDrag.moved > 6) return
+        const next = togglePhase()
+        onHover(next === 'day' ? 'Window — switch to night' : 'Window — switch to day', e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+    >
+      <mesh ref={rain} position={[0, 0, 0.055]} visible={false}>
+        <planeGeometry args={[1.66, 2.26]} />
+        <meshBasicMaterial map={rainTexture()} transparent opacity={0.45} depthWrite={false} toneMapped={false} />
+      </mesh>
       <Box position={[0, 0, 0]} size={[1.9, 2.5, 0.08]} color={C.trim} />
       <mesh position={[0, 0, 0.05]}>
         <planeGeometry args={[1.66, 2.26]} />
@@ -1182,26 +1435,254 @@ const Plant = memo(function Plant({ position, tall = false }: { position: Vec3; 
   )
 })
 
+const DUST_GALLERY = { center: [-4.9, 2.9, 2.4] as Vec3, size: [1.6, 1.8, 3.4] as Vec3 }
+const DUST_DESK = { center: [1.4, 2.6, -4.4] as Vec3, size: [1.0, 2.0, 1.0] as Vec3 }
+
+// random points inside a box, made outside render so the component stays pure
+const scatter = (count: number, size: Vec3) =>
+  Float32Array.from({ length: count * 3 }, (_, i) => (Math.random() - 0.5) * size[i % 3])
+
+/** Dust drifting up through a cone of light. */
+const Dust = memo(function Dust({ count, center, size }: { count: number; center: Vec3; size: Vec3 }) {
+  const points = useRef<THREE.Points>(null)
+  const start = useMemo(() => scatter(count, size), [count, size])
+  useFrame(({ clock }) => {
+    const p = points.current
+    if (!p) return
+    const t = clock.elapsedTime
+    const pos = p.geometry.attributes.position as THREE.BufferAttribute
+    for (let i = 0; i < count; i++) {
+      const y = ((start[i * 3 + 1] / size[1] + 0.5 + t * 0.012 + (i % 7) * 0.01) % 1) - 0.5
+      pos.setXYZ(
+        i,
+        start[i * 3] + Math.sin(t * 0.4 + i) * 0.05,
+        y * size[1],
+        start[i * 3 + 2] + Math.cos(t * 0.3 + i * 1.3) * 0.05
+      )
+    }
+    pos.needsUpdate = true
+  })
+  return (
+    <points ref={points} position={center}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[start.slice(), 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.014}
+        color="#ffe2b8"
+        transparent
+        opacity={0.55}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
+  )
+})
+
+/* --- string lights, curtains and a neon sign: emissive only, they glow through bloom and add no lights ---- */
+const BULBS = 28
+const BULB_X = [-5.6, 5.2]
+const BULB_COLORS = ['#ffd9a0', '#8fcfc9']
+
+/** Little bulbs strung in swags along the top of the back wall; they twinkle a little. */
+const FairyLights = memo(function FairyLights({ animate }: { animate: boolean }) {
+  const mesh = useRef<THREE.InstancedMesh>(null)
+  const dummy = useMemo(() => new THREE.Object3D(), [])
+  const base = useMemo(() => BULB_COLORS.map((c) => new THREE.Color(c)), [])
+  const tint = useMemo(() => new THREE.Color(), [])
+  useFrame(({ clock }) => {
+    const m = mesh.current
+    if (!m) return
+    const t = animate ? clock.elapsedTime : 0
+    for (let i = 0; i < BULBS; i++) {
+      const f = i / (BULBS - 1)
+      // three swags: the wire sags between its hooks
+      const swag = (f * 3) % 1
+      dummy.position.set(BULB_X[0] + (BULB_X[1] - BULB_X[0]) * f, 4.78 - 0.2 * 4 * swag * (1 - swag) + Math.sin(t * 0.8 + i) * 0.006, -5.9)
+      dummy.updateMatrix()
+      m.setMatrixAt(i, dummy.matrix)
+      // above 1 so the HD bloom picks them up
+      tint.copy(base[i % 2]).multiplyScalar(1.2 + 0.9 * (0.5 + 0.5 * Math.sin(t * 1.7 + i * 2.3)))
+      m.setColorAt(i, tint)
+    }
+    m.instanceMatrix.needsUpdate = true
+    if (m.instanceColor) m.instanceColor.needsUpdate = true
+  })
+  return (
+    <instancedMesh ref={mesh} args={[undefined, undefined, BULBS]}>
+      <sphereGeometry args={[0.035, 12, 8]} />
+      <meshBasicMaterial toneMapped={false} />
+    </instancedMesh>
+  )
+})
+
+/** Two curtains either side of the window, swaying very slightly. */
+const Curtains = memo(function Curtains({ animate }: { animate: boolean }) {
+  const panels = useRef<THREE.Group[]>([])
+  useFrame(({ clock }) => {
+    const t = animate ? clock.elapsedTime : 0
+    panels.current.forEach((g, i) => {
+      if (g) g.rotation.z = Math.sin(t * 0.5 + i * 1.7) * 0.02
+    })
+  })
+  return (
+    <group>
+      <Box position={[4.0, 4.5, -5.84]} size={[3.1, 0.04, 0.04]} color="#2a1f18" />
+      {[2.9, 5.1].map((x, i) => (
+        <group
+          key={x}
+          position={[x, 4.46, -5.84]}
+          ref={(g) => {
+            if (g) panels.current[i] = g
+          }}
+        >
+          <mesh position={[0, -1.4, 0]} castShadow>
+            <boxGeometry args={[0.46, 2.8, 0.05]} />
+            <meshStandardMaterial color="#4b3b33" roughness={1} />
+          </mesh>
+        </group>
+      ))}
+    </group>
+  )
+})
+
+// muted colours a click cycles through; the last click starts the "broken sign" flicker, then it starts over
+const NEON_COLORS = ['#5fb7bd', '#ffb35a', '#e58aa5', '#a794f0', '#7fd6a0'].map((c) => new THREE.Color(c).multiplyScalar(2.4))
+const NEON_ERROR = new THREE.Color('#ff6a5a').multiplyScalar(2.4)
+
+/** A neon name sign on the left wall above the bookshelf. Click: next colour; after the last, it flickers like a fault. */
+const NeonSign = memo(function NeonSign({
+  animate,
+  onHover,
+}: {
+  animate: boolean
+  onHover: (label: string | null, x: number, y: number) => void
+}) {
+  const map = useMemo(() => neonTexture(), [])
+  useEffect(() => () => map.dispose(), [map])
+  const mat = useRef<THREE.MeshBasicMaterial>(null)
+  const mode = useRef(0)
+  const leave = useRef<number | undefined>(undefined)
+  useFrame(({ clock }) => {
+    const m = mat.current
+    if (!m) return
+    const t = clock.elapsedTime
+    if (mode.current < NEON_COLORS.length) {
+      m.color.copy(NEON_COLORS[mode.current])
+      return
+    }
+    // a failing tube: irregular stutter, now and then dark for a moment
+    const stutter = Math.sin(t * 37) + Math.sin(t * 23.7) * 0.8 > 0.2
+    const dead = animate && t % 2.6 > 2.25
+    m.color.copy(NEON_ERROR).multiplyScalar(animate ? (stutter && !dead ? 1 : 0.08) : 1)
+  })
+  const label = (next: number) => (next < NEON_COLORS.length ? 'Neon — change colour' : 'Neon — do not touch')
+  return (
+    <group
+      position={[-5.92, 4.3, -2.85]}
+      rotation={[0, Math.PI / 2, 0]}
+      onPointerOver={(e: ThreeEvent<PointerEvent>) => {
+        e.stopPropagation()
+        window.clearTimeout(leave.current)
+        onHover(label((mode.current + 1) % (NEON_COLORS.length + 1)), e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        leave.current = window.setTimeout(() => onHover(null, 0, 0), 90)
+      }}
+      onClick={(e) => {
+        e.stopPropagation()
+        if (pointerDrag.moved > 6) return
+        mode.current = (mode.current + 1) % (NEON_COLORS.length + 1)
+        onHover(label((mode.current + 1) % (NEON_COLORS.length + 1)), e.nativeEvent.clientX, e.nativeEvent.clientY)
+      }}
+    >
+      <Box position={[0, 0, -0.015]} size={[2.0, 0.62, 0.03]} color="#0b0e11" />
+      <mesh position={[0, 0, 0.005]}>
+        <planeGeometry args={[1.94, 0.56]} />
+        <meshBasicMaterial ref={mat} map={map} transparent toneMapped={false} depthWrite={false} />
+      </mesh>
+    </group>
+  )
+})
+
+/* --- digital wall clock above the whiteboard: the real time in Manado, to the second ------------- */
+let wallClock: { ctx: CanvasRenderingContext2D; texture: THREE.CanvasTexture; second: number } | null = null
+const clockScreen = () => {
+  if (!wallClock) {
+    const canvas = document.createElement('canvas')
+    canvas.width = 512
+    canvas.height = 144
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.colorSpace = THREE.SRGBColorSpace
+    texture.anisotropy = 8
+    wallClock = { ctx: canvas.getContext('2d')!, texture, second: -1 }
+  }
+  return wallClock
+}
+const witaParts = () =>
+  new Date()
+    .toLocaleTimeString('en-GB', { timeZone: 'Asia/Makassar', hour12: false })
+    .split(':')
+
+const paintClock = (ctx: CanvasRenderingContext2D, [h, m, s]: string[]) => {
+  ctx.fillStyle = '#07090c'
+  ctx.fillRect(0, 0, 512, 144)
+  ctx.textBaseline = 'middle'
+  ctx.shadowColor = '#ffa94d'
+  ctx.shadowBlur = 16
+  ctx.fillStyle = '#ffbe6b'
+  ctx.font = '700 104px "JetBrains Mono", ui-monospace, monospace'
+  ctx.textAlign = 'left'
+  // the colon blinks once a second, like a real digital clock
+  const colon = Number(s) % 2 === 0 ? ':' : ' '
+  ctx.fillText(`${h}${colon}${m}`, 26, 74)
+  ctx.font = '700 52px "JetBrains Mono", ui-monospace, monospace'
+  ctx.fillText(s, 372, 54)
+  ctx.shadowBlur = 0
+  ctx.fillStyle = '#8a6a3a'
+  ctx.font = '600 22px "JetBrains Mono", ui-monospace, monospace'
+  ctx.fillText('WITA', 376, 108)
+}
+
+/** A wall clock with a digital face, hung above the whiteboard. */
+const WallClock = memo(function WallClock() {
+  useFrame(() => {
+    const c = clockScreen()
+    const parts = witaParts()
+    const second = Number(parts[2])
+    if (c.second === second) return
+    c.second = second
+    paintClock(c.ctx, parts)
+    c.texture.needsUpdate = true
+  })
+  return (
+    <group position={[-1.9, 4.22, -5.92]}>
+      <Box position={[0, 0, 0]} size={[1.34, 0.4, 0.06]} color="#1b1410" />
+      <mesh position={[0, 0, 0.032]}>
+        <planeGeometry args={[1.24, 0.3]} />
+        <meshBasicMaterial map={clockScreen().texture} toneMapped={false} />
+      </mesh>
+    </group>
+  )
+})
+
 /** Gallery bar above the certificate frames: the awards wall gets the same warmth as the desk. */
 const GalleryLight = memo(function GalleryLight() {
-  // the spot washes the whole frame wall from the bar's side of the room so every scan reads
-  const aim = useMemo(() => {
-    const o = new THREE.Object3D()
-    o.position.set(-2.1, -2.17, 0)
-    return o
+  // one soft strip as long as the bar, aimed down at the frame wall: an even wash with no hot spot
+  const wash = useRef<THREE.RectAreaLight>(null)
+  useEffect(() => {
+    wash.current?.lookAt(-5.9, 2.7, 2.4)
   }, [])
   return (
     <group position={[-5.78, 3.92, 2.4]}>
-      <primitive object={aim} />
-      <spotLight
-        position={[1.9, 0.05, 0]}
-        target={aim}
-        angle={0.72}
-        penumbra={0.55}
-        intensity={22}
-        distance={7}
-        decay={2}
-        color="#fff0dc"
+      <rectAreaLight
+        ref={wash}
+        position={[0.55, -0.05, 0]}
+        width={4.1}
+        height={0.1}
+        intensity={5.5}
+        color="#ffe9cf"
       />
       <Box
         position={[0, 0.06, 0]}
@@ -1468,7 +1949,12 @@ const paintPong = (ctx: CanvasRenderingContext2D, s: PongState, active: boolean)
 }
 
 // layout of the TV menus in canvas pixels, shared by the painters and the tap hit-test
-const MENU_CARDS = [34, 256].map((x) => ({ x, y: 116, w: 190, h: 140 }))
+const MENU_CARDS = [24, 172, 320].map((x) => ({ x, y: 116, w: 136, h: 140 }))
+const MENU_ITEMS = [
+  { label: 'PONG', note: 'play the match', color: '#3fb0b7' },
+  { label: 'BREAKOUT', note: 'clear the wall', color: '#8fcfc9' },
+  { label: 'YOUTUBE', note: 'watch a video', color: '#ffd08a' },
+]
 const VIDEO_ROWS = TV_PICKS.map((_, i) => ({ x: 40, y: 96 + i * 50, w: 400, h: 40 }))
 
 const tvBackdrop = (ctx: CanvasRenderingContext2D) => {
@@ -1517,6 +2003,83 @@ const padLogo = (ctx: CanvasRenderingContext2D, cx: number, cy: number) => {
   }
 }
 
+/** Three rows of bricks over a paddle and ball. */
+const bricksLogo = (ctx: CanvasRenderingContext2D, cx: number, cy: number) => {
+  BRICK_COLORS.slice(0, 3).forEach((color, row) => {
+    ctx.fillStyle = color
+    for (let col = 0; col < 4; col++) ctx.fillRect(cx - 38 + col * 19.5, cy - 24 + row * 10, 17, 7)
+  })
+  ctx.fillStyle = '#e8f1f2'
+  ctx.beginPath()
+  ctx.arc(cx + 6, cy + 10, 4, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.fillStyle = '#3fb0b7'
+  ctx.fillRect(cx - 16, cy + 20, 32, 5)
+}
+
+const BRICK_COLORS = ['#c0392b', '#b4693a', '#e8c66a', '#3fb0b7', '#1f6f6b']
+
+const paintBreakout = (ctx: CanvasRenderingContext2D, s: BreakoutState, best: number) => {
+  const { w, h } = PONG
+  tvBackdrop(ctx)
+  s.bricks.forEach((alive, i) => {
+    if (!alive) return
+    const row = Math.floor(i / BREAKOUT_COLS)
+    const b = brickAt(row, i % BREAKOUT_COLS)
+    ctx.fillStyle = BRICK_COLORS[row % BRICK_COLORS.length]
+    ctx.beginPath()
+    ctx.roundRect(b.x * w, b.y * h, b.w * w, b.h * h, 3)
+    ctx.fill()
+  })
+  ctx.fillStyle = '#3fb0b7'
+  ctx.beginPath()
+  ctx.roundRect((s.paddle - PADDLE_HALF) * w, PADDLE_Y * h, PADDLE_HALF * 2 * w, 8, 4)
+  ctx.fill()
+  ctx.fillStyle = '#ffffff'
+  ctx.beginPath()
+  ctx.arc(s.bx * w, s.by * h, BALL_R * w, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.font = '700 15px ui-monospace, monospace'
+  ctx.textAlign = 'left'
+  ctx.fillStyle = '#e8f1f2'
+  ctx.fillText(`SCORE ${s.score}`, 16, 24)
+  ctx.textAlign = 'center'
+  ctx.fillStyle = '#ffd08a'
+  ctx.fillText(`BEST ${Math.max(best, s.score)}`, w / 2, 24)
+  ctx.textAlign = 'right'
+  ctx.fillStyle = '#e08a7a'
+  ctx.fillText('♥'.repeat(Math.max(0, s.lives)), w - 16, 24)
+  ctx.textAlign = 'center'
+  if (s.over) {
+    ctx.fillStyle = 'rgba(7,16,25,0.75)'
+    ctx.fillRect(0, h / 2 - 40, w, 80)
+    ctx.fillStyle = '#e8f1f2'
+    ctx.font = '700 26px ui-monospace, monospace'
+    ctx.fillText('GAME OVER', w / 2, h / 2 - 4)
+    ctx.fillStyle = 'rgba(232,241,242,0.6)'
+    ctx.font = '600 13px ui-monospace, monospace'
+    ctx.fillText('click the screen to play again', w / 2, h / 2 + 24)
+  }
+}
+
+// a visitor's best Breakout score; storage can be blocked, so every access is guarded
+const BEST_KEY = 'studio-breakout-best'
+const readBest = () => {
+  try {
+    return Number(localStorage.getItem(BEST_KEY)) || 0
+  } catch {
+    return 0
+  }
+}
+const saveBest = (score: number) => {
+  try {
+    localStorage.setItem(BEST_KEY, String(score))
+  } catch {
+    /* private mode: the best lives for this visit only */
+  }
+}
+
 const paintMenu = (ctx: CanvasRenderingContext2D, sel: number) => {
   const { w } = PONG
   tvBackdrop(ctx)
@@ -1529,7 +2092,7 @@ const paintMenu = (ctx: CanvasRenderingContext2D, sel: number) => {
 
   MENU_CARDS.forEach((card, i) => {
     const on = i === sel
-    const color = i === 0 ? '#3fb0b7' : '#ffd08a'
+    const { color, label, note } = MENU_ITEMS[i]
     ctx.fillStyle = on ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)'
     ctx.beginPath()
     ctx.roundRect(card.x, card.y, card.w, card.h, 12)
@@ -1539,13 +2102,14 @@ const paintMenu = (ctx: CanvasRenderingContext2D, sel: number) => {
     ctx.stroke()
     const cx = card.x + card.w / 2
     if (i === 0) padLogo(ctx, cx, card.y + 48)
-    else youtubeLogo(ctx, cx, card.y + 48, 1)
+    else if (i === 1) bricksLogo(ctx, cx, card.y + 48)
+    else youtubeLogo(ctx, cx, card.y + 48, 0.9)
     ctx.fillStyle = on ? color : 'rgba(232,241,242,0.6)'
-    ctx.font = '700 18px ui-monospace, monospace'
-    ctx.fillText(i === 0 ? 'PONG' : 'YOUTUBE', cx, card.y + 104)
+    ctx.font = '700 17px ui-monospace, monospace'
+    ctx.fillText(label, cx, card.y + 104)
     ctx.fillStyle = 'rgba(232,241,242,0.45)'
     ctx.font = '600 11px ui-monospace, monospace'
-    ctx.fillText(i === 0 ? 'play the match' : 'watch a video', cx, card.y + 124)
+    ctx.fillText(note, cx, card.y + 124)
   })
 }
 
@@ -1649,6 +2213,19 @@ const Lounge = memo(function Lounge({
   })
   const paint = useRef(0)
   const lastFrame = useRef('')
+  const brk = useRef<BreakoutState>(newGame())
+  const best = useRef(0)
+  useEffect(() => {
+    // every visit to Breakout starts a fresh game
+    if (mode !== 'breakout') return
+    brk.current = newGame()
+    best.current = readBest()
+    const game = brk
+    // leaving mid-game still keeps a new best
+    return () => {
+      if (game.current.score > readBest()) saveBest(game.current.score)
+    }
+  }, [mode])
 
   useFrame(({ pointer, camera, size }, delta) => {
     if (tvOverlay.el && glass.current)
@@ -1656,6 +2233,16 @@ const Lounge = memo(function Lounge({
 
     const dt = Math.min(delta, 0.05)
     const s = match.current
+
+    if (mode === 'breakout') {
+      const b = brk.current
+      const wasOver = b.over
+      stepBreakout(b, dt, active ? 0.5 + pointer.x * 0.6 : b.bx)
+      if (b.over && !wasOver && b.score > best.current) {
+        best.current = b.score
+        saveBest(b.score)
+      }
+    }
 
     if (mode === 'game') {
       const move = (from: number, to: number, rate: number) =>
@@ -1695,7 +2282,8 @@ const Lounge = memo(function Lounge({
     // the screen repaints at 20 fps for the match and much slower for the menus, which barely move
     paint.current += dt
     const frame = `${mode}:${sel}`
-    const redraw = lastFrame.current !== frame || paint.current > (mode === 'game' ? 0.05 : 0.4)
+    const playing = mode === 'game' || mode === 'breakout'
+    const redraw = lastFrame.current !== frame || paint.current > (playing ? 0.05 : 0.4)
     if (!redraw) return
     paint.current = 0
     lastFrame.current = frame
@@ -1704,6 +2292,7 @@ const Lounge = memo(function Lounge({
     if (mode === 'menu') paintMenu(screen.ctx, sel)
     else if (mode === 'videos') paintVideos(screen.ctx, sel)
     else if (mode === 'youtube') paintVideo(screen.ctx)
+    else if (mode === 'breakout') paintBreakout(screen.ctx, brk.current, best.current)
     else paintPong(screen.ctx, s, active)
     screen.texture.needsUpdate = true
   })
@@ -1771,6 +2360,10 @@ const Lounge = memo(function Lounge({
             if (!active || !e.uv) return
             e.stopPropagation()
             if (pointerDrag.moved > 6) return
+            if (mode === 'breakout') {
+              if (brk.current.over) brk.current = newGame()
+              return
+            }
             const index = tvHit(mode, e.uv.x, e.uv.y)
             if (index >= 0) onTvPick(index)
           }}
@@ -2263,6 +2856,12 @@ const Billiards = memo(function Billiards({
 // the main rug's inner area, kept clear of its edges (see RoomShell)
 const DOG_AREA = { x0: -2.7, x1: 0.7, z0: -1.8, z1: 1.1 }
 const DOG_SPEED = 0.4
+const DOG_SCALE = 1.4
+// body height when standing: the leg pivot sits 0.03 under it and a paw's sole 0.227 under the pivot
+const DOG_STAND_Y = 0.257
+// trotting after him: he walks at ~1.15 m/s, so the dog keeps up from a little way behind
+const DOG_TROT = 1.0
+const DOG_BEHIND = 0.8
 // hip and shoulder pivots: front left, front right, back left, back right
 const DOG_LEGS: Vec3[] = [
   [-0.065, -0.03, 0.15],
@@ -2280,6 +2879,7 @@ const Dog = memo(function Dog({
   const body = useRef<THREE.Group>(null)
   const head = useRef<THREE.Group>(null)
   const tail = useRef<THREE.Group>(null)
+  const mouth = useRef<THREE.Mesh>(null)
   const legs = useRef<(THREE.Group | null)[]>([])
   const s = useRef({
     x: -1.2,
@@ -2292,33 +2892,114 @@ const Dog = memo(function Dog({
     until: 6,
     lie: 1,
     phase: 0,
+    following: false,
+    returning: false,
+    followUntil: 0,
+    nextFollow: 70,
+    nextPet: 25,
+    asking: false,
+    askedAt: 0,
+    // a click: he turns to face the camera, then barks twice
+    facingUntil: 0,
+    barkAt: 0,
+    barked: true,
   })
   const excited = useRef(-10)
   // set by a click, turned into a timestamp on the next frame (the clock lives in useFrame)
   const poke = useRef(false)
+  const heard = useRef(0)
   const leave = useRef<number | undefined>(undefined)
   const coat = '#c98a4b'
   const cream = '#f1e3c8'
 
-  useFrame(({ clock, pointer }, delta) => {
+  useFrame(({ clock, pointer, camera }, delta) => {
     const t = clock.elapsedTime
     const dt = Math.min(delta, 0.05)
     const d = s.current
+    // a click, or the terminal's `bark`, makes him perk up
     if (poke.current) {
-      excited.current = t
       poke.current = false
+      d.facingUntil = t + 3.2
+      d.barkAt = t + 0.9
+      d.barked = false
     }
+    if (roomFx.bark > heard.current) {
+      excited.current = t
+      heard.current = roomFx.bark
+    }
+    const facing = t < d.facingUntil
     const since = t - excited.current
     const happy = since < 1.6 ? 1 - since / 1.6 : 0
 
     let speed = 0
-    if (!d.walking && t > d.until) {
+    // now and then, resting on the rug, he stands and waits for a pat
+    if (!d.following && !d.asking && !d.walking && t > d.nextPet) {
+      d.asking = true
+      d.askedAt = t
+      dogPet.want = true
+      dogPet.active = false
+      dogPet.x = d.x
+      dogPet.z = d.z
+      dogPet.yaw = d.yaw
+    }
+    if (d.asking) {
+      d.walking = false
+      d.lying = false
+      // nobody came (he was at the desk), or the pat is over: back to the usual wandering
+      if (!dogPet.want || (!dogPet.active && t - d.askedAt > 25)) {
+        d.asking = false
+        dogPet.want = false
+        d.nextPet = t + 60 + Math.random() * 30
+        d.until = t + 2
+      }
+    }
+    const petted = dogPet.active ? 1 : 0
+    // now and then he gets up and trails the character for a while, then goes back to the rug
+    if (!d.following && !d.asking && t > d.nextFollow) {
+      d.following = true
+      d.followUntil = t + 15 + Math.random() * 10
+    }
+    if (d.following) {
+      if (t > d.followUntil) {
+        d.following = false
+        d.returning = true
+        d.nextFollow = t + 40 + Math.random() * 30
+        d.walking = false
+        d.until = 0
+      } else {
+        d.tx = charPos.x - Math.sin(charPos.yaw) * DOG_BEHIND
+        d.tz = charPos.z - Math.cos(charPos.yaw) * DOG_BEHIND
+        const near =
+          Math.hypot(d.tx - d.x, d.tz - d.z) < 0.25 ||
+          (charPos.busy && Math.hypot(charPos.x - d.x, charPos.z - d.z) < 0.9)
+        d.walking = !near
+        d.lying = near && charPos.busy
+      }
+    }
+    if (!d.following && !d.asking && !d.walking && t > d.until) {
       // next spot somewhere on the rug, far enough away to be worth the walk
       do {
         d.tx = DOG_AREA.x0 + Math.random() * (DOG_AREA.x1 - DOG_AREA.x0)
         d.tz = DOG_AREA.z0 + Math.random() * (DOG_AREA.z1 - DOG_AREA.z0)
       } while (Math.hypot(d.tx - d.x, d.tz - d.z) < 0.8)
       d.walking = true
+    }
+    if (facing) {
+      // stop whatever he was doing, stand, and turn square to the camera
+      d.walking = false
+      d.lying = false
+      const dx = camera.position.x - d.x
+      const dz = camera.position.z - d.z
+      let turn = Math.atan2(dx, dz) - d.yaw
+      turn = Math.atan2(Math.sin(turn), Math.cos(turn))
+      d.yaw += THREE.MathUtils.clamp(turn, -5 * dt, 5 * dt)
+      // once he is looking (or after a moment), the woofs go out with the sound
+      if (!d.barked && (Math.abs(turn) < 0.12 || t > d.barkAt)) {
+        d.barked = true
+        d.barkAt = t
+        excited.current = t
+        bark()
+      }
     }
     if (d.walking && d.lie < 0.15) {
       const dx = d.tx - d.x
@@ -2328,27 +3009,30 @@ const Dog = memo(function Dog({
       turn = Math.atan2(Math.sin(turn), Math.cos(turn))
       d.yaw += THREE.MathUtils.clamp(turn, -2.6 * dt, 2.6 * dt)
       // slow down while turning so it never strafes
-      speed = DOG_SPEED * Math.max(0, Math.cos(turn)) * Math.min(1, dist / 0.25 + 0.3)
+      speed = (d.following ? DOG_TROT : DOG_SPEED) * Math.max(0, Math.cos(turn)) * Math.min(1, dist / 0.25 + 0.3)
       d.x += Math.sin(d.yaw) * speed * dt
       d.z += Math.cos(d.yaw) * speed * dt
-      if (dist < 0.06) {
+      if (!d.following && dist < 0.06) {
         d.walking = false
-        d.lying = Math.random() < 0.6
+        d.lying = d.returning || Math.random() < 0.6
+        d.returning = false
         d.until = t + (d.lying ? 8 + Math.random() * 8 : 2 + Math.random() * 3)
       }
     }
     const lieTo = d.walking ? 0 : d.lying ? 1 : 0
     d.lie += (lieTo - d.lie) * Math.min(1, dt * 2.5)
     d.phase += dt * 22 * speed
-    const stride = (speed / DOG_SPEED) * (1 - d.lie)
+    const stride = Math.min(1.3, speed / DOG_SPEED) * (1 - d.lie)
 
     if (root.current) {
-      root.current.position.set(d.x, 0.057, d.z)
+      // the rug is 5.7 cm thick; off it (trailing him) he walks on the floor
+      const onRug = d.x > -3.2 && d.x < 1.2 && d.z > -2.25 && d.z < 1.55
+      root.current.position.set(d.x, onRug ? 0.057 : 0, d.z)
       root.current.rotation.y = d.yaw
     }
     if (body.current) {
       body.current.position.y =
-        THREE.MathUtils.lerp(0.3, 0.12, d.lie) + Math.abs(Math.sin(d.phase)) * 0.012 * stride
+        THREE.MathUtils.lerp(DOG_STAND_Y, 0.12, d.lie) + Math.abs(Math.sin(d.phase)) * 0.012 * stride
       body.current.scale.y = 1 + Math.sin(t * 2.2) * 0.02
     }
     // front legs stretch forward and back legs tuck when lying; diagonal pairs swing when walking
@@ -2358,17 +3042,24 @@ const Dog = memo(function Dog({
       const swing = Math.sin(d.phase + (i === 0 || i === 3 ? 0 : Math.PI)) * 0.55 * stride
       leg.rotation.x = swing - d.lie * (front ? 1.45 : 1.3)
     })
-    if (tail.current) tail.current.rotation.y = Math.sin(t * (4 + happy * 14)) * (0.25 + happy * 0.35)
+    // mouth: open on each of the two woofs (0 and 0.22 s after the bark starts)
+    const sinceBark = t - d.barkAt
+    const woof = (from: number) => (sinceBark > from && sinceBark < from + 0.16 ? Math.sin(((sinceBark - from) / 0.16) * Math.PI) : 0)
+    const open = d.barked && facing ? Math.max(woof(0), woof(0.22)) : 0
+    if (mouth.current) mouth.current.scale.set(1, 0.05 + open * 0.9, 1.1)
+    if (head.current && open > 0) head.current.rotation.x -= open * 0.25
+    const joy = Math.max(happy, petted * 0.8)
+    if (tail.current) tail.current.rotation.y = Math.sin(t * (4 + joy * 14)) * (0.25 + joy * 0.35)
     if (head.current) {
       // rests its chin low when lying, perks up when clicked, keeps half an eye on the pointer
       head.current.rotation.x = THREE.MathUtils.lerp(
         head.current.rotation.x,
-        0.22 * d.lie - happy * 0.5,
+        0.22 * d.lie - happy * 0.5 - petted * 0.35,
         0.12
       )
       head.current.rotation.y = THREE.MathUtils.lerp(
         head.current.rotation.y,
-        d.walking ? 0 : pointer.x * 0.5,
+        d.walking || petted ? 0 : pointer.x * 0.5,
         0.05
       )
     }
@@ -2377,6 +3068,7 @@ const Dog = memo(function Dog({
   return (
     <group
       ref={root}
+      scale={DOG_SCALE}
       onPointerOver={(e: ThreeEvent<PointerEvent>) => {
         e.stopPropagation()
         window.clearTimeout(leave.current)
@@ -2390,11 +3082,10 @@ const Dog = memo(function Dog({
         e.stopPropagation()
         if (pointerDrag.moved > 6) return
         unlock()
-        bark()
         poke.current = true
       }}
     >
-      <group ref={body} position={[0, 0.3, 0]}>
+      <group ref={body} position={[0, DOG_STAND_Y, 0]}>
         {/* body along z, with a cream belly and chest */}
         <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
           <capsuleGeometry args={[0.11, 0.3, 10, 24]} />
@@ -2447,6 +3138,10 @@ const Dog = memo(function Dog({
           <mesh position={[0, -0.035, 0.08]} scale={[0.75, 0.6, 0.9]}>
             <sphereGeometry args={[0.08, 24, 16]} />
             <meshStandardMaterial color={cream} roughness={0.85} />
+          </mesh>
+          <mesh ref={mouth} position={[0, -0.062, 0.118]} scale={[1, 0.05, 1.1]}>
+            <sphereGeometry args={[0.04, 16, 12]} />
+            <meshStandardMaterial color="#4a1818" roughness={0.6} />
           </mesh>
           <mesh position={[0, -0.01, 0.155]}>
             <sphereGeometry args={[0.018, 16, 12]} />
@@ -2509,11 +3204,13 @@ export const Room = memo(function Room({
   tvActive,
   tvMode,
   tvSel,
-  deskActive,
-  deskSel,
-  onDeskOpen,
   onLook,
   billiardsActive,
+  onCert,
+  particles,
+  reduced,
+  guestNotes,
+  onSign,
 }: {
   onPick: (id: StationId) => void
   onHover: (label: string | null, x: number, y: number) => void
@@ -2523,11 +3220,13 @@ export const Room = memo(function Room({
   tvActive: boolean
   tvMode: TvMode
   tvSel: number
-  deskActive: boolean
-  deskSel: number
-  onDeskOpen: (index: number) => void
   onLook: (view: 'terminal' | 'sideboard' | 'billiards') => void
   billiardsActive: boolean
+  onCert: (id: string) => void
+  particles: number
+  reduced: boolean
+  guestNotes: Note[]
+  onSign: () => void
 }) {
   return (
     <group>
@@ -2535,16 +3234,18 @@ export const Room = memo(function Room({
       <Desk
         onPick={onPick}
         onHover={onHover}
-        active={deskActive}
-        sel={deskSel}
-        onOpen={onDeskOpen}
         onLook={onLook}
       />
       <Shelf onPick={onPick} onHover={onHover} />
       <Board onPick={onPick} onHover={onHover} />
-      <Frames onPick={onPick} onHover={onHover} />
+      <WallClock />
+      <FairyLights animate={!reduced} />
+      <Curtains animate={!reduced} />
+      <NeonSign animate={!reduced} onHover={onHover} />
+      <Frames onPick={onPick} onHover={onHover} onCert={onCert} />
+      <GuestBoard notes={guestNotes} onSign={onSign} onHover={onHover} />
       <Poster onPick={onPoster} onHover={onHover} />
-      <Window />
+      <Window onHover={onHover} />
       <Rack />
 
       <group position={LOUNGE_AT} scale={LOUNGE_SCALE}>
@@ -2565,6 +3266,13 @@ export const Room = memo(function Room({
       <Sideboard onLook={onLook} onHover={onHover} />
       <GalleryLight />
       <Pendant />
+      <Confetti />
+      {particles > 0 && (
+        <>
+          <Dust count={particles} center={DUST_GALLERY.center} size={DUST_GALLERY.size} />
+          <Dust count={particles} center={DUST_DESK.center} size={DUST_DESK.size} />
+        </>
+      )}
 
       <Plant position={[-5.45, 0, 4.45]} />
       <Plant position={[-5.0, 0, -5.1]} tall />

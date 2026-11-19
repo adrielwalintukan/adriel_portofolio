@@ -6,9 +6,9 @@ import { PROMPT, TERM_COLORS, type TermLine } from './terminal'
  * moves the camera to `pose` and opens the matching HTML panel. `room` is the overview.
  */
 export type StationId = 'projects' | 'skills' | 'experience' | 'certificates' | 'about'
-export type ViewId = 'room' | 'poster' | 'tv' | 'terminal' | 'sideboard' | 'billiards' | StationId
-/** What the lounge TV is showing: the picker, the video list, the little pong match, or a real YouTube embed. */
-export type TvMode = 'menu' | 'videos' | 'game' | 'youtube'
+export type ViewId = 'room' | 'poster' | 'tv' | 'terminal' | 'sideboard' | 'billiards' | 'guestbook' | StationId
+/** What the lounge TV is showing: the picker, the video list, pong ('game'), breakout, or a real YouTube embed. */
+export type TvMode = 'menu' | 'videos' | 'game' | 'breakout' | 'youtube'
 
 /** The videos on the TV's YouTube list. */
 export const TV_PICKS: { id: string; label: string }[] = [
@@ -23,11 +23,39 @@ export const tvOverlay: { el: HTMLDivElement | null } = { el: null }
 /** The open project window; the main monitor moves it over its screen every frame. */
 export const deskOverlay: { el: HTMLDivElement | null } = { el: null }
 
+/** Whether the two monitors are powered: "Shut down" in AdrielOS turns them off; leaving the view does not. */
+export const screenPower = { on: true }
+
+/** Where the character is right now, for the dog to trail; Character writes it every frame. */
+export const charPos = { x: 0, z: 0, yaw: 0, busy: false }
+
+/**
+ * A petting moment: the dog asks (want, with where it stands and faces), the character walks over,
+ * crouches and pets it (active), then clears both.
+ */
+export const dogPet = { want: false, active: false, x: 0, z: 0, yaw: 0 }
+
+/** Room effects the terminal's hidden commands start; times are performance.now() in ms. */
+export const roomFx: { kind: 'hire' | 'matrix' | null; at: number; rain: boolean; bark: number } = {
+  kind: null,
+  at: 0,
+  rain: false,
+  bark: 0,
+}
+export const FX_MS = { hire: 3000, matrix: 8000 } as const
+/** 0..1 strength of a running effect, or 0 when it is not the one playing. */
+export const fxLevel = (kind: 'hire' | 'matrix') => {
+  if (roomFx.kind !== kind) return 0
+  const p = (performance.now() - roomFx.at) / FX_MS[kind]
+  return p >= 1 ? 0 : Math.min(1, (1 - p) * 4)
+}
+
 /** What the left monitor's terminal shows: its history and the line being typed. Kept for the whole visit. */
 export const terminalLog: { lines: TermLine[]; input: string } = {
   lines: [
     [PROMPT + 'welcome', TERM_COLORS.prompt],
     ['this terminal works. type help to start.', TERM_COLORS.out],
+    ['psst: it has secrets too. type hint', TERM_COLORS.ok],
   ],
   input: '',
 }
@@ -35,9 +63,8 @@ export const terminalLog: { lines: TermLine[]; input: string } = {
 /** CSS size the screen overlays are laid out at, before they are mapped onto the 3D screen. */
 export const SCREEN_PX = { w: 960, h: 532 }
 
-/** The folders on the monitor's desktop, five to a row. */
+/** The projects that have a folder on the monitor's desktop. */
 export const DESK_PROJECTS = PROJECTS.filter((p) => !p.inDevelopment)
-export const DESK_COLS = 5
 
 export interface Pose {
   eye: [number, number, number]
@@ -64,6 +91,8 @@ export const POSES: Record<ViewId, Pose> = {
   sideboard: { eye: [-2.55, 2.0, 2.3], target: [-5.75, 1.1, 2.3] },
   // over the pool table from its long side, steep enough to aim across the whole felt
   billiards: { eye: [-2.0, 3.4, 6.6], target: [-2.0, 0.6, 3.65] },
+  // square to the guest book's cork board on the left wall
+  guestbook: { eye: [-3.75, 2.62, -0.5], target: [-5.9, 2.6, -0.5] },
 }
 
 /**
@@ -85,6 +114,7 @@ export const PORTRAIT_POSES: Record<ViewId, Pose> = {
   terminal: { eye: [1.19, 1.85, -1.76], target: [0.427, 1.55, -4.871] },
   sideboard: { eye: [-2.1, 2.0, 2.3], target: [-5.75, 1.1, 2.3] },
   billiards: { eye: [-2.0, 6.2, 7.0], target: [-2.0, 0.6, 3.75] },
+  guestbook: { eye: [-1.75, 2.62, -0.5], target: [-5.9, 2.6, -0.5] },
 }
 
 export const STATIONS: { id: StationId; label: string; where: string }[] = [

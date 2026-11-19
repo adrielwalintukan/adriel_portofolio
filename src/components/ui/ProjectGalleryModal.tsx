@@ -9,6 +9,8 @@ import { ProjectLink } from './ProjectLink'
 interface ProjectGalleryModalProps {
   project: Project | null
   onClose: () => void
+  /** frosted glass (the default): the page or the room shows blurred behind it; false gives the old solid panel */
+  glass?: boolean
 }
 
 /**
@@ -19,6 +21,7 @@ interface ProjectGalleryModalProps {
 export const ProjectGalleryModal = memo(function ProjectGalleryModal({
   project,
   onClose,
+  glass = true,
 }: ProjectGalleryModalProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState<'left' | 'right'>('right')
@@ -112,7 +115,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
           onClick={onClose}
-          className="absolute inset-0 bg-background/90 backdrop-blur-xl"
+          className={`absolute inset-0 ${glass ? 'bg-background/25 backdrop-blur-[2px]' : 'bg-background/90 backdrop-blur-xl'}`}
         />
 
         {/* Ambient Glow behind Modal */}
@@ -124,7 +127,7 @@ export const ProjectGalleryModal = memo(function ProjectGalleryModal({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="glass-strong relative z-10 flex h-full max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl sm:rounded-3xl border border-border/50 bg-surface/60 shadow-glow-xl"
+          className={`relative z-10 flex h-full max-h-[92svh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl sm:rounded-3xl border shadow-glow-xl ${glass ? 'border-white/40 bg-surface/55 backdrop-blur-2xl backdrop-saturate-150' : 'glass-strong border-border/50 bg-surface/60'}`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header Metadata Bar */}

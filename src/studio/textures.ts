@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { EXPERIENCE_TIMELINE } from '@/lib/constants'
+import type { Phase } from './daylight'
 
 /**
  * Screens, boards and poster art are painted on 2D canvases and used as textures: no image
@@ -73,35 +74,60 @@ export const boardTexture = () => {
   return texture
 }
 
-/** Window at night: a soft city below, so the room feels lived in. */
-export const windowTexture = () =>
+const WINDOW_SKY: Record<Phase, { sky: [string, string, string]; city: string; lit: number; orb: string; orbY: number }> = {
+  night: { sky: ['#0a1730', '#143247', '#2b4a52'], city: '#0b1420', lit: 90, orb: '#dfe9ec', orbY: 120 },
+  dawn: { sky: ['#8fb6cf', '#e9b38f', '#f3c29b'], city: '#3a3550', lit: 25, orb: '#ffe7c2', orbY: 470 },
+  day: { sky: ['#5f9fcf', '#9ccbe4', '#cfe6f0'], city: '#5d7488', lit: 0, orb: '#fff6dc', orbY: 110 },
+  dusk: { sky: ['#2c2350', '#7b4a6e', '#f0a35e'], city: '#2a2338', lit: 50, orb: '#ffcf8a', orbY: 430 },
+}
+
+/** The view out of the window at the current time in Manado: sky, sun or moon, and the city below. */
+export const windowTexture = (phase: Phase = 'night') =>
   make(512, 640, (ctx, w, h) => {
+    const look = WINDOW_SKY[phase]
     const sky = ctx.createLinearGradient(0, 0, 0, h)
-    sky.addColorStop(0, '#0a1730')
-    sky.addColorStop(0.55, '#143247')
-    sky.addColorStop(1, '#2b4a52')
+    sky.addColorStop(0, look.sky[0])
+    sky.addColorStop(0.55, look.sky[1])
+    sky.addColorStop(1, look.sky[2])
     ctx.fillStyle = sky
     ctx.fillRect(0, 0, w, h)
 
-    ctx.fillStyle = '#dfe9ec'
+    ctx.fillStyle = look.orb
     ctx.beginPath()
-    ctx.arc(380, 120, 34, 0, Math.PI * 2)
+    ctx.arc(380, look.orbY, 34, 0, Math.PI * 2)
     ctx.fill()
-    ctx.fillStyle = 'rgba(223,233,236,0.25)'
-    for (let i = 0; i < 40; i++) {
-      ctx.beginPath()
-      ctx.arc((i * 137) % w, (i * 83) % 380, 1.6, 0, Math.PI * 2)
-      ctx.fill()
+    if (phase === 'night') {
+      ctx.fillStyle = 'rgba(223,233,236,0.25)'
+      for (let i = 0; i < 40; i++) {
+        ctx.beginPath()
+        ctx.arc((i * 137) % w, (i * 83) % 380, 1.6, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+    if (phase === 'day') {
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'
+      for (const [x, y, r] of [
+        [110, 150, 30],
+        [150, 140, 38],
+        [195, 152, 28],
+        [300, 250, 22],
+        [335, 244, 30],
+        [368, 254, 20],
+      ]) {
+        ctx.beginPath()
+        ctx.arc(x, y, r, 0, Math.PI * 2)
+        ctx.fill()
+      }
     }
 
-    ctx.fillStyle = '#0b1420'
+    ctx.fillStyle = look.city
     for (let i = 0; i < 16; i++) {
       const bw = 26 + ((i * 17) % 34)
       const bh = 90 + ((i * 53) % 220)
       ctx.fillRect(i * 34 - 8, h - bh, bw, bh)
     }
     ctx.fillStyle = 'rgba(255,206,138,0.75)'
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < look.lit; i++) {
       ctx.fillRect(8 + ((i * 61) % 480), h - 30 - ((i * 97) % 260), 5, 6)
     }
   })
@@ -120,6 +146,84 @@ export const noteTexture = (paper: string, ink: string, lines: string[]) =>
     ctx.fillStyle = ink
     ctx.font = '600 30px "JetBrains Mono", monospace'
     lines.forEach((line, i) => ctx.fillText(line, 24, 88 + i * 46))
+  })
+
+/** A visitor's note for the guest book board: the message word-wrapped, signed at the bottom. */
+export const guestNoteTexture = (paper: string, ink: string, message: string, name: string) =>
+  make(256, 256, (ctx, w, h) => {
+    ctx.fillStyle = paper
+    ctx.fillRect(0, 0, w, h)
+    const fold = ctx.createLinearGradient(0, 0, 0, 40)
+    fold.addColorStop(0, 'rgba(0,0,0,0.12)')
+    fold.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = fold
+    ctx.fillRect(0, 0, w, 40)
+    ctx.fillStyle = ink
+    ctx.font = '500 19px "JetBrains Mono", monospace'
+    const lines: string[] = []
+    for (const word of message.split(' ')) {
+      const last = lines[lines.length - 1]
+      if (last !== undefined && ctx.measureText(`${last} ${word}`).width <= w - 40) lines[lines.length - 1] = `${last} ${word}`
+      else lines.push(word)
+    }
+    lines.slice(0, 6).forEach((line, i) => ctx.fillText(line, 20, 62 + i * 26, w - 40))
+    ctx.font = '700 18px "JetBrains Mono", monospace'
+    ctx.textAlign = 'right'
+    ctx.fillText(`— ${name}`, w - 20, h - 24, w - 40)
+  })
+
+/** The guest book board's title card. */
+export const guestTitleTexture = () =>
+  make(512, 96, (ctx, w, h) => {
+    ctx.fillStyle = '#f3efe4'
+    ctx.fillRect(0, 0, w, h)
+    ctx.fillStyle = '#1f6f6b'
+    ctx.textAlign = 'center'
+    ctx.font = '700 52px "Big Shoulders Display", "Arial Narrow", sans-serif'
+    ctx.fillText('GUEST BOOK', w / 2, 58)
+    ctx.fillStyle = '#b4693a'
+    ctx.font = '600 17px "JetBrains Mono", monospace'
+    ctx.fillText('click to leave a note', w / 2, 84)
+  })
+
+/**
+ * The neon sign: a tube-style outline of the name on a transparent ground, with the letters spaced a little apart.
+ * Drawn in white so the sign's material colour tints it; a click on the sign cycles that colour.
+ */
+export const neonTexture = () =>
+  make(560, 160, (ctx, w, h) => {
+    const text = 'ADRIEL'
+    const gap = 16
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    ctx.font = '700 118px "Big Shoulders Display", "Arial Narrow", sans-serif'
+    ctx.lineJoin = 'round'
+    const widths = [...text].map((c) => ctx.measureText(c).width)
+    const x = (w - widths.reduce((a, b) => a + b, 0) - gap * (text.length - 1)) / 2
+    const draw = (stroke: string, width: number, blur: number) => {
+      ctx.shadowColor = '#ffffff'
+      ctx.shadowBlur = blur
+      ctx.strokeStyle = stroke
+      ctx.lineWidth = width
+      let cx = x
+      ;[...text].forEach((c, i) => {
+        ctx.strokeText(c, cx, h / 2 + 4)
+        cx += widths[i] + gap
+      })
+    }
+    draw('#9a9a9a', 9, 22)
+    draw('#ffffff', 3, 0)
+  })
+
+/** Cork: warm brown with a scatter of darker flecks. */
+export const corkTexture = () =>
+  make(512, 384, (ctx, w, h) => {
+    ctx.fillStyle = '#b88a5a'
+    ctx.fillRect(0, 0, w, h)
+    for (let i = 0; i < 1400; i++) {
+      ctx.fillStyle = i % 3 ? 'rgba(90,58,30,0.35)' : 'rgba(230,200,150,0.35)'
+      ctx.fillRect((i * 151) % w, (i * 97 + ((i * 13) % 7)) % h, 2 + (i % 3), 2)
+    }
   })
 
 /** A polaroid of the night skyline: white border, a deeper bottom lip. */
